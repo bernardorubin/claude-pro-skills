@@ -36,7 +36,7 @@ Auto-trigger on natural language, also invocable as `/<name>` from the slash pal
 | `/write-slack-message` | "draft a slack message", "how should I phrase this for slack" |
 | `/prd-to-jira` | "create tickets from this PRD", "break this down into jira tasks" |
 
-See [`plugins/br-tools/README.md`](plugins/br-tools/README.md) for full details on every command and skill, the PR review modes (full / lite), and the iterative review loop.
+See [`plugins/br-tools/README.md`](plugins/br-tools/README.md) for full details on every command and skill, the PR review modes (PR / local / full-repo), and the iterative review loop.
 
 ## License
 

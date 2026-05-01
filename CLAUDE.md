@@ -103,13 +103,3 @@ The agent becomes invocable via the Task tool as `subagent_type: br-tools:<name>
 3. On any machine that already has the marketplace: `/plugin marketplace update bernardorubin-tools` → `/plugin install br-tools@bernardorubin-tools` to pull updates.
 
 There is no app store, approval process, or release pipeline — pushing to `main` is publishing.
-
-## Related-but-not-plugin migration items
-
-Some of the user's tooling lives outside this marketplace and won't migrate via `/plugin install`. Track these separately when moving to a new machine:
-
-- `~/.local/bin/jira-curl` — wrapper script for Jira API calls. Sources credentials from `~/.config/jira/credentials` (NEVER commit this file — contains email + API token for both `happy` and `horizon` Jira instances).
-- `~/.config/jira/credentials` — sensitive; copy via secure transfer, not git.
-- `~/.claude/CLAUDE.md` — global user instructions (stack defaults, anti-patterns, post-edit quality rules).
-- `~/.claude/settings.json` — hooks (GitKrakenCLI integration) + permissions allowlist + env vars.
-- `~/.claude/bin/claude-notify` + `~/.claude/assets/claude-logo.png` — notification script and its asset.
