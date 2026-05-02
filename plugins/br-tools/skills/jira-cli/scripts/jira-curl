@@ -1,0 +1,140 @@
+#!/bin/bash
+# jira-curl — Multi-instance Jira REST API wrapper.
+# Each instance has email + API token + base URL stored in ~/.config/jira/credentials.
+
+set -euo pipefail
+
+CREDS_FILE="${JIRA_CREDENTIALS:-$HOME/.config/jira/credentials}"
+
+usage() {
+  cat <<EOF
+Usage:
+  jira-curl init [name]                       Configure a Jira instance interactively
+  jira-curl list                              List configured instances
+  jira-curl <instance> <METHOD> <path> [...]  Call the Jira REST API for an instance
+
+Examples:
+  jira-curl init happy
+  jira-curl list
+  jira-curl happy GET /rest/api/3/issue/HPY-1234?fields=status,summary
+  jira-curl happy POST /rest/api/3/issue/HPY-1234/comment -d @comment.json
+
+Credentials file: $CREDS_FILE
+EOF
+}
+
+to_upper() { printf '%s' "$1" | tr '[:lower:]-' '[:upper:]_'; }
+to_lower() { printf '%s' "$1" | tr '[:upper:]_' '[:lower:]-'; }
+
+load_creds() {
+  if [[ ! -f "$CREDS_FILE" ]]; then
+    return 1
+  fi
+  # shellcheck source=/dev/null
+  source "$CREDS_FILE"
+}
+
+list_instances() {
+  if ! load_creds; then
+    echo "No credentials file at $CREDS_FILE." >&2
+    echo "Run: jira-curl init <name>" >&2
+    return 1
+  fi
+  local found=0
+  for var in $(compgen -v | grep -E '^JIRA_[A-Z0-9_]+_EMAIL$' || true); do
+    local upper="${var#JIRA_}"; upper="${upper%_EMAIL}"
+    local email_var="JIRA_${upper}_EMAIL"
+    local url_var="JIRA_${upper}_URL"
+    local name; name="$(to_lower "$upper")"
+    printf '%-16s %s  (%s)\n' "$name" "${!url_var:-(no URL set)}" "${!email_var}"
+    found=1
+  done
+  if [[ $found -eq 0 ]]; then
+    echo "No instances configured. Run: jira-curl init <name>" >&2
+    return 1
+  fi
+}
+
+init_instance() {
+  local name="${1:-}"
+  if [[ -z "$name" ]]; then
+    read -rp "Instance name (e.g. happy, work, personal): " name
+  fi
+  if [[ -z "$name" ]]; then
+    echo "Instance name is required." >&2
+    return 1
+  fi
+  local upper; upper="$(to_upper "$name")"
+
+  read -rp "Base URL (e.g. https://yourorg.atlassian.net): " url
+  url="${url%/}"
+  read -rp "Email: " email
+  read -rsp "API token (create at https://id.atlassian.com/manage-profile/security/api-tokens): " token
+  echo
+
+  if [[ -z "$url" || -z "$email" || -z "$token" ]]; then
+    echo "URL, email, and token are all required." >&2
+    return 1
+  fi
+
+  mkdir -p "$(dirname "$CREDS_FILE")"
+  touch "$CREDS_FILE"
+  chmod 600 "$CREDS_FILE"
+
+  # Strip any existing entries for this instance, preserving everything else.
+  local tmp; tmp="$(mktemp)"
+  grep -vE "^(export[[:space:]]+)?JIRA_${upper}_(EMAIL|TOKEN|URL)=" "$CREDS_FILE" >"$tmp" || true
+  {
+    cat "$tmp"
+    echo "export JIRA_${upper}_EMAIL='${email}'"
+    echo "export JIRA_${upper}_TOKEN='${token}'"
+    echo "export JIRA_${upper}_URL='${url}'"
+  } >"$CREDS_FILE"
+  rm -f "$tmp"
+  chmod 600 "$CREDS_FILE"
+
+  echo
+  echo "Saved $name → $CREDS_FILE"
+  echo "Test it: jira-curl $name GET /rest/api/3/myself"
+}
+
+case "${1:-}" in
+  ""|-h|--help|help)
+    usage; exit 0 ;;
+  init)
+    shift; init_instance "${1:-}"; exit 0 ;;
+  list)
+    list_instances; exit 0 ;;
+esac
+
+INSTANCE="$1"
+METHOD="${2:?Missing HTTP method (GET, POST, PUT, DELETE, PATCH)}"
+API_PATH="${3:?Missing API path (e.g. /rest/api/3/issue/HPY-1234)}"
+shift 3
+
+UPPER="$(to_upper "$INSTANCE")"
+
+if ! load_creds; then
+  echo "No credentials at $CREDS_FILE. Run: jira-curl init $INSTANCE" >&2
+  exit 1
+fi
+
+email_var="JIRA_${UPPER}_EMAIL"
+token_var="JIRA_${UPPER}_TOKEN"
+url_var="JIRA_${UPPER}_URL"
+
+if [[ -z "${!email_var:-}" || -z "${!token_var:-}" || -z "${!url_var:-}" ]]; then
+  echo "Unknown instance: $INSTANCE" >&2
+  echo >&2
+  echo "Configured instances:" >&2
+  list_instances >&2 || true
+  echo >&2
+  echo "Add a new one with: jira-curl init $INSTANCE" >&2
+  exit 1
+fi
+
+curl -s -X "$METHOD" \
+  -u "${!email_var}:${!token_var}" \
+  -H "Content-Type: application/json" \
+  "${!url_var}${API_PATH}" \
+  "$@"

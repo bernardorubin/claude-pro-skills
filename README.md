@@ -35,6 +35,7 @@ Auto-trigger on natural language, also invocable as `/<name>` from the slash pal
 | `/pr-description` | "write a PR description", "draft the PR body", "update the PR" |
 | `/write-slack-message` | "draft a slack message", "how should I phrase this for slack" |
 | `/prd-to-jira` | "create tickets from this PRD", "break this down into jira tasks" |
+| `/jira-cli` | Jira URL or key (HPY-1234, WEB-456), "update the description on ABC-123", "add a comment to …", "what's the status of …", "move this to in progress" |
 
 See [`plugins/br-tools/README.md`](plugins/br-tools/README.md) for full details on every command and skill, the PR review modes (PR / local / full-repo), and the iterative review loop.
 

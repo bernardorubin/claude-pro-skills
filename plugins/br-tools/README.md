@@ -1,6 +1,6 @@
 # br-tools
 
-Bernardo's Claude Code toolkit — 6 slash commands and 4 skills for code reviews (PR / local / full-repo audit), git workflow, Claude meta tasks, and external integrations.
+Bernardo's Claude Code toolkit — 6 slash commands and 5 skills for code reviews (PR / local / full-repo audit), git workflow, Claude meta tasks, and external integrations.
 
 ## Installation
 
@@ -78,6 +78,19 @@ Drafts a Slack message ready to copy-paste, with proper formatting and a busines
 
 ### `/prd-to-jira`
 PRD breakdown into a Jira epic — same workflow as the slash command above, but auto-triggers when you share a PRD, ask to "create tickets", "break this down", "make Jira tasks", etc.
+
+### `/jira-cli`
+Read/update/comment/transition Jira tickets directly from the shell via the bundled `jira-curl` CLI. Supports multiple Jira instances per machine (e.g. work + personal). Auto-triggers when you paste a Jira URL or key (`HPY-1234`, `WEB-456`) or say things like "update the description on ABC-123", "add a comment to …", "what's the status of …", "move this to In Progress".
+
+**First-time setup:**
+```
+mkdir -p ~/.local/bin
+ln -s "$CLAUDE_PLUGIN_ROOT/skills/jira-cli/scripts/jira-curl" ~/.local/bin/jira-curl
+jira-curl init <name>      # interactive: base URL + email + API token
+jira-curl list             # show configured instances
+```
+
+Credentials are stored at `~/.config/jira/credentials` with mode 600. Add as many instances as you need by re-running `jira-curl init <name>`.
 
 ### `/pr-review` — Confidence-scored code reviews (3 modes)
 
