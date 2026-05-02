@@ -85,7 +85,7 @@ Read/update/comment/transition Jira tickets directly from the shell via the bund
 **First-time setup:** the skill self-installs on first use — Claude detects the missing binary, runs the bundled installer, and prompts you for credentials. If you'd rather set it up manually:
 
 ```
-bash "$CLAUDE_PLUGIN_ROOT/skills/jira-cli/scripts/jira-curl" install   # symlinks to ~/.local/bin/jira-curl (idempotent)
+bash "$(ls -dt ~/.claude/plugins/cache/*/br-tools/*/skills/jira-cli/scripts/jira-curl 2>/dev/null | head -1)" install
 jira-curl init <name>      # interactive: base URL + email + API token
 jira-curl list             # show configured instances
 ```
