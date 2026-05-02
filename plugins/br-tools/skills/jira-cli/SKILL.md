@@ -1,7 +1,7 @@
 ---
 name: jira-cli
 description: Use when the user mentions a Jira ticket, pastes a Jira URL (e.g. https://yourorg.atlassian.net/browse/ABC-123), pastes a ticket key (HPY-1234, WEB-456, ABC-789), or asks to read, update, comment on, transition, assign, link, or search Jira issues. Triggers on phrases like "work on this jira ticket", "update the description in jira", "add a comment to ABC-123", "what's the status of WEB-456", "move this to in progress", "find tickets assigned to me". Wraps the `jira-curl` CLI.
-allowed-tools: Bash(jira-curl:*) Bash(jq:*) Bash(cat:*)
+allowed-tools: Bash(jira-curl:*) Bash(jq:*) Bash(cat:*) Bash(command:*) Bash(bash:*)
 ---
 
 # Jira CLI
@@ -28,27 +28,34 @@ Plain-language requests should "just work" — recognize a Jira URL, key, or any
 jira-curl <instance> <METHOD> <path> [extra curl args...]
 jira-curl list                        # show configured instances
 jira-curl init [name]                 # set up a new instance interactively
+jira-curl install [dest]              # symlink onto PATH (default: ~/.local/bin/jira-curl)
 ```
 
 The instance name is the lowercased label the user picked at setup (e.g. `happy`, `work`). When the user pastes a URL, the host disambiguates (`yourorg.atlassian.net` → look up which instance has that URL via `jira-curl list`). When ambiguous, ask.
 
-## First-time setup (per machine)
+## Preflight (run once per fresh machine)
 
-If `jira-curl --help` errors with "command not found", install it:
-
-```bash
-mkdir -p ~/.local/bin
-ln -s "$CLAUDE_PLUGIN_ROOT/skills/jira-cli/scripts/jira-curl" ~/.local/bin/jira-curl
-# ensure ~/.local/bin is on PATH
-```
-
-Then add at least one instance:
+Before the first call in a session, verify `jira-curl` is on PATH:
 
 ```bash
-jira-curl init happy
+command -v jira-curl >/dev/null 2>&1 || bash "$CLAUDE_PLUGIN_ROOT/skills/jira-cli/scripts/jira-curl" install
 ```
 
-This prompts for base URL (`https://yourorg.atlassian.net`), email, and API token (create one at https://id.atlassian.com/manage-profile/security/api-tokens), and writes `~/.config/jira/credentials` with mode 600. Re-run `init <name>` to update an existing instance.
+The bundled script self-symlinks into `~/.local/bin/jira-curl` and is idempotent (re-running is a no-op if already linked). If it warns that `~/.local/bin` isn't on `$PATH`, relay that message to the user — they need to add the export to their shell rc and reopen the shell before `jira-curl` becomes invocable from a fresh terminal.
+
+After install, check whether any instances are configured:
+
+```bash
+jira-curl list 2>/dev/null || true
+```
+
+If empty, the user needs at least one instance:
+
+```bash
+jira-curl init <name>
+```
+
+This prompts for base URL (`https://yourorg.atlassian.net`), email, and API token (create one at https://id.atlassian.com/manage-profile/security/api-tokens), and writes `~/.config/jira/credentials` with mode 600. The token prompt is a credential — let the user type it; never paste tokens into the conversation. Re-run `init <name>` to update an existing instance.
 
 Verify with `jira-curl <name> GET /rest/api/3/myself`.
 

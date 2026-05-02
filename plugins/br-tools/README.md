@@ -82,15 +82,15 @@ PRD breakdown into a Jira epic — same workflow as the slash command above, but
 ### `/jira-cli`
 Read/update/comment/transition Jira tickets directly from the shell via the bundled `jira-curl` CLI. Supports multiple Jira instances per machine (e.g. work + personal). Auto-triggers when you paste a Jira URL or key (`HPY-1234`, `WEB-456`) or say things like "update the description on ABC-123", "add a comment to …", "what's the status of …", "move this to In Progress".
 
-**First-time setup:**
+**First-time setup:** the skill self-installs on first use — Claude detects the missing binary, runs the bundled installer, and prompts you for credentials. If you'd rather set it up manually:
+
 ```
-mkdir -p ~/.local/bin
-ln -s "$CLAUDE_PLUGIN_ROOT/skills/jira-cli/scripts/jira-curl" ~/.local/bin/jira-curl
+bash "$CLAUDE_PLUGIN_ROOT/skills/jira-cli/scripts/jira-curl" install   # symlinks to ~/.local/bin/jira-curl (idempotent)
 jira-curl init <name>      # interactive: base URL + email + API token
 jira-curl list             # show configured instances
 ```
 
-Credentials are stored at `~/.config/jira/credentials` with mode 600. Add as many instances as you need by re-running `jira-curl init <name>`.
+Credentials are stored at `~/.config/jira/credentials` with mode 600. Add as many instances as you need by re-running `jira-curl init <name>`. If `~/.local/bin` isn't on your `$PATH`, the installer prints the export line to add to your shell rc.
 
 ### `/pr-review` — Confidence-scored code reviews (3 modes)
 

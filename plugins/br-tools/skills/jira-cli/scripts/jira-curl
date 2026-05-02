@@ -9,11 +9,13 @@ CREDS_FILE="${JIRA_CREDENTIALS:-$HOME/.config/jira/credentials}"
 usage() {
   cat <<EOF
 Usage:
+  jira-curl install [dest]                    Symlink this script onto PATH (default: ~/.local/bin/jira-curl)
   jira-curl init [name]                       Configure a Jira instance interactively
   jira-curl list                              List configured instances
   jira-curl <instance> <METHOD> <path> [...]  Call the Jira REST API for an instance
 
 Examples:
+  jira-curl install
   jira-curl init happy
   jira-curl list
   jira-curl happy GET /rest/api/3/issue/HPY-1234?fields=status,summary
@@ -21,6 +23,48 @@ Examples:
 
 Credentials file: $CREDS_FILE
 EOF
+}
+
+resolve_self() {
+  # Resolve $0/BASH_SOURCE through symlinks to the canonical script path.
+  local src="${BASH_SOURCE[0]}"
+  while [[ -L "$src" ]]; do
+    local dir; dir="$(cd -P "$(dirname "$src")" && pwd)"
+    src="$(readlink "$src")"
+    [[ "$src" != /* ]] && src="$dir/$src"
+  done
+  printf '%s/%s\n' "$(cd -P "$(dirname "$src")" && pwd)" "$(basename "$src")"
+}
+
+install_self() {
+  local dest="${1:-$HOME/.local/bin/jira-curl}"
+  local src; src="$(resolve_self)"
+
+  mkdir -p "$(dirname "$dest")"
+
+  if [[ -e "$dest" || -L "$dest" ]]; then
+    local current; current="$(readlink "$dest" 2>/dev/null || true)"
+    if [[ "$current" == "$src" ]]; then
+      echo "Already installed: $dest → $src"
+    else
+      rm -f "$dest"
+      ln -s "$src" "$dest"
+      echo "Replaced existing $dest → $src"
+    fi
+  else
+    ln -s "$src" "$dest"
+    echo "Installed $dest → $src"
+  fi
+
+  case ":$PATH:" in
+    *":$(dirname "$dest"):"*) ;;
+    *)
+      echo
+      echo "Note: $(dirname "$dest") is not on \$PATH."
+      echo "Add this to your shell rc (~/.zshrc or ~/.bashrc):"
+      echo "  export PATH=\"$(dirname "$dest"):\$PATH\""
+      ;;
+  esac
 }
 
 to_upper() { printf '%s' "$1" | tr '[:lower:]-' '[:upper:]_'; }
@@ -101,6 +145,8 @@ init_instance() {
 case "${1:-}" in
   ""|-h|--help|help)
     usage; exit 0 ;;
+  install)
+    shift; install_self "${1:-}"; exit 0 ;;
   init)
     shift; init_instance "${1:-}"; exit 0 ;;
   list)
