@@ -363,7 +363,7 @@ Main content.
 - [[related-page]]
 ```
 
-(Also write `templates/person.md`, `templates/integration.md`, `templates/ticket.md` — same pattern as the HappyVault templates if useful, or leave out if you want minimal scaffolding.)
+(Optionally also write `templates/person.md`, `templates/integration.md`, `templates/ticket.md` — same frontmatter+headings pattern as `page.md`, specialized per category. Keep it minimal at scaffold time; the user can add more templates as their wiki grows.)
 
 #### `{vault}/.gitignore`
 
@@ -499,4 +499,4 @@ Don't dump the full file tree. The user can `ls` if curious. Bracketed lines are
 ## Related
 
 - `vault-keeper` skill — does the actual reading/writing once the vault exists
-- `/save-session-to-worklog` — vault-aware; routes happy-style worklogs into `{vault}/raw/sessions/` if registered
+- `/save-session-to-worklog` — vault-aware; routes worklogs into `{vault}/raw/sessions/` for any project registered in the vault registry

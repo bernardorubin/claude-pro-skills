@@ -2,6 +2,8 @@
 
 Bernardo's Claude Code toolkit — 7 slash commands and 6 skills for code reviews (PR / local / full-repo audit), git workflow, Claude meta tasks, external integrations, and per-project knowledge vaults.
 
+> **Heads up for non-author users**: examples in the docs below reference my own projects (`happy`, `meyer`), Jira instance names (`happy`, `horizon`), and ticket prefixes (`HPY-####`). These are illustrative — the plugin works for any project. Where you see config that's literally my data (the **Project Map** in `/save-session-to-worklog`, the registry under `~/.config/br-tools/vaults.json`), swap in your own.
+
 ## Installation
 
 ```

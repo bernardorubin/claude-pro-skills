@@ -8,6 +8,8 @@ allowed-tools: Bash(jira-curl:*) Bash(jq:*) Bash(cat:*) Bash(command:*) Bash(bas
 
 Talk to Jira from the shell via `jira-curl`, an authenticated wrapper around the Jira REST API v3. Supports multiple Jira instances per machine.
 
+> **Note on examples**: the API examples below use `happy` and `horizon` as instance names (the plugin author's two Jira workspaces). When you set up your own with `jira-curl init <name>`, pick whatever names make sense (`work`, `personal`, etc.) and substitute them throughout — the actual API URLs and JSON payloads are identical.
+
 ## ⚠️ Preflight — run BEFORE any `jira-curl <instance>` API call
 
 You MUST resolve binary + instance before making any API call. Skipping this and falling back on retry-after-failure produces confusing errors. Run these two checks in order, every time:

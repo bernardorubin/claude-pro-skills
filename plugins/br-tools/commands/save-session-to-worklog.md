@@ -31,10 +31,14 @@ The project name decides which file gets updated. Resolve it in this order:
 
 #### Project Map
 
+> **Customize this for your projects.** The map below is the plugin author's example — replace it with your own directory→project-name mappings. Multiple repos that belong to the same project (e.g. a frontend + backend pair, or a monorepo + sibling repos) should share one project name so they feed into the same worklog file.
+
 | Directory pattern | Project name |
 |---|---|
 | `horizon-meyer`, `meyer` | `meyer` |
 | `happy`, `hpy`, `happy-checkout`, `hpy-api`, `hpy-onboarding` | `happy` |
+
+If no entry matches, the command falls back to the cwd's directory name as the project — so the map is purely for canonicalizing aliases (e.g., several repos that should share one worklog).
 
 #### Vault routing (via shared registry)
 
