@@ -106,6 +106,20 @@ Follow the workflow defined in `{vault}/CLAUDE.md` (it's typically: read full so
 
 **Discuss takeaways with the user before writing anything.** Surface the 3–7 most important findings and ask which to emphasize. This is the most important step and shouldn't be skipped.
 
+### Epic-shipped mode (final ingest + archive)
+
+Triggered by phrases like: *"do a final ingest of `raw/projects/<slug>/` then archive it"*, *"the eve epic is done, wrap it up"*, *"archive the {project} folder"*.
+
+Steps:
+1. List every file in `{vault}/raw/projects/<slug>/`
+2. For each file, diff against current wiki content — file anything new or changed into the relevant concept/integration/ticket/playbook pages
+3. Add a log entry to the current month's `{vault}/wiki/logs/{YYYY-MM}.md`: `## [YYYY-MM-DD] archive | <slug> epic shipped | {pages updated}`
+4. `git mv {vault}/raw/projects/<slug>/ {vault}/raw/archive/projects/<slug>/` (or plain `mv` if vault isn't a git repo)
+5. If the user said *"and delete it"*: `rm -rf {vault}/raw/archive/projects/<slug>/` after step 4 (confirm once before destructive removal)
+6. Tell the user: "archived [and deleted]; citations are filename-only and remain valid in the wiki"
+
+**Default behavior is archive (reversible).** Only delete if explicitly asked. Citations elsewhere in the wiki use bare filenames, so neither move nor delete breaks anything currently filed.
+
 ### Lint mode (audit)
 
 Triggered by: "lint the vault", "audit the wiki", "what's stale?"
@@ -122,7 +136,7 @@ Report as a numbered list with suggested fixes.
 
 ## Step 4 — Hard rules (apply across all modes)
 
-1. **`{vault}/raw/` top-level is immutable.** External sources are never modified — they're citation anchors. **`{vault}/raw/plans/` and `{vault}/raw/sessions/` are exempt** (living documents that user + Claude both edit). When uncertain about a vault's exact subfolder semantics, defer to its own `CLAUDE.md` — different vaults may organize raw differently.
+1. **`{vault}/raw/` is per-file mutable.** Reference docs (e.g. external snapshots, sandbox notes) inside `raw/projects/<slug>/` are citation anchors — don't modify. Living plans in those same folders, and worklog files in `raw/sessions/`, ARE meant to be edited freely by both Claude and the user. Defer to each vault's own `CLAUDE.md` for project-specific conventions.
 2. **Always update `{vault}/wiki/index.md` and the current month's `{vault}/wiki/logs/{YYYY-MM}.md`** after any wiki write. (Also update `{vault}/wiki/log.md` — the index — when a new month's file is created.)
 3. **Page names are lowercase-hyphenated** (with the rare exception of ticket IDs like `HPY-5611.md` if the vault's CLAUDE.md says so).
 4. **No empty wiki pages.** A stubbed page gets at least a summary line and a "Related pages" section.

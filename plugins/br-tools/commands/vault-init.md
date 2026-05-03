@@ -55,10 +55,10 @@ Default both to yes. The GitHub repo only happens if `gh` is installed and authe
 Create the directory structure:
 
 ```bash
-mkdir -p {vault}/raw/{plans,sessions/archive,archive/plans}
+mkdir -p {vault}/raw/{projects,sessions/archive,archive/projects}
 mkdir -p {vault}/wiki/{people,projects,integrations,concepts,playbooks,tickets,sources,logs}
 mkdir -p {vault}/templates
-touch    {vault}/raw/{plans,sessions,sessions/archive,archive,archive/plans}/.gitkeep
+touch    {vault}/raw/{projects,sessions,sessions/archive,archive,archive/projects}/.gitkeep
 touch    {vault}/wiki/{people,projects,integrations,concepts,playbooks,tickets,sources}/.gitkeep
 ```
 
@@ -78,14 +78,15 @@ The human curates sources, asks questions, and directs analysis. **Claude mainta
 ## Folder structure
 
 ```
-raw/                  ← source documents
-  (top-level)         ← IMMUTABLE external sources — never modify
-  plans/              ← LIVING plans, freely edited (e.g., epic execution plans)
-  sessions/           ← worklog files; current month at top, past months in archive/
-    archive/          ← past months auto-rotated here by /save-session-to-worklog
-  archive/            ← retired living plans (manual move when epic completes)
-    plans/
-wiki/                 ← LLM-maintained markdown
+raw/                    ← source documents
+  projects/             ← EPIC/INITIATIVE-SCOPED bundles — refs + plans for one project
+    <epic-slug>/        ← e.g. eve-integration/, mobile-redesign/, etc.
+      *.md              ← reference docs (immutable) AND living plans together
+  sessions/             ← worklog files; current month at top, past months in archive/
+    archive/            ← past months auto-rotated here by /save-session-to-worklog
+  archive/
+    projects/           ← retired epic folders (final-ingested + archived)
+wiki/                   ← LLM-maintained markdown
   index.md    ← TOC for the entire wiki, organized by category
   log.md      ← INDEX of operation logs (points to monthly files)
   logs/       ← monthly operation logs (append-only)
@@ -196,7 +197,23 @@ Report as a numbered list. Don't auto-fix — surface and let the user decide.
 
 ## Hard rules
 
-1. **`raw/` top-level is immutable.** External sources are never modified — they're citation anchors. **`raw/plans/` and `raw/sessions/` are exempt** because they're living documents authored locally; both Claude and the user can edit them. The immutability principle is per-folder, not per-`raw/`.
+1. **`raw/` is per-folder mutable.** Reference docs (anything inside `raw/projects/<slug>/` that's not flagged as a living plan) are citation anchors and shouldn't be modified. Living plans (typically the execution-plan file within each project folder) and worklog files (`raw/sessions/`) ARE meant to be edited freely by both Claude and the user. The immutability principle is per-file, not per-`raw/`.
+
+## Epic-shipped workflow (when work for a project completes)
+
+When an epic in `raw/projects/<slug>/` is complete:
+
+User says: *"Do a final ingest of `raw/projects/<slug>/` then archive it"* (optionally adds *"and delete it"*).
+
+Claude:
+1. Re-reads each file in the folder and diffs against existing wiki content
+2. Files anything new or changed into the relevant wiki pages (concepts, integrations, tickets, etc.)
+3. Adds a log entry capturing what was new in the final pass
+4. `git mv raw/projects/<slug>/ raw/archive/projects/<slug>/`
+5. If the user said "and delete it": also `rm -rf raw/archive/projects/<slug>/` after archiving (or instead — confirm intent)
+6. Confirms: "archived [and deleted]; citations are filename-only and remain valid"
+
+Default behavior is archive (reversible). Deletion is explicit because re-ingestion is sometimes useful later.
 2. **Always update `wiki/index.md` and the current month's `wiki/logs/{YYYY-MM}.md`** after any wiki write. (Also update `wiki/log.md` — the index — when a new month's file is created.)
 3. **Page names are lowercase-hyphenated** (except ticket IDs).
 4. **No empty wiki pages** — at least a summary line and a "Related pages" section.
