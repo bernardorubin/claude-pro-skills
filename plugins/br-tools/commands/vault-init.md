@@ -407,6 +407,31 @@ If `gh` isn't available or auth fails, skip silently and tell the user how to do
 
 > Skipped GitHub creation. To do it later: `cd {vault} && gh repo create {vault-basename} --private --source=. --remote=origin --push`
 
+### Step 6.5 — Add a Knowledge Vault section to the project's CLAUDE.md
+
+Look for an existing `CLAUDE.md` at the **project path** (not the vault path) — this is the file Claude auto-loads on every session in that project. Adding a short section makes the vault discoverable to anyone reading it.
+
+Ask the user (default Yes):
+
+> Add a "Knowledge Vault" section to `{project-path}/CLAUDE.md`? \[Y/n\]
+
+If they accept:
+
+- **If `{project-path}/CLAUDE.md` exists** and does NOT already contain a `## Knowledge Vault` heading: append the snippet below.
+- **If `{project-path}/CLAUDE.md` exists** AND already has a `## Knowledge Vault` heading: skip with a note ("project already has a vault section, skipped"). Do not silently rewrite.
+- **If `{project-path}/CLAUDE.md` does NOT exist**: ask whether to create one with just the vault section. Default Yes.
+
+The snippet (substitute `{vault-path}` and `{project-basename}`):
+
+```markdown
+
+## Knowledge Vault
+
+A `{project-basename}` vault is registered for this project at `{vault-path}` (Karpathy-style LLM Wiki, Obsidian-compatible). The `vault-keeper` skill (br-tools) handles read/write rules — see its SKILL.md for the auto-update triggers and the vault's own `CLAUDE.md` for schema rules. The `~/.claude/projects/<cwd-mangled>/memory/` files remain session-level scratch (per-conversation feedback) — distinct from the vault's persistent, cross-linked knowledge layer.
+```
+
+If the user declines, skip silently. The registry alone is enough for the skill to function.
+
 ### Step 7 — Register the vault
 
 Update `~/.config/br-tools/vaults.json`. Create the file + parent dir if missing.
@@ -432,6 +457,7 @@ Tell the user, briefly:
 ```
 ✓ Vault scaffolded at {vault}
 ✓ Registered {project} → {vault}
+[✓ Added "Knowledge Vault" section to {project}/CLAUDE.md]
 [✓ git init + initial commit]
 [✓ GitHub: github.com/<user>/<vault-basename> (private)]
 
@@ -439,7 +465,7 @@ The vault-keeper skill will now auto-engage on sessions in {project}.
 Open the vault in Obsidian to browse. Entry point: wiki/index.md.
 ```
 
-Don't dump the full file tree. The user can `ls` if curious.
+Don't dump the full file tree. The user can `ls` if curious. Bracketed lines are conditional — only include them for steps that actually ran.
 
 ## Edge cases
 
