@@ -4,7 +4,7 @@ Log today's work into a monthly worklog. For standups and invoicing — not git 
 
 Each project gets its own file. Multiple repos that belong to the same project (e.g., `happy-checkout-sk`, `hpy-api`, `hpy-onboarding` all belong to "happy") feed into a single log.
 
-**Vault-aware**: if the detected project has an associated knowledge vault (see Vault Map), the worklog is written into the vault's `raw/sessions/` folder instead of `~/Desktop/`, and a one-line entry is appended to the vault's `wiki/log.md`. Projects without a vault keep writing to the Desktop.
+**Vault-aware**: if the detected project is registered in `~/.config/br-tools/vaults.json`, the worklog is written into the vault's `raw/sessions/` folder instead of `~/Desktop/`, and a one-line entry is appended to the vault's `wiki/logs/{YYYY-MM}.md` (the current month's operation log). Projects without a vault keep writing to the Desktop.
 
 ## Arguments
 
@@ -36,15 +36,26 @@ The project name decides which file gets updated. Resolve it in this order:
 | `horizon-meyer`, `meyer` | `meyer` |
 | `happy`, `hpy`, `happy-checkout`, `hpy-api`, `hpy-onboarding` | `happy` |
 
-#### Vault Map
+#### Vault routing (via shared registry)
 
-If the resolved project name appears here, the worklog is routed into the vault's `raw/sessions/` folder. Otherwise, falls back to `~/Desktop/`.
+If the current working directory falls under a project that's registered in `~/.config/br-tools/vaults.json`, route the worklog into that vault's `raw/sessions/` folder. Otherwise, fall back to `~/Desktop/`.
 
-| Project | Vault path |
-|---|---|
-| `happy` | `/Users/rubin/Desktop/HappyVault` |
+The registry is shared with the `vault-keeper` skill and `/vault-init` command — single source of truth.
 
-To add a vault for another project, append a row here. The path must point to an existing directory containing a `raw/` subfolder (the wiki layer is optional but expected for `wiki/log.md` updates).
+```bash
+# Resolve cwd → vault path. Walk up the directory tree looking for a registered project.
+DIR="$(pwd)"
+VAULT=""
+if [ -f ~/.config/br-tools/vaults.json ]; then
+  while [ "$DIR" != "/" ] && [ -z "$VAULT" ]; do
+    VAULT=$(jq -r --arg d "$DIR" '.vaults[$d] // empty' ~/.config/br-tools/vaults.json 2>/dev/null)
+    DIR="$(dirname "$DIR")"
+  done
+fi
+# If $VAULT is empty after this, fall back to ~/Desktop/. Otherwise use $VAULT/raw/sessions/.
+```
+
+To register a vault for a new project, run `/vault-init` (or edit `~/.config/br-tools/vaults.json` directly).
 
 ### Step 2: Gather Context
 
@@ -72,7 +83,7 @@ Run these in parallel:
 
 ### Step 3: Determine the File
 
-If the project has a vault path in the **Vault Map** above:
+Resolve the vault path via the registry lookup above. If a vault is registered:
 
 ```
 {vault-path}/raw/sessions/{month}-{year}-{project}-worklog.md
@@ -134,15 +145,31 @@ Standalone items stay flat. Aim for 3-6 top-level entries per day.
 
 ### Step 5.5: Update the Vault Log (vault projects only)
 
-If the worklog was written into a vault, append a one-line entry to `{vault-path}/wiki/log.md` (create the file if it doesn't exist):
+If the worklog was written into a vault, append a one-line entry to the current month's vault log file: `{vault-path}/wiki/logs/{YYYY-MM}.md`.
+
+```bash
+YEAR_MONTH=$(date "+%Y-%m")        # e.g. 2026-05
+TODAY=$(date "+%Y-%m-%d")           # e.g. 2026-05-23
+LOG_FILE="$VAULT/wiki/logs/$YEAR_MONTH.md"
+```
+
+**If `$LOG_FILE` already exists**: append the entry under the existing content.
+
+**If `$LOG_FILE` does NOT exist yet** (first vault op of a new month):
+1. Create it from the format reference at the top of the most recent monthly file in `$VAULT/wiki/logs/` (copy the frontmatter + heading + format reference, swap the `month:` field, `summary:`, `# heading`, and `last_updated:` to today's values)
+2. Add the entry under the `---` divider
+3. Prepend `- [[logs/{YYYY-MM}]] — {Month} {Year} (current)` to the **Months** list in `$VAULT/wiki/log.md` (the index file)
+4. Edit the previous month's entry in that list to drop the `(current)` marker (if present)
+
+The actual entry to append:
 
 ```
 ## [YYYY-MM-DD] worklog | {project} | {N} items logged
 ```
 
-Use the date from `date "+%Y-%m-%d"`. Don't summarize the bullets here — the worklog file itself has the detail. The log entry is just bookkeeping so the vault's lifecycle reflects the write.
+Don't summarize the bullets here — the worklog file itself has the detail. The log entry is just bookkeeping so the vault's lifecycle reflects the write.
 
-If `wiki/log.md` doesn't exist, the vault wasn't fully scaffolded; skip this step silently (the worklog write itself still happened).
+If `$VAULT/wiki/log.md` (the index) doesn't exist, the vault wasn't fully scaffolded; skip this step silently (the worklog write itself still happened).
 
 ### Step 6: Confirm
 

@@ -1,6 +1,6 @@
 # br-tools
 
-Bernardo's Claude Code toolkit — 6 slash commands and 5 skills for code reviews (PR / local / full-repo audit), git workflow, Claude meta tasks, and external integrations.
+Bernardo's Claude Code toolkit — 7 slash commands and 6 skills for code reviews (PR / local / full-repo audit), git workflow, Claude meta tasks, external integrations, and per-project knowledge vaults.
 
 ## Installation
 
@@ -55,12 +55,24 @@ Breaks down a PRD, spec, or feature document into a Jira epic with well-structur
 ```
 
 #### `/br-tools:save-session-to-worklog`
-Logs the current session's work into a monthly worklog file on the Desktop (e.g. `~/Desktop/april-2026-happy-worklog.md`). For standups and invoicing — not git history. Auto-detects the project; multiple repos belonging to the same project share one file.
+Logs the current session's work into a monthly worklog file. **Vault-aware**: if the current project is registered in `~/.config/br-tools/vaults.json` (via `/vault-init` or the `vault-keeper` skill), the worklog lands in `{vault}/raw/sessions/` and an entry is appended to `{vault}/wiki/log.md`. Otherwise falls back to `~/Desktop/`. For standups and invoicing — not git history. Auto-detects the project; multiple repos belonging to the same project share one file.
 
 ```
 /br-tools:save-session-to-worklog                       # Auto-detect project
 /br-tools:save-session-to-worklog --project happy       # Force project name
 ```
+
+### Knowledge vaults
+
+#### `/br-tools:vault-init`
+Scaffold a Karpathy-style LLM Wiki vault for the current project. Interactive: asks for vault path, project path, git, and (optionally) a private GitHub repo. Writes a generic `CLAUDE.md` schema, sets up `raw/`/`wiki/`/`templates/`, and registers the project → vault mapping in `~/.config/br-tools/vaults.json` so the `vault-keeper` skill auto-engages.
+
+```
+/br-tools:vault-init                            # Interactive
+/br-tools:vault-init ~/MyProjectVault           # Specify vault path; still asks the rest
+```
+
+After init, drop sources into `{vault}/raw/`, ask Claude to ingest, and browse the result in [Obsidian](https://obsidian.md). The vault auto-updates during sessions in the registered project.
 
 ## Skills
 
@@ -78,6 +90,18 @@ Drafts a Slack message ready to copy-paste, with proper formatting and a busines
 
 ### `/prd-to-jira`
 PRD breakdown into a Jira epic — same workflow as the slash command above, but auto-triggers when you share a PRD, ask to "create tickets", "break this down", "make Jira tasks", etc.
+
+### `/vault-keeper`
+Reads from and writes to a registered project's knowledge vault (Karpathy-style LLM Wiki). Auto-fires when documenting findings (architecture decisions, integration quirks, debugging discoveries, team facts), looking up domain context, ingesting raw sources, or asking for a vault lint. Resolves the current cwd against `~/.config/br-tools/vaults.json`; if no vault is registered for the project, the skill self-terminates silently. Each vault carries its own `CLAUDE.md` (the schema authority) — the skill defers to it for project-specific rules.
+
+**Three modes triggered by user intent:**
+
+- **Read** — domain questions ("what does X do?", "who owns Y?"). Reads `wiki/index.md`, follows links, synthesizes with citations to specific wiki pages.
+- **Write** — proactive auto-update. When you encounter an integration quirk, architectural decision, debugging finding, or team fact worth preserving, the skill files it into the relevant `wiki/` subfolder and updates `index.md` + `log.md`. No permission needed for small touches.
+- **Ingest** — adding a new raw source. Discusses takeaways with the user before writing, then creates a summary page + updates concept/entity pages, all cross-linked.
+- **Lint** — surfaces orphans, contradictions, stub pages, stale claims, format violations, and index drift. Reports without auto-fixing.
+
+To set up a new vault, use `/vault-init`.
 
 ### `/jira-cli`
 Read/update/comment/transition Jira tickets directly from the shell via the bundled `jira-curl` CLI. Supports multiple Jira instances per machine (e.g. work + personal). Auto-triggers when you paste a Jira URL or key (`HPY-1234`, `WEB-456`) or say things like "update the description on ABC-123", "add a comment to …", "what's the status of …", "move this to In Progress".

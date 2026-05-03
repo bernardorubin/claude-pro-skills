@@ -1,7 +1,7 @@
 {
   "name": "br-tools",
-  "description": "Bernardo's Claude Code toolkit: confidence-scored code reviews (PR, local, or full-repo audit), git workflow shortcuts, PR/Slack helpers, Claude meta commands, and Jira integration. 6 slash commands and 5 skills.",
-  "version": "1.1.2",
+  "description": "Bernardo's Claude Code toolkit: confidence-scored code reviews (PR, local, or full-repo audit), git workflow shortcuts, PR/Slack helpers, Claude meta commands, Jira integration, and per-project knowledge vaults (Karpathy-style LLM Wiki). 7 slash commands and 6 skills.",
+  "version": "1.2.0",
   "author": {
     "name": "Bernardo Rubin",
     "url": "https://github.com/bernardorubin"
