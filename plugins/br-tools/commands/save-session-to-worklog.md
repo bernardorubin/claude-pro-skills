@@ -1,8 +1,10 @@
-# Save Session to Desktop Worklog
+# Save Session to Worklog
 
-Log today's work into a monthly worklog on the Desktop (e.g., `~/Desktop/april-2026-happy-worklog.md`). For standups and invoicing — not git history. Auto-detects project, newest entries at the top.
+Log today's work into a monthly worklog. For standups and invoicing — not git history. Auto-detects project, newest entries at the top.
 
 Each project gets its own file. Multiple repos that belong to the same project (e.g., `happy-checkout-sk`, `hpy-api`, `hpy-onboarding` all belong to "happy") feed into a single log.
+
+**Vault-aware**: if the detected project has an associated knowledge vault (see Vault Map), the worklog is written into the vault's `raw/sessions/` folder instead of `~/Desktop/`, and a one-line entry is appended to the vault's `wiki/log.md`. Projects without a vault keep writing to the Desktop.
 
 ## Arguments
 
@@ -34,6 +36,16 @@ The project name decides which file gets updated. Resolve it in this order:
 | `horizon-meyer`, `meyer` | `meyer` |
 | `happy`, `hpy`, `happy-checkout`, `hpy-api`, `hpy-onboarding` | `happy` |
 
+#### Vault Map
+
+If the resolved project name appears here, the worklog is routed into the vault's `raw/sessions/` folder. Otherwise, falls back to `~/Desktop/`.
+
+| Project | Vault path |
+|---|---|
+| `happy` | `/Users/rubin/Desktop/HappyVault` |
+
+To add a vault for another project, append a row here. The path must point to an existing directory containing a `raw/` subfolder (the wiki layer is optional but expected for `wiki/log.md` updates).
+
 ### Step 2: Gather Context
 
 Run these in parallel:
@@ -60,11 +72,19 @@ Run these in parallel:
 
 ### Step 3: Determine the File
 
+If the project has a vault path in the **Vault Map** above:
+
+```
+{vault-path}/raw/sessions/{month}-{year}-{project}-worklog.md
+```
+
+Otherwise:
+
 ```
 ~/Desktop/{month}-{year}-{project}-worklog.md
 ```
 
-Use lowercase month and project. Get the month/year from `date`.
+Use lowercase month and project. Get the month/year from `date`. Create `{vault-path}/raw/sessions/` if it doesn't exist (`mkdir -p`).
 
 ### Step 4: Write the Entries
 
@@ -111,6 +131,18 @@ Standalone items stay flat. Aim for 3-6 top-level entries per day.
 2. **If today's date heading doesn't exist**: Insert a new day heading + bullets **immediately after the `# Title` line** (before all other day entries). This keeps newest entries at the top.
 
 **Never modify or rewrite previous days' entries.**
+
+### Step 5.5: Update the Vault Log (vault projects only)
+
+If the worklog was written into a vault, append a one-line entry to `{vault-path}/wiki/log.md` (create the file if it doesn't exist):
+
+```
+## [YYYY-MM-DD] worklog | {project} | {N} items logged
+```
+
+Use the date from `date "+%Y-%m-%d"`. Don't summarize the bullets here — the worklog file itself has the detail. The log entry is just bookkeeping so the vault's lifecycle reflects the write.
+
+If `wiki/log.md` doesn't exist, the vault wasn't fully scaffolded; skip this step silently (the worklog write itself still happened).
 
 ### Step 6: Confirm
 
