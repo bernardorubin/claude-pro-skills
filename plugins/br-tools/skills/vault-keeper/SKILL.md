@@ -91,7 +91,7 @@ Triggered when, during normal work, you encounter:
 
 **Always after any wiki write**:
 1. Refresh the entry in `{vault}/wiki/index.md`
-2. Append a one-line entry to `{vault}/wiki/logs/{YYYY-MM}.md` (current month). If the file doesn't exist yet (first entry of the month), create it from the format reference at the top of the most recent monthly file in `{vault}/wiki/logs/` and prepend an entry for it to the **Months** list in `{vault}/wiki/log.md` (the index). Format: `## [YYYY-MM-DD] update | {page} | {what}`
+2. Append a one-line entry to `{vault}/wiki/log.md` (single append-only operation log, Karpathy pattern). Format: `## [YYYY-MM-DD] update | {page} | {what}`
 3. If you introduced a new `[[wiki-link]]`, make sure the target page exists (stub it if needed)
 
 **Threshold**: file a fact if knowing it would have saved 5+ minutes at session start. Skip if the source code itself documents it clearly. Don't file ephemeral status (PR review state, in-flight bugs already fixed in commits).
@@ -113,7 +113,7 @@ Triggered by phrases like: *"do a final ingest of `raw/projects/<slug>/` then ar
 Steps:
 1. List every file in `{vault}/raw/projects/<slug>/`
 2. For each file, diff against current wiki content — file anything new or changed into the relevant concept/integration/ticket/playbook pages
-3. Add a log entry to the current month's `{vault}/wiki/logs/{YYYY-MM}.md`: `## [YYYY-MM-DD] archive | <slug> epic shipped | {pages updated}`
+3. Append a log entry to `{vault}/wiki/log.md`: `## [YYYY-MM-DD] archive | <slug> epic shipped | {pages updated}`
 4. `git mv {vault}/raw/projects/<slug>/ {vault}/raw/archive/projects/<slug>/` (or plain `mv` if vault isn't a git repo)
 5. If the user said *"and delete it"*: `rm -rf {vault}/raw/archive/projects/<slug>/` after step 4 (confirm once before destructive removal)
 6. Tell the user: "archived [and deleted]; citations are filename-only and remain valid in the wiki"
@@ -136,8 +136,8 @@ Report as a numbered list with suggested fixes.
 
 ## Step 4 — Hard rules (apply across all modes)
 
-1. **`{vault}/raw/` is per-file mutable.** Reference docs (e.g. external snapshots, sandbox notes) inside `raw/projects/<slug>/` are citation anchors — don't modify. Living plans in those same folders, and worklog files in `raw/sessions/`, ARE meant to be edited freely by both Claude and the user. Defer to each vault's own `CLAUDE.md` for project-specific conventions.
-2. **Always update `{vault}/wiki/index.md` and the current month's `{vault}/wiki/logs/{YYYY-MM}.md`** after any wiki write. (Also update `{vault}/wiki/log.md` — the index — when a new month's file is created.)
+1. **`{vault}/raw/` is per-file mutable.** Reference docs (e.g. external snapshots, sandbox notes) inside `raw/projects/<slug>/` are citation anchors — don't modify. Living plans in those same folders, and worklog files in `raw/work-logs/`, ARE meant to be edited freely by both Claude and the user. Defer to each vault's own `CLAUDE.md` for project-specific conventions.
+2. **Always update `{vault}/wiki/index.md` and `{vault}/wiki/log.md`** after any wiki write.
 3. **Page names are lowercase-hyphenated** (with the rare exception of ticket IDs like `HPY-5611.md` if the vault's CLAUDE.md says so).
 4. **No empty wiki pages.** A stubbed page gets at least a summary line and a "Related pages" section.
 5. **When uncertain about categorization, ask the user.** Better to pause than to file something in the wrong folder.
@@ -146,7 +146,7 @@ Report as a numbered list with suggested fixes.
 
 When you write to the vault, surface a short confirmation in your reply:
 
-> Filed [[page-name]] (1 page touched), logged in `wiki/logs/{YYYY-MM}.md`.
+> Filed [[page-name]] (1 page touched), logged in `wiki/log.md`.
 
 Not a paragraph. One line per write. The user can browse the diff in Obsidian or via git.
 

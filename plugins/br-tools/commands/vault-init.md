@@ -55,10 +55,10 @@ Default both to yes. The GitHub repo only happens if `gh` is installed and authe
 Create the directory structure:
 
 ```bash
-mkdir -p {vault}/raw/{projects,sessions/archive,archive/projects}
-mkdir -p {vault}/wiki/{people,projects,integrations,concepts,playbooks,tickets,sources,logs}
+mkdir -p {vault}/raw/{projects,work-logs/archive,archive/projects}
+mkdir -p {vault}/wiki/{people,projects,integrations,concepts,playbooks,tickets,sources}
 mkdir -p {vault}/templates
-touch    {vault}/raw/{projects,sessions,sessions/archive,archive,archive/projects}/.gitkeep
+touch    {vault}/raw/{projects,work-logs,work-logs/archive,archive,archive/projects}/.gitkeep
 touch    {vault}/wiki/{people,projects,integrations,concepts,playbooks,tickets,sources}/.gitkeep
 ```
 
@@ -82,15 +82,13 @@ raw/                    ← source documents
   projects/             ← EPIC/INITIATIVE-SCOPED bundles — refs + plans for one project
     <epic-slug>/        ← e.g. eve-integration/, mobile-redesign/, etc.
       *.md              ← reference docs (immutable) AND living plans together
-  sessions/             ← worklog files; current month at top, past months in archive/
+  work-logs/            ← worklog files; current month at top, past months in archive/
     archive/            ← past months auto-rotated here by /save-session-to-worklog
   archive/
     projects/           ← retired epic folders (final-ingested + archived)
 wiki/                   ← LLM-maintained markdown
   index.md    ← TOC for the entire wiki, organized by category
-  log.md      ← INDEX of operation logs (points to monthly files)
-  logs/       ← monthly operation logs (append-only)
-    {YYYY-MM}.md
+  log.md      ← append-only chronological operation log (single file, Karpathy pattern)
   people/     ← people involved (one page per person)
   projects/   ← repos / sub-projects
   integrations/ ← third-party services and APIs
@@ -149,7 +147,7 @@ You don't wait for an explicit "ingest" command for everyday updates. During any
 
 **Always after any auto-update**:
 1. Add or refresh the entry in `wiki/index.md`
-2. Append a one-line entry to `wiki/logs/{YYYY-MM}.md` (current month). If today's month doesn't have a file yet, create it from the format reference at the top of the most recent monthly file, and prepend an entry for it to the **Months** list in `wiki/log.md`. Format: `## [YYYY-MM-DD] update | {page} | {what}`
+2. Append a one-line entry to `wiki/log.md` (single append-only operation log). Format: `## [YYYY-MM-DD] update | {page} | {what}`
 3. If the update introduces a new wiki-link, ensure the target page exists (stub if needed)
 
 **Threshold for writing**: if a fact would have saved 5+ minutes if known at session start, file it. If it's obvious from reading the code, don't.
@@ -164,7 +162,7 @@ When the user adds a new source to `raw/` and asks you to ingest it:
 4. Create or update concept/entity/integration pages for each major idea or entity
 5. Add `[[wiki-links]]` connecting related pages (in both directions)
 6. Update `wiki/index.md` with new pages and one-line summaries
-7. Append a log entry to the current month's `wiki/logs/{YYYY-MM}.md`: `## [YYYY-MM-DD] ingest | {source title} | {pages touched count}`
+7. Append a log entry to `wiki/log.md`: `## [YYYY-MM-DD] ingest | {source title} | {pages touched count}`
 
 If a source contradicts an existing wiki page, do NOT silently overwrite. Note the contradiction in the page (`> **Conflict**: source X says ..., source Y says ...`) and ask the user how to resolve.
 
@@ -197,7 +195,7 @@ Report as a numbered list. Don't auto-fix — surface and let the user decide.
 
 ## Hard rules
 
-1. **`raw/` is per-folder mutable.** Reference docs (anything inside `raw/projects/<slug>/` that's not flagged as a living plan) are citation anchors and shouldn't be modified. Living plans (typically the execution-plan file within each project folder) and worklog files (`raw/sessions/`) ARE meant to be edited freely by both Claude and the user. The immutability principle is per-file, not per-`raw/`.
+1. **`raw/` is per-file mutable.** Reference docs (anything inside `raw/projects/<slug>/` that's not flagged as a living plan) are citation anchors and shouldn't be modified. Living plans (typically the execution-plan file within each project folder) and worklog files (`raw/work-logs/`) ARE meant to be edited freely by both Claude and the user. The immutability principle is per-file, not per-`raw/`.
 
 ## Epic-shipped workflow (when work for a project completes)
 
@@ -214,7 +212,7 @@ Claude:
 6. Confirms: "archived [and deleted]; citations are filename-only and remain valid"
 
 Default behavior is archive (reversible). Deletion is explicit because re-ingestion is sometimes useful later.
-2. **Always update `wiki/index.md` and the current month's `wiki/logs/{YYYY-MM}.md`** after any wiki write. (Also update `wiki/log.md` — the index — when a new month's file is created.)
+2. **Always update `wiki/index.md` and `wiki/log.md`** after any wiki write.
 3. **Page names are lowercase-hyphenated** (except ticket IDs).
 4. **No empty wiki pages** — at least a summary line and a "Related pages" section.
 5. **When uncertain about categorization, ask the user.**
@@ -270,72 +268,21 @@ _Summary pages for ingested raw documents._
 
 #### `{vault}/wiki/log.md`
 
-The thin index pointing to monthly log files. Substitute `{YYYY-MM}` for the current month at scaffold time (e.g. `2026-05`).
+Single append-only chronological log (Karpathy's pattern). One file, never rotates.
 
 ```markdown
----
-summary: Index of {Project} Vault operation logs, split by month.
-last_updated: YYYY-MM-DD
-tags: [meta, log, index]
----
+# {Project} Vault Operation Log
 
-# {Project} Vault — Operation Log Index
+Append-only chronological record of every vault operation. Newest entries at the bottom. Format: `## [YYYY-MM-DD] {op} | {target} | {note}`.
 
-Operation entries (init, ingest, update, lint, query, worklog) live in monthly files under `wiki/logs/`. This index points to each month.
-
-Format of each entry: `## [YYYY-MM-DD] {op} | {target} | {note}`.
-
-Search across all months: `grep -h "^## \[" wiki/logs/*.md | tail -20`
-Search a specific month: `grep "^## \[" wiki/logs/{YYYY-MM}.md`
+Greppable: `grep "^## \[" wiki/log.md | tail -10`
 
 Operation types: `init`, `ingest`, `update`, `lint`, `query`, `worklog`.
-
----
-
-## Months
-
-- [[logs/{YYYY-MM}]] — {Month} {Year} (current)
-
----
-
-## How to log a new entry
-
-If today's month already has a file in [[logs/]]: append the entry to the bottom of that file.
-
-If today's month doesn't have a file yet:
-1. Create `wiki/logs/{YYYY-MM}.md` from the template at the top of the most recent monthly file
-2. Add the first entry
-3. Prepend `- [[logs/{YYYY-MM}]] — {Month} {Year} (current)` to the **Months** list above
-4. Update the previous month's index entry to drop the `(current)` marker
-```
-
-#### `{vault}/wiki/logs/{YYYY-MM}.md` — first month's log file
-
-Substitute `{YYYY-MM}` and `{Month}` `{Year}` for the current month at scaffold time.
-
-```markdown
----
-summary: Operation log for {Month} {Year}.
-last_updated: YYYY-MM-DD
-tags: [meta, log]
-month: {YYYY-MM}
----
-
-# {Project} Vault — Operation Log: {Month} {Year}
-
-Operations during {Month} {Year}. Append-only, newest entries at the bottom. Format: `## [YYYY-MM-DD] {op} | {target} | {note}`.
-
-Greppable within month: `grep "^## \[" wiki/logs/{YYYY-MM}.md`
-Greppable across all months: `grep -h "^## \[" wiki/logs/*.md | tail -20`
-
-Operation types: `init`, `ingest`, `update`, `lint`, `query`, `worklog`.
-
-Index of all months: [[log]]
 
 ---
 
 ## [YYYY-MM-DD] init | vault scaffolded
-Created CLAUDE.md schema, wiki/index.md, wiki/log.md (index), wiki/logs/{YYYY-MM}.md (first month), and category subfolders. Registered with vault-keeper.
+Created CLAUDE.md schema, wiki/index.md, wiki/log.md, and category subfolders. Registered with vault-keeper.
 ```
 
 #### `{vault}/templates/page.md`
@@ -499,4 +446,4 @@ Don't dump the full file tree. The user can `ls` if curious. Bracketed lines are
 ## Related
 
 - `vault-keeper` skill — does the actual reading/writing once the vault exists
-- `/save-session-to-worklog` — vault-aware; routes worklogs into `{vault}/raw/sessions/` for any project registered in the vault registry
+- `/save-session-to-worklog` — vault-aware; routes worklogs into `{vault}/raw/work-logs/` for any project registered in the vault registry

@@ -4,7 +4,7 @@ Log today's work into a monthly worklog. For standups and invoicing — not git 
 
 Each project gets its own file. Multiple repos that belong to the same project (e.g., `happy-checkout-sk`, `hpy-api`, `hpy-onboarding` all belong to "happy") feed into a single log.
 
-**Vault-aware**: if the detected project is registered in `~/.config/br-tools/vaults.json`, the worklog is written into the vault's `raw/sessions/` folder instead of `~/Desktop/`, and a one-line entry is appended to the vault's `wiki/logs/{YYYY-MM}.md` (the current month's operation log). Projects without a vault keep writing to the Desktop.
+**Vault-aware**: if the detected project is registered in `~/.config/br-tools/vaults.json`, the worklog is written into the vault's `raw/work-logs/` folder instead of `~/Desktop/`, and a one-line entry is appended to the vault's `wiki/log.md` (single append-only operation log, Karpathy pattern). Projects without a vault keep writing to the Desktop.
 
 ## Arguments
 
@@ -42,7 +42,7 @@ If no entry matches, the command falls back to the cwd's directory name as the p
 
 #### Vault routing (via shared registry)
 
-If the current working directory falls under a project that's registered in `~/.config/br-tools/vaults.json`, route the worklog into that vault's `raw/sessions/` folder. Otherwise, fall back to `~/Desktop/`.
+If the current working directory falls under a project that's registered in `~/.config/br-tools/vaults.json`, route the worklog into that vault's `raw/work-logs/` folder. Otherwise, fall back to `~/Desktop/`.
 
 The registry is shared with the `vault-keeper` skill and `/vault-init` command — single source of truth.
 
@@ -56,7 +56,7 @@ if [ -f ~/.config/br-tools/vaults.json ]; then
     DIR="$(dirname "$DIR")"
   done
 fi
-# If $VAULT is empty after this, fall back to ~/Desktop/. Otherwise use $VAULT/raw/sessions/.
+# If $VAULT is empty after this, fall back to ~/Desktop/. Otherwise use $VAULT/raw/work-logs/.
 ```
 
 To register a vault for a new project, run `/vault-init` (or edit `~/.config/br-tools/vaults.json` directly).
@@ -90,7 +90,7 @@ Run these in parallel:
 Resolve the vault path via the registry lookup above. If a vault is registered:
 
 ```
-{vault-path}/raw/sessions/{month}-{year}-{project}-worklog.md
+{vault-path}/raw/work-logs/{month}-{year}-{project}-worklog.md
 ```
 
 Otherwise:
@@ -99,34 +99,34 @@ Otherwise:
 ~/Desktop/{month}-{year}-{project}-worklog.md
 ```
 
-Use lowercase month and project. Get the month/year from `date`. Create `{vault-path}/raw/sessions/` if it doesn't exist (`mkdir -p`).
+Use lowercase month and project. Get the month/year from `date`. Create `{vault-path}/raw/work-logs/` if it doesn't exist (`mkdir -p`).
 
 ### Step 3.5: Auto-archive past-month worklogs (vault projects only)
 
-Before writing this session's bullets, check if any worklog files in `{vault-path}/raw/sessions/` belong to a past month. If so, move them to `{vault-path}/raw/sessions/archive/`.
+Before writing this session's bullets, check if any worklog files in `{vault-path}/raw/work-logs/` belong to a past month. If so, move them to `{vault-path}/raw/work-logs/archive/`.
 
 ```bash
 CURRENT_PREFIX="$(date '+%B' | tr '[:upper:]' '[:lower:]')-$(date '+%Y')-"
 # e.g., "may-2026-"
 
-mkdir -p "$VAULT/raw/sessions/archive"
+mkdir -p "$VAULT/raw/work-logs/archive"
 
 shopt -s nullglob
-for f in "$VAULT/raw/sessions"/*-worklog.md; do
+for f in "$VAULT/raw/work-logs"/*-worklog.md; do
   base="$(basename "$f")"
   if [[ "$base" != "$CURRENT_PREFIX"* ]]; then
     if git -C "$VAULT" rev-parse --git-dir >/dev/null 2>&1; then
-      git -C "$VAULT" mv "raw/sessions/$base" "raw/sessions/archive/$base"
+      git -C "$VAULT" mv "raw/work-logs/$base" "raw/work-logs/archive/$base"
     else
-      mv "$f" "$VAULT/raw/sessions/archive/$base"
+      mv "$f" "$VAULT/raw/work-logs/archive/$base"
     fi
   fi
 done
 ```
 
-**Why**: keeps `raw/sessions/` to a single active month, makes the current worklog easy to find. Past months stay accessible in `archive/`. Wiki citations are path-transparent (filename-only), so the move doesn't break anything.
+**Why**: keeps `raw/work-logs/` to a single active month, makes the current worklog easy to find. Past months stay accessible in `archive/`. Wiki citations are path-transparent (filename-only), so the move doesn't break anything.
 
-**Skip silently** if `$VAULT/raw/sessions/` doesn't exist (legacy vault without the new layout) or if no past-month files are present.
+**Skip silently** if `$VAULT/raw/work-logs/` doesn't exist (legacy vault, or vault uses a different worklog layout) or if no past-month files are present.
 
 ### Step 4: Write the Entries
 
@@ -176,31 +176,17 @@ Standalone items stay flat. Aim for 3-6 top-level entries per day.
 
 ### Step 5.5: Update the Vault Log (vault projects only)
 
-If the worklog was written into a vault, append a one-line entry to the current month's vault log file: `{vault-path}/wiki/logs/{YYYY-MM}.md`.
+If the worklog was written into a vault, append a one-line entry to the vault's operation log at `{vault-path}/wiki/log.md` (single append-only file, Karpathy pattern).
 
 ```bash
-YEAR_MONTH=$(date "+%Y-%m")        # e.g. 2026-05
 TODAY=$(date "+%Y-%m-%d")           # e.g. 2026-05-23
-LOG_FILE="$VAULT/wiki/logs/$YEAR_MONTH.md"
-```
-
-**If `$LOG_FILE` already exists**: append the entry under the existing content.
-
-**If `$LOG_FILE` does NOT exist yet** (first vault op of a new month):
-1. Create it from the format reference at the top of the most recent monthly file in `$VAULT/wiki/logs/` (copy the frontmatter + heading + format reference, swap the `month:` field, `summary:`, `# heading`, and `last_updated:` to today's values)
-2. Add the entry under the `---` divider
-3. Prepend `- [[logs/{YYYY-MM}]] — {Month} {Year} (current)` to the **Months** list in `$VAULT/wiki/log.md` (the index file)
-4. Edit the previous month's entry in that list to drop the `(current)` marker (if present)
-
-The actual entry to append:
-
-```
-## [YYYY-MM-DD] worklog | {project} | {N} items logged
+echo "" >> "$VAULT/wiki/log.md"
+echo "## [$TODAY] worklog | $PROJECT | $N items logged" >> "$VAULT/wiki/log.md"
 ```
 
 Don't summarize the bullets here — the worklog file itself has the detail. The log entry is just bookkeeping so the vault's lifecycle reflects the write.
 
-If `$VAULT/wiki/log.md` (the index) doesn't exist, the vault wasn't fully scaffolded; skip this step silently (the worklog write itself still happened).
+If `$VAULT/wiki/log.md` doesn't exist, the vault wasn't fully scaffolded; skip this step silently (the worklog write itself still happened).
 
 ### Step 6: Confirm
 
