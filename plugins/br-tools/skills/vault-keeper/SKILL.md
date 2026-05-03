@@ -122,7 +122,7 @@ Report as a numbered list with suggested fixes.
 
 ## Step 4 — Hard rules (apply across all modes)
 
-1. **Never modify anything in `{vault}/raw/`.** It's the source of truth.
+1. **`{vault}/raw/` top-level is immutable.** External sources are never modified — they're citation anchors. **`{vault}/raw/plans/` and `{vault}/raw/sessions/` are exempt** (living documents that user + Claude both edit). When uncertain about a vault's exact subfolder semantics, defer to its own `CLAUDE.md` — different vaults may organize raw differently.
 2. **Always update `{vault}/wiki/index.md` and the current month's `{vault}/wiki/logs/{YYYY-MM}.md`** after any wiki write. (Also update `{vault}/wiki/log.md` — the index — when a new month's file is created.)
 3. **Page names are lowercase-hyphenated** (with the rare exception of ticket IDs like `HPY-5611.md` if the vault's CLAUDE.md says so).
 4. **No empty wiki pages.** A stubbed page gets at least a summary line and a "Related pages" section.

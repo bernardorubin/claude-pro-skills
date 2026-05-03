@@ -97,6 +97,33 @@ Otherwise:
 
 Use lowercase month and project. Get the month/year from `date`. Create `{vault-path}/raw/sessions/` if it doesn't exist (`mkdir -p`).
 
+### Step 3.5: Auto-archive past-month worklogs (vault projects only)
+
+Before writing this session's bullets, check if any worklog files in `{vault-path}/raw/sessions/` belong to a past month. If so, move them to `{vault-path}/raw/sessions/archive/`.
+
+```bash
+CURRENT_PREFIX="$(date '+%B' | tr '[:upper:]' '[:lower:]')-$(date '+%Y')-"
+# e.g., "may-2026-"
+
+mkdir -p "$VAULT/raw/sessions/archive"
+
+shopt -s nullglob
+for f in "$VAULT/raw/sessions"/*-worklog.md; do
+  base="$(basename "$f")"
+  if [[ "$base" != "$CURRENT_PREFIX"* ]]; then
+    if git -C "$VAULT" rev-parse --git-dir >/dev/null 2>&1; then
+      git -C "$VAULT" mv "raw/sessions/$base" "raw/sessions/archive/$base"
+    else
+      mv "$f" "$VAULT/raw/sessions/archive/$base"
+    fi
+  fi
+done
+```
+
+**Why**: keeps `raw/sessions/` to a single active month, makes the current worklog easy to find. Past months stay accessible in `archive/`. Wiki citations are path-transparent (filename-only), so the move doesn't break anything.
+
+**Skip silently** if `$VAULT/raw/sessions/` doesn't exist (legacy vault without the new layout) or if no past-month files are present.
+
 ### Step 4: Write the Entries
 
 Each entry should be:

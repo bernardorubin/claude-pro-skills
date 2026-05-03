@@ -55,10 +55,10 @@ Default both to yes. The GitHub repo only happens if `gh` is installed and authe
 Create the directory structure:
 
 ```bash
-mkdir -p {vault}/raw/sessions
+mkdir -p {vault}/raw/{plans,sessions/archive,archive/plans}
 mkdir -p {vault}/wiki/{people,projects,integrations,concepts,playbooks,tickets,sources,logs}
 mkdir -p {vault}/templates
-touch    {vault}/raw/sessions/.gitkeep
+touch    {vault}/raw/{plans,sessions,sessions/archive,archive,archive/plans}/.gitkeep
 touch    {vault}/wiki/{people,projects,integrations,concepts,playbooks,tickets,sources}/.gitkeep
 ```
 
@@ -78,9 +78,14 @@ The human curates sources, asks questions, and directs analysis. **Claude mainta
 ## Folder structure
 
 ```
-raw/          ← source documents (immutable; never modify)
-  sessions/   ← /save-session-to-worklog output lands here
-wiki/         ← LLM-maintained markdown
+raw/                  ← source documents
+  (top-level)         ← IMMUTABLE external sources — never modify
+  plans/              ← LIVING plans, freely edited (e.g., epic execution plans)
+  sessions/           ← worklog files; current month at top, past months in archive/
+    archive/          ← past months auto-rotated here by /save-session-to-worklog
+  archive/            ← retired living plans (manual move when epic completes)
+    plans/
+wiki/                 ← LLM-maintained markdown
   index.md    ← TOC for the entire wiki, organized by category
   log.md      ← INDEX of operation logs (points to monthly files)
   logs/       ← monthly operation logs (append-only)
@@ -191,7 +196,7 @@ Report as a numbered list. Don't auto-fix — surface and let the user decide.
 
 ## Hard rules
 
-1. **Never modify anything in `raw/`.** Read-only.
+1. **`raw/` top-level is immutable.** External sources are never modified — they're citation anchors. **`raw/plans/` and `raw/sessions/` are exempt** because they're living documents authored locally; both Claude and the user can edit them. The immutability principle is per-folder, not per-`raw/`.
 2. **Always update `wiki/index.md` and the current month's `wiki/logs/{YYYY-MM}.md`** after any wiki write. (Also update `wiki/log.md` — the index — when a new month's file is created.)
 3. **Page names are lowercase-hyphenated** (except ticket IDs).
 4. **No empty wiki pages** — at least a summary line and a "Related pages" section.
