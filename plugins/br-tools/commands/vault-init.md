@@ -55,12 +55,14 @@ Default both to yes. The GitHub repo only happens if `gh` is installed and authe
 Create the directory structure:
 
 ```bash
-mkdir -p {vault}/raw/{projects,work-logs/archive,archive/projects}
+mkdir -p {vault}/raw/{projects,work-logs,archive/projects}
 mkdir -p {vault}/wiki/{people,projects,integrations,concepts,playbooks,tickets,sources}
 mkdir -p {vault}/templates
-touch    {vault}/raw/{projects,work-logs,work-logs/archive,archive,archive/projects}/.gitkeep
+touch    {vault}/raw/{projects,work-logs,archive,archive/projects}/.gitkeep
 touch    {vault}/wiki/{people,projects,integrations,concepts,playbooks,tickets,sources}/.gitkeep
 ```
+
+> **Note on `work-logs/`**: per-user subfolders (`work-logs/<user-slug>/`) and their `archive/` are created lazily by `/save-session-to-worklog` on first use. Don't pre-scaffold them — the active user is unknown at vault-init time.
 
 Write the following files (use the exact content shown — these are templates, not Claude-generated prose):
 
@@ -82,8 +84,10 @@ raw/                    ← source documents
   projects/             ← EPIC/INITIATIVE-SCOPED bundles — refs + plans for one project
     <epic-slug>/        ← e.g. eve-integration/, mobile-redesign/, etc.
       *.md              ← reference docs (immutable) AND living plans together
-  work-logs/            ← worklog files; current month at top, past months in archive/
-    archive/            ← past months auto-rotated here by /save-session-to-worklog
+  work-logs/            ← per-user worklog folders (created lazily by /save-session-to-worklog)
+    <user-slug>/        ← e.g. bernardorubin/, alice/ — one folder per teammate
+      *.md              ← current month's worklog at the top
+      archive/          ← past months auto-rotated here by /save-session-to-worklog
   archive/
     projects/           ← retired epic folders (final-ingested + archived)
 wiki/                   ← LLM-maintained markdown
@@ -195,7 +199,7 @@ Report as a numbered list. Don't auto-fix — surface and let the user decide.
 
 ## Hard rules
 
-1. **`raw/` is per-file mutable.** Reference docs (anything inside `raw/projects/<slug>/` that's not flagged as a living plan) are citation anchors and shouldn't be modified. Living plans (typically the execution-plan file within each project folder) and worklog files (`raw/work-logs/`) ARE meant to be edited freely by both Claude and the user. The immutability principle is per-file, not per-`raw/`.
+1. **`raw/` is per-file mutable.** Reference docs (anything inside `raw/projects/<slug>/` that's not flagged as a living plan) are citation anchors and shouldn't be modified. Living plans (typically the execution-plan file within each project folder) and worklog files (`raw/work-logs/<user-slug>/`) ARE meant to be edited freely by both Claude and the user. The immutability principle is per-file, not per-`raw/`. **Worklog folders are user-scoped** — only edit worklogs under your own `<user-slug>/` (resolved by `/save-session-to-worklog`); other teammates' folders are read-only to you.
 
 ## Epic-shipped workflow (when work for a project completes)
 
@@ -446,4 +450,4 @@ Don't dump the full file tree. The user can `ls` if curious. Bracketed lines are
 ## Related
 
 - `vault-keeper` skill — does the actual reading/writing once the vault exists
-- `/save-session-to-worklog` — vault-aware; routes worklogs into `{vault}/raw/work-logs/` for any project registered in the vault registry
+- `/save-session-to-worklog` — vault-aware; routes worklogs into `{vault}/raw/work-logs/<user-slug>/` (per-user subfolder, derived from `git config user.email` or `$BR_TOOLS_VAULT_USER`) for any project registered in the vault registry

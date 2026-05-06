@@ -136,7 +136,7 @@ Report as a numbered list with suggested fixes.
 
 ## Step 4 — Hard rules (apply across all modes)
 
-1. **`{vault}/raw/` is per-file mutable.** Reference docs (e.g. external snapshots, sandbox notes) inside `raw/projects/<slug>/` are citation anchors — don't modify. Living plans in those same folders, and worklog files in `raw/work-logs/`, ARE meant to be edited freely by both Claude and the user. Defer to each vault's own `CLAUDE.md` for project-specific conventions.
+1. **`{vault}/raw/` is per-file mutable.** Reference docs (e.g. external snapshots, sandbox notes) inside `raw/projects/<slug>/` are citation anchors — don't modify. Living plans in those same folders, and worklog files in `raw/work-logs/<user-slug>/`, ARE meant to be edited freely by both Claude and the user. **Worklog folders are user-scoped** — only edit files under the active user's slug (resolved by `/save-session-to-worklog` from `git config user.email` or `$BR_TOOLS_VAULT_USER`); treat other teammates' worklog folders as read-only references when they exist. Defer to each vault's own `CLAUDE.md` for project-specific conventions.
 2. **Always update `{vault}/wiki/index.md` and `{vault}/wiki/log.md`** after any wiki write.
 3. **Page names are lowercase-hyphenated** (with the rare exception of ticket IDs like `HPY-5611.md` if the vault's CLAUDE.md says so).
 4. **No empty wiki pages.** A stubbed page gets at least a summary line and a "Related pages" section.
