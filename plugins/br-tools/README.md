@@ -1,6 +1,6 @@
 # br-tools
 
-Bernardo's Claude Code toolkit — 7 slash commands and 6 skills for code reviews (PR / local / full-repo audit), git workflow, Claude meta tasks, external integrations, and per-project knowledge vaults.
+Bernardo's Claude Code toolkit — 8 slash commands and 6 skills for code reviews (PR / local / full-repo audit), git workflow, Claude meta tasks, external integrations, and per-project knowledge vaults.
 
 > **Heads up for non-author users**: examples in the docs below reference my own projects (`happy`, `meyer`), Jira instance names (`happy`, `horizon`), and ticket prefixes (`HPY-####`). These are illustrative — the plugin works for any project. Where you see config that's literally my data (the **Project Map** in `/save-session-to-worklog`, the registry under `~/.config/br-tools/vaults.json`), swap in your own.
 
@@ -75,6 +75,13 @@ Scaffold a Karpathy-style LLM Wiki vault for the current project. Interactive: a
 ```
 
 After init, drop sources into `{vault}/raw/`, ask Claude to ingest, and browse the result in [Obsidian](https://obsidian.md). The vault auto-updates during sessions in the registered project.
+
+#### `/br-tools:vault-resolve-conflicts`
+Auto-resolve merge/stash conflicts in vault markdown by keeping BOTH the incoming and local changes for every conflict block (union merge). Designed for `wiki/log.md`, `wiki/index.md`, and other append-only/list-style vault files where union-merging is almost always the right call. Vault-only — refuses to run outside a registered vault. After resolving, surfaces near-duplicate adjacent lines (the "same fact, two phrasings" pattern) for the user to pick one.
+
+```
+/br-tools:vault-resolve-conflicts
+```
 
 ## Skills
 

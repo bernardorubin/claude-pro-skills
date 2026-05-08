@@ -24,6 +24,8 @@ Explicit-only — invoked by typing the slash command.
 | `/br-tools:claude-modularize` | Split a monolithic CLAUDE.md across the project |
 | `/br-tools:prd-to-jira` | Break a PRD into a Jira epic with right-sized tickets |
 | `/br-tools:save-session-to-worklog` | Log session work to a monthly Desktop worklog |
+| `/br-tools:vault-init` | Scaffold a Karpathy-style LLM Wiki vault for the current project |
+| `/br-tools:vault-resolve-conflicts` | Union-merge vault conflicts (keep both incoming and local changes) |
 
 ### Skills
 
