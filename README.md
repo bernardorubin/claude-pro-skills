@@ -19,6 +19,7 @@ Explicit-only — invoked by typing the slash command.
 | Command | Purpose |
 |---------|---------|
 | `/br-tools:git-acp` | Stage all, commit with auto-generated message, push |
+| `/br-tools:git-ac` | Stage all, commit with auto-generated message (no push) — for push-blocked remotes |
 | `/br-tools:git-pull-reapply` | Pull + preserve local work via stash/rebase |
 | `/br-tools:claude-learn` | Capture session learnings into CLAUDE.md files |
 | `/br-tools:claude-modularize` | Split a monolithic CLAUDE.md across the project |

@@ -1,6 +1,6 @@
 # br-tools
 
-Bernardo's Claude Code toolkit — 8 slash commands and 6 skills for code reviews (PR / local / full-repo audit), git workflow, Claude meta tasks, external integrations, and per-project knowledge vaults.
+Bernardo's Claude Code toolkit — 9 slash commands and 6 skills for code reviews (PR / local / full-repo audit), git workflow, Claude meta tasks, external integrations, and per-project knowledge vaults.
 
 > **Heads up for non-author users**: examples in the docs below reference my own projects (`happy`, `meyer`), Jira instance names (`happy`, `horizon`), and ticket prefixes (`HPY-####`). These are illustrative — the plugin works for any project. Where you see config that's literally my data (the **Project Map** in `/save-session-to-worklog`, the registry under `~/.config/br-tools/vaults.json`), swap in your own.
 
@@ -23,6 +23,9 @@ Bernardo's Claude Code toolkit — 8 slash commands and 6 skills for code review
 
 #### `/br-tools:git-acp`
 Stage all changes, generate a concise commit message from the diff, commit (no AI co-author lines), and push to the current branch's remote. One-shot replacement for the `git add -A && git commit && git push` ritual.
+
+#### `/br-tools:git-ac`
+Same as `git-acp` but stops after the commit — no push. Use when the remote blocks pushes (branch protection, pre-receive hooks, push-blocked config) or when you want to batch commits locally before pushing yourself.
 
 #### `/br-tools:git-pull-reapply`
 Bring the current branch up to date with remote while preserving local work. Handles four scenarios:
