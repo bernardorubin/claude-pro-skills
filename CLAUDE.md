@@ -1,4 +1,4 @@
-# claude-plugins (bernardorubin-tools marketplace)
+# claude-plugins (claude-pro marketplace)
 
 This repo is a Claude Code **plugin marketplace**. It is not application code — there is no build, no test runner, and no package manager. Everything here is JSON manifests + markdown skill definitions consumed by the Claude Code harness.
 
@@ -21,10 +21,10 @@ claude-plugins/
 
 ## How everything wires together
 
-- **Marketplace name**: `bernardorubin-tools` (set in `.claude-plugin/marketplace.json`)
+- **Marketplace name**: `claude-pro` (set in `.claude-plugin/marketplace.json`)
 - **GitHub identifier**: `bernardorubin/claude-plugins` (used in `/plugin marketplace add`)
 - **Single plugin**: `claude-pro-tools` — bundles 13 skills (no commands). The `pr-review` skill itself supports three modes: PR review, local diff review, and full-repo audit.
-- **Install path** (after `/plugin install`): `~/.claude/plugins/cache/bernardorubin-tools/claude-pro-tools/<version>/`
+- **Install path** (after `/plugin install`): `~/.claude/plugins/cache/claude-pro/claude-pro-tools/<version>/`
 
 When users update the marketplace and reinstall, the harness pulls from `main` of this repo via the `git-subdir` source defined in `marketplace.json`.
 
@@ -88,6 +88,6 @@ The agent becomes invocable via the Task tool as `subagent_type: claude-pro-tool
    python3 -c "import json; json.load(open('plugins/claude-pro-tools/.claude-plugin/plugin.json'))"
    ```
 2. Commit + push to `main`.
-3. On any machine that already has the marketplace: `/plugin marketplace update bernardorubin-tools` → `/plugin install claude-pro-tools@bernardorubin-tools` to pull updates.
+3. On any machine that already has the marketplace: `/plugin marketplace update claude-pro` → `/plugin install claude-pro-tools@claude-pro` to pull updates.
 
 There is no app store, approval process, or release pipeline — pushing to `main` is publishing.
