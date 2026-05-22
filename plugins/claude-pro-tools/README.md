@@ -1,33 +1,27 @@
-# br-tools
+# claude-pro-tools
 
-Bernardo's Claude Code toolkit — 9 slash commands and 6 skills for code reviews (PR / local / full-repo audit), git workflow, Claude meta tasks, external integrations, and per-project knowledge vaults.
+A Claude Code toolkit — **13 skills, no prefix to type**. Code reviews (PR / local / full-repo audit), git workflow, Claude meta tasks, external integrations, and per-project knowledge vaults.
 
-> **Heads up for non-author users**: examples in the docs below reference my own projects (`happy`, `meyer`), Jira instance names (`happy`, `horizon`), and ticket prefixes (`HPY-####`). These are illustrative — the plugin works for any project. Where you see config that's literally my data (the **Project Map** in `/save-session-to-worklog`, the registry under `~/.config/br-tools/vaults.json`), swap in your own.
+> **Heads up for non-author users**: examples in the docs below reference my own projects (`happy`, `meyer`), Jira instance names (`happy`, `horizon`), and ticket prefixes (`HPY-####`). These are illustrative — the plugin works for any project. Where you see config that's literally my data (the **Project Map** in `/save-session-to-worklog`, the registry under `~/.config/claude-pro-tools/vaults.json`), swap in your own.
 
 ## Installation
 
 ```
 /plugin marketplace add bernardorubin/claude-plugins
-/plugin install br-tools@bernardorubin-tools
+/plugin install claude-pro-tools@bernardorubin-tools
 /reload-plugins
 ```
 
-## Commands vs Skills
+## Skills only — no prefix
 
-- **Commands** (`/br-tools:<name>`) only fire when you explicitly type the slash command. Use them for actions you want full control over.
-- **Skills** (`/<name>`) appear in the slash palette without the `br-tools:` prefix and **also auto-trigger** on natural language. Use them for tasks you'd happily ask for in plain English.
+Every entry below is a **skill** invocable as `/<name>` (no `claude-pro-tools:` prefix). Skills appear in the slash palette and **auto-trigger** when you describe the task in plain English.
 
-## Commands
+## Git
 
-### Git
+### `/git-ac`
+Stage all changes, generate a concise commit message from the diff, commit (no AI co-author lines), **no push**. Use when the remote blocks pushes (branch protection, pre-receive hooks) or when you want to batch commits locally before pushing yourself.
 
-#### `/br-tools:git-acp`
-Stage all changes, generate a concise commit message from the diff, commit (no AI co-author lines), and push to the current branch's remote. One-shot replacement for the `git add -A && git commit && git push` ritual.
-
-#### `/br-tools:git-ac`
-Same as `git-acp` but stops after the commit — no push. Use when the remote blocks pushes (branch protection, pre-receive hooks, push-blocked config) or when you want to batch commits locally before pushing yourself.
-
-#### `/br-tools:git-pull-reapply`
+### `/git-pull-reapply`
 Bring the current branch up to date with remote while preserving local work. Handles four scenarios:
 1. Clean tree + fast-forward → simple `git pull`
 2. Uncommitted changes + fast-forward → stash, pull, pop
@@ -36,57 +30,69 @@ Bring the current branch up to date with remote while preserving local work. Han
 
 Always rebases over merging so history stays linear.
 
-### Claude meta
+## Claude meta
 
-#### `/br-tools:claude-learn`
+### `/claude-learn`
 Reviews the current session and documents valuable learnings into the right CLAUDE.md files (global, project root, or module). Helps future sessions start smarter.
 
 ```
-/br-tools:claude-learn                # Review whole session
-/br-tools:claude-learn <learning>     # Document a specific learning
+/claude-learn                # Review whole session
+/claude-learn <learning>     # Document a specific learning
 ```
 
-#### `/br-tools:claude-modularize`
+### `/claude-modularize`
 Breaks down a large, monolithic CLAUDE.md into smaller, scoped files distributed across the project's directory structure (component-specific guidelines move next to components, etc.).
 
-### Integrations
+## Integrations
 
-#### `/br-tools:prd-to-jira`
-Breaks down a PRD, spec, or feature document into a Jira epic with well-structured, right-sized tickets organized by work area. Backed by the `prd-to-jira` skill — typing the slash command runs the same workflow, but the skill auto-triggers when you share a PRD in conversation.
-
-```
-/br-tools:prd-to-jira                          # Expects PRD pasted in conversation
-/br-tools:prd-to-jira <path-or-url-or-key>     # Path, URL, or Jira ticket key
-```
-
-#### `/br-tools:save-session-to-worklog`
-Logs the current session's work into a monthly worklog file. **Vault-aware**: if the current project is registered in `~/.config/br-tools/vaults.json` (via `/vault-init` or the `vault-keeper` skill), the worklog lands in `{vault}/raw/sessions/` and an entry is appended to `{vault}/wiki/log.md`. Otherwise falls back to `~/Desktop/`. For standups and invoicing — not git history. Auto-detects the project; multiple repos belonging to the same project share one file.
+### `/prd-to-jira`
+Breaks down a PRD, spec, or feature document into a Jira epic with well-structured, right-sized tickets organized by work area. Auto-triggers when you share a PRD or ask to "create tickets", "break this down", "make Jira tasks".
 
 ```
-/br-tools:save-session-to-worklog                       # Auto-detect project
-/br-tools:save-session-to-worklog --project happy       # Force project name
+/prd-to-jira                          # Expects PRD pasted in conversation
+/prd-to-jira <path-or-url-or-key>     # Path, URL, or Jira ticket key
 ```
 
-### Knowledge vaults
-
-#### `/br-tools:vault-init`
-Scaffold a Karpathy-style LLM Wiki vault for the current project. Interactive: asks for vault path, project path, git, and (optionally) a private GitHub repo. Writes a generic `CLAUDE.md` schema, sets up `raw/`/`wiki/`/`templates/`, and registers the project → vault mapping in `~/.config/br-tools/vaults.json` so the `vault-keeper` skill auto-engages.
+### `/save-session-to-worklog`
+Logs the current session's work into a monthly worklog file. **Vault-aware**: if the current project is registered in `~/.config/claude-pro-tools/vaults.json` (via `/vault-init` or the `vault-keeper` skill), the worklog lands in `{vault}/raw/work-logs/<user-slug>/` and an entry is appended to `{vault}/wiki/log.md`. Otherwise falls back to `~/Desktop/`. For standups and invoicing — not git history. Auto-detects the project; multiple repos belonging to the same project share one file.
 
 ```
-/br-tools:vault-init                            # Interactive
-/br-tools:vault-init ~/MyProjectVault           # Specify vault path; still asks the rest
+/save-session-to-worklog                       # Auto-detect project
+/save-session-to-worklog --project happy       # Force project name
+```
+
+## Knowledge vaults
+
+### `/vault-init`
+Scaffold a Karpathy-style LLM Wiki vault for the current project. Interactive: asks for vault path, project path, git, and (optionally) a private GitHub repo. Writes a generic `CLAUDE.md` schema, sets up `raw/`/`wiki/`/`templates/`, and registers the project → vault mapping in `~/.config/claude-pro-tools/vaults.json` so the `vault-keeper` skill auto-engages.
+
+```
+/vault-init                            # Interactive
+/vault-init ~/MyProjectVault           # Specify vault path; still asks the rest
 ```
 
 After init, drop sources into `{vault}/raw/`, ask Claude to ingest, and browse the result in [Obsidian](https://obsidian.md). The vault auto-updates during sessions in the registered project.
 
-#### `/br-tools:vault-resolve-conflicts`
+### `/vault-resolve-conflicts`
 Auto-resolve merge/stash conflicts in vault markdown by keeping BOTH the incoming and local changes for every conflict block (union merge). Designed for `wiki/log.md`, `wiki/index.md`, and other append-only/list-style vault files where union-merging is almost always the right call. Vault-only — refuses to run outside a registered vault. After resolving, surfaces near-duplicate adjacent lines (the "same fact, two phrasings" pattern) for the user to pick one.
 
 ```
-/br-tools:vault-resolve-conflicts
+/vault-resolve-conflicts
 ```
 
-## Skills
+### `/vault-keeper`
+Reads from and writes to a registered project's knowledge vault (Karpathy-style LLM Wiki). Auto-fires when documenting findings (architecture decisions, integration quirks, debugging discoveries, team facts), looking up domain context, ingesting raw sources, or asking for a vault lint. Resolves the current cwd against `~/.config/claude-pro-tools/vaults.json`; if no vault is registered for the project, the skill self-terminates silently. Each vault carries its own `CLAUDE.md` (the schema authority) — the skill defers to it for project-specific rules.
+
+**Four modes triggered by user intent:**
+
+- **Read** — domain questions ("what does X do?", "who owns Y?"). Reads `wiki/index.md`, follows links, synthesizes with citations to specific wiki pages.
+- **Write** — proactive auto-update. When you encounter an integration quirk, architectural decision, debugging finding, or team fact worth preserving, the skill files it into the relevant `wiki/` subfolder and updates `index.md` + `log.md`. No permission needed for small touches.
+- **Ingest** — adding a new raw source. Discusses takeaways with the user before writing, then creates a summary page + updates concept/entity pages, all cross-linked.
+- **Lint** — surfaces orphans, contradictions, stub pages, stale claims, format violations, and index drift. Reports without auto-fixing.
+
+To set up a new vault, use `/vault-init`.
+
+## PR helpers
 
 ### `/pr-description`
 Generates a GitHub-ready PR description from the diff and updates the PR directly via `gh`. Falls back to saving to `~/Desktop/pr-description.md` if the GitHub update fails. Auto-triggers on phrases like "write a PR description", "draft the PR body", "update the PR".
@@ -100,20 +106,7 @@ Generates a GitHub-ready PR description from the diff and updates the PR directl
 ### `/write-slack-message`
 Drafts a Slack message ready to copy-paste, with proper formatting and a business-casual tone. Saves to `~/Desktop/slack-message.md`. Auto-triggers on phrases like "draft a slack message", "how should I phrase this for slack", "write up a slack post".
 
-### `/prd-to-jira`
-PRD breakdown into a Jira epic — same workflow as the slash command above, but auto-triggers when you share a PRD, ask to "create tickets", "break this down", "make Jira tasks", etc.
-
-### `/vault-keeper`
-Reads from and writes to a registered project's knowledge vault (Karpathy-style LLM Wiki). Auto-fires when documenting findings (architecture decisions, integration quirks, debugging discoveries, team facts), looking up domain context, ingesting raw sources, or asking for a vault lint. Resolves the current cwd against `~/.config/br-tools/vaults.json`; if no vault is registered for the project, the skill self-terminates silently. Each vault carries its own `CLAUDE.md` (the schema authority) — the skill defers to it for project-specific rules.
-
-**Three modes triggered by user intent:**
-
-- **Read** — domain questions ("what does X do?", "who owns Y?"). Reads `wiki/index.md`, follows links, synthesizes with citations to specific wiki pages.
-- **Write** — proactive auto-update. When you encounter an integration quirk, architectural decision, debugging finding, or team fact worth preserving, the skill files it into the relevant `wiki/` subfolder and updates `index.md` + `log.md`. No permission needed for small touches.
-- **Ingest** — adding a new raw source. Discusses takeaways with the user before writing, then creates a summary page + updates concept/entity pages, all cross-linked.
-- **Lint** — surfaces orphans, contradictions, stub pages, stale claims, format violations, and index drift. Reports without auto-fixing.
-
-To set up a new vault, use `/vault-init`.
+## Jira
 
 ### `/jira-cli`
 Read/update/comment/transition Jira tickets directly from the shell via the bundled `jira-curl` CLI. Supports multiple Jira instances per machine (e.g. work + personal). Auto-triggers when you paste a Jira URL or key (`HPY-1234`, `WEB-456`) or say things like "update the description on ABC-123", "add a comment to …", "what's the status of …", "move this to In Progress".
@@ -121,12 +114,14 @@ Read/update/comment/transition Jira tickets directly from the shell via the bund
 **First-time setup:** the skill self-installs on first use — Claude detects the missing binary, runs the bundled installer, and prompts you for credentials. If you'd rather set it up manually:
 
 ```
-bash "$(ls -dt ~/.claude/plugins/cache/*/br-tools/*/skills/jira-cli/scripts/jira-curl 2>/dev/null | head -1)" install
+bash "$(ls -dt ~/.claude/plugins/cache/*/claude-pro-tools/*/skills/jira-cli/scripts/jira-curl 2>/dev/null | head -1)" install
 jira-curl init <name>      # interactive: base URL + email + API token
 jira-curl list             # show configured instances
 ```
 
 Credentials are stored at `~/.config/jira/credentials` with mode 600. Add as many instances as you need by re-running `jira-curl init <name>`. If `~/.local/bin` isn't on your `$PATH`, the installer prints the export line to add to your shell rc.
+
+## Code review
 
 ### `/pr-review` — Confidence-scored code reviews (3 modes)
 

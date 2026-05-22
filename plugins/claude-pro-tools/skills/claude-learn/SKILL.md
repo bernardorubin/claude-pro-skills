@@ -1,3 +1,8 @@
+---
+name: claude-learn
+description: Use when the user wants to document learnings from the current session into CLAUDE.md files, making future Claude sessions smarter. Triggers on phrases like "document what we learned", "update CLAUDE.md with this learning", "save this to CLAUDE.md", "claude-learn", "review the session for learnings", "what should we document from this session".
+---
+
 # Claude Learn
 
 Review the current session and document valuable learnings to CLAUDE.md files, making future Claude sessions smarter.

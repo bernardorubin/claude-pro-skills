@@ -1,3 +1,8 @@
+---
+name: claude-modularize
+description: Use when the user wants to break down a large, monolithic CLAUDE.md file into smaller maintainable pieces distributed across the project directory structure. Triggers on phrases like "modularize CLAUDE.md", "split up CLAUDE.md", "break down our CLAUDE.md", "distribute CLAUDE.md by directory", "claude-modularize", "our CLAUDE.md is too big".
+---
+
 # Modularize CLAUDE.md
 
 Break down a large, monolithic CLAUDE.md file into smaller, maintainable pieces distributed across the project's directory structure.
