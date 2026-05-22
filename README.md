@@ -1,4 +1,4 @@
-# bernardorubin-tools
+# claude-pro
 
 A Claude Code plugin marketplace by Bernardo Rubin. One plugin (`claude-pro-tools`), everything bundled, no command/skill prefixes to type.
 
@@ -6,7 +6,7 @@ A Claude Code plugin marketplace by Bernardo Rubin. One plugin (`claude-pro-tool
 
 ```
 /plugin marketplace add bernardorubin/claude-plugins
-/plugin install claude-pro-tools@bernardorubin-tools
+/plugin install claude-pro-tools@claude-pro
 /reload-plugins
 ```
 

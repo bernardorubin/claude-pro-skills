@@ -8,7 +8,7 @@ A Claude Code toolkit — **13 skills, no prefix to type**. Code reviews (PR / l
 
 ```
 /plugin marketplace add bernardorubin/claude-plugins
-/plugin install claude-pro-tools@bernardorubin-tools
+/plugin install claude-pro-tools@claude-pro
 /reload-plugins
 ```
 
