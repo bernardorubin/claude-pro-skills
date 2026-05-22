@@ -1,0 +1,12 @@
+{
+  "name": "claude-pro-tools",
+  "description": "Claude Code toolkit: confidence-scored code reviews (PR, local, or full-repo audit), git workflow shortcuts, PR/Slack helpers, Claude meta skills, Jira integration, and per-project knowledge vaults (Karpathy-style LLM Wiki). 13 skills, all invocable with no prefix.",
+  "version": "2.0.0",
+  "author": {
+    "name": "Bernardo Rubin",
+    "url": "https://github.com/bernardorubin"
+  },
+  "homepage": "https://github.com/bernardorubin/claude-plugins",
+  "repository": "https://github.com/bernardorubin/claude-plugins",
+  "license": "MIT"
+}

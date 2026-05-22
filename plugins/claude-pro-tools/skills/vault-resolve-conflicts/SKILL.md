@@ -1,8 +1,13 @@
+---
+name: vault-resolve-conflicts
+description: Use when the user has merge or stash conflicts in a registered vault and wants to auto-resolve by union-merging both sides (keep both incoming and local changes). Vault-only — refuses to run outside registered vaults. Triggers on phrases like "resolve vault conflicts", "union merge the vault", "keep both in vault conflicts", "vault-resolve-conflicts", "fix my vault conflicts".
+---
+
 # Resolve Vault Conflicts (Keep Both Sides)
 
 Auto-resolve merge/stash conflicts in a registered vault by keeping BOTH the incoming and local changes for every conflict block. Designed for vault files like `wiki/log.md` (append-only chronological), `wiki/index.md` (TOC), and other markdown content where union-merging is almost always the right call.
 
-**Vault-only**: this command refuses to run outside a directory registered in `~/.config/br-tools/vaults.json`. Union-merging code files can produce syntactically broken output; markdown logs/lists tolerate it well.
+**Vault-only**: this skill refuses to run outside a directory registered in `~/.config/claude-pro-tools/vaults.json`. Union-merging code files can produce syntactically broken output; markdown logs/lists tolerate it well.
 
 ## When to use
 
@@ -17,18 +22,18 @@ Run the steps below in order. Stop and surface to the user if any diagnostic fai
 ### Step 1 — Resolve cwd to a registered vault
 
 ```bash
-test -f ~/.config/br-tools/vaults.json || { echo "❌ No vault registry at ~/.config/br-tools/vaults.json. Run /vault-init first."; exit 1; }
+test -f ~/.config/claude-pro-tools/vaults.json || { echo "❌ No vault registry at ~/.config/claude-pro-tools/vaults.json. Run /vault-init first."; exit 1; }
 
 DIR="$(pwd)"
 VAULT=""
 while [ "$DIR" != "/" ] && [ -z "$VAULT" ]; do
-  VAULT=$(jq -r --arg d "$DIR" '.vaults[$d] // empty' ~/.config/br-tools/vaults.json 2>/dev/null)
+  VAULT=$(jq -r --arg d "$DIR" '.vaults[$d] // empty' ~/.config/claude-pro-tools/vaults.json 2>/dev/null)
   DIR="$(dirname "$DIR")"
 done
 
 if [ -z "$VAULT" ]; then
-  echo "❌ Current directory is not inside a registered vault. This command is vault-only by design."
-  echo "   Registered vaults: $(jq -r '.vaults | keys | .[]' ~/.config/br-tools/vaults.json)"
+  echo "❌ Current directory is not inside a registered vault. This skill is vault-only by design."
+  echo "   Registered vaults: $(jq -r '.vaults | keys | .[]' ~/.config/claude-pro-tools/vaults.json)"
   exit 1
 fi
 
@@ -123,7 +128,7 @@ The one case union gets wrong: **same line, both sides edited differently** (e.g
 
 ## Notes
 
-- Never auto-commit. The user reviews `git diff --cached` and commits with `/git-acp` or by hand.
+- Never auto-commit. The user reviews `git diff --cached` and commits with `/git-ac` or by hand.
 - If `git merge-file --union` reports an error (rare — usually means the file isn't actually conflicted at the index level), surface the error and stop on that file, continue with the rest.
 - For non-markdown files in the vault (rare), still applies — union just concatenates text. If the user has YAML frontmatter or JSON in conflict, they'll need to hand-merge; flag it.
-- Alternative for files that are ALWAYS append-only (like `wiki/log.md`): add a `.gitattributes` entry `wiki/log.md merge=union` to make git auto-resolve at merge/stash-apply time without needing this command. This command is the catch-all for everything else.
+- Alternative for files that are ALWAYS append-only (like `wiki/log.md`): add a `.gitattributes` entry `wiki/log.md merge=union` to make git auto-resolve at merge/stash-apply time without needing this skill. This skill is the catch-all for everything else.

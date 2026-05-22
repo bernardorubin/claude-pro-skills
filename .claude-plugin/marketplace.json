@@ -9,15 +9,15 @@
   },
   "plugins": [
     {
-      "name": "br-tools",
+      "name": "claude-pro-tools",
       "source": {
         "source": "git-subdir",
         "url": "https://github.com/bernardorubin/claude-plugins.git",
-        "path": "plugins/br-tools",
+        "path": "plugins/claude-pro-tools",
         "ref": "main"
       },
-      "description": "Bernardo's Claude Code toolkit: confidence-scored code reviews (PR, local, or full-repo audit), git workflow shortcuts, PR/Slack helpers, Claude meta commands, and Jira integration. 9 slash commands and 6 skills.",
-      "version": "1.4.0",
+      "description": "Claude Code toolkit: confidence-scored code reviews (PR, local, or full-repo audit), git workflow shortcuts, PR/Slack helpers, Claude meta skills, Jira integration, and per-project knowledge vaults. 13 skills, all invocable with no prefix.",
+      "version": "2.0.0",
       "author": {
         "name": "Bernardo Rubin"
       }

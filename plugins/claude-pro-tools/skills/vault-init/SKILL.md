@@ -1,3 +1,8 @@
+---
+name: vault-init
+description: Use when the user wants to scaffold a new Karpathy-style LLM Wiki vault for the current project and register it for the vault-keeper skill. Triggers on phrases like "init a vault", "set up a knowledge vault", "create a second brain for this project", "scaffold the wiki", "vault-init", "start a new vault here".
+---
+
 # Initialize a new project vault
 
 Scaffold a Karpathy-style LLM Wiki vault for the current project, register it, and (optionally) version-control it.
@@ -37,7 +42,7 @@ If `$ARGUMENTS` provided a vault path, use that. Otherwise ask:
 Expand `~` to `$HOME`. Resolve to an absolute path.
 
 **Refuse to proceed if:**
-- The project path is already registered in `~/.config/br-tools/vaults.json` (offer to overwrite explicitly)
+- The project path is already registered in `~/.config/claude-pro-tools/vaults.json` (offer to overwrite explicitly)
 - The vault path already exists and contains files other than `.obsidian/` or `.git/` (offer to use it as-is and skip scaffolding, or pick a different path)
 
 ### Step 3 — Ask about version control
@@ -346,7 +351,7 @@ Three layers:
 2. `wiki/` — markdown pages Claude maintains, cross-linked via `[[wiki-links]]`
 3. `CLAUDE.md` — the schema (page format, ingest workflow, auto-update triggers)
 
-Open in [Obsidian](https://obsidian.md). Entry point: `wiki/index.md`. The vault auto-updates during Claude sessions via the `vault-keeper` skill in br-tools.
+Open in [Obsidian](https://obsidian.md). Entry point: `wiki/index.md`. The vault auto-updates during Claude sessions via the `vault-keeper` skill in claude-pro-tools.
 
 > ⚠️ Personal knowledge base.
 ```
@@ -400,27 +405,27 @@ The snippet (substitute `{vault-path}` and `{project-basename}`):
 
 ## Knowledge Vault
 
-A `{project-basename}` vault is registered for this project at `{vault-path}` (Karpathy-style LLM Wiki, Obsidian-compatible). The `vault-keeper` skill (br-tools) handles read/write rules — see its SKILL.md for the auto-update triggers and the vault's own `CLAUDE.md` for schema rules. The `~/.claude/projects/<cwd-mangled>/memory/` files remain session-level scratch (per-conversation feedback) — distinct from the vault's persistent, cross-linked knowledge layer.
+A `{project-basename}` vault is registered for this project at `{vault-path}` (Karpathy-style LLM Wiki, Obsidian-compatible). The `vault-keeper` skill (claude-pro-tools) handles read/write rules — see its SKILL.md for the auto-update triggers and the vault's own `CLAUDE.md` for schema rules. The `~/.claude/projects/<cwd-mangled>/memory/` files remain session-level scratch (per-conversation feedback) — distinct from the vault's persistent, cross-linked knowledge layer.
 ```
 
 If the user declines, skip silently. The registry alone is enough for the skill to function.
 
 ### Step 7 — Register the vault
 
-Update `~/.config/br-tools/vaults.json`. Create the file + parent dir if missing.
+Update `~/.config/claude-pro-tools/vaults.json`. Create the file + parent dir if missing.
 
 ```bash
-mkdir -p ~/.config/br-tools
+mkdir -p ~/.config/claude-pro-tools
 
-if [ ! -f ~/.config/br-tools/vaults.json ]; then
-  echo '{"vaults":{}}' > ~/.config/br-tools/vaults.json
+if [ ! -f ~/.config/claude-pro-tools/vaults.json ]; then
+  echo '{"vaults":{}}' > ~/.config/claude-pro-tools/vaults.json
 fi
 
 # Add the entry (idempotent — overwrites if key exists):
 jq --arg p "{project-path}" --arg v "{vault-path}" \
   '.vaults[$p] = $v' \
-  ~/.config/br-tools/vaults.json > ~/.config/br-tools/vaults.json.tmp \
-  && mv ~/.config/br-tools/vaults.json.tmp ~/.config/br-tools/vaults.json
+  ~/.config/claude-pro-tools/vaults.json > ~/.config/claude-pro-tools/vaults.json.tmp \
+  && mv ~/.config/claude-pro-tools/vaults.json.tmp ~/.config/claude-pro-tools/vaults.json
 ```
 
 ### Step 8 — Confirm
@@ -450,4 +455,4 @@ Don't dump the full file tree. The user can `ls` if curious. Bracketed lines are
 ## Related
 
 - `vault-keeper` skill — does the actual reading/writing once the vault exists
-- `/save-session-to-worklog` — vault-aware; routes worklogs into `{vault}/raw/work-logs/<user-slug>/` (per-user subfolder, derived from `git config user.email` or `$BR_TOOLS_VAULT_USER`) for any project registered in the vault registry
+- `/save-session-to-worklog` — vault-aware; routes worklogs into `{vault}/raw/work-logs/<user-slug>/` (per-user subfolder, derived from `git config user.email` or `$CLAUDE_PRO_TOOLS_VAULT_USER`) for any project registered in the vault registry

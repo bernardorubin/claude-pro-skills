@@ -1,3 +1,8 @@
+---
+name: git-pull-reapply
+description: Use when the user wants to safely pull or rebase the current branch from remote while preserving any local work (handles dirty trees, divergent branches via stash + rebase). Triggers on phrases like "pull and reapply", "pull with my changes", "sync this branch safely", "safe pull", "rebase from remote", "pull but keep my work".
+---
+
 # Pull and Reapply Changes
 
 Bring the current branch up to date with remote, preserving any local work.
