@@ -1,20 +1,20 @@
-# claude-pro-tools
+# claude-pro-skills
 
 A Claude Code toolkit — **13 skills, no prefix to type**. Code reviews (PR / local / full-repo audit), git workflow, Claude meta tasks, external integrations, and per-project knowledge vaults.
 
-> **Heads up for non-author users**: examples in the docs below reference my own projects (`happy`, `meyer`), Jira instance names (`happy`, `horizon`), and ticket prefixes (`HPY-####`). These are illustrative — the plugin works for any project. Where you see config that's literally my data (the **Project Map** in `/save-session-to-worklog`, the registry under `~/.config/claude-pro-tools/vaults.json`), swap in your own.
+> **Heads up for non-author users**: examples in the docs below reference my own projects (`happy`, `meyer`), Jira instance names (`happy`, `horizon`), and ticket prefixes (`HPY-####`). These are illustrative — the plugin works for any project. Where you see config that's literally my data (the **Project Map** in `/save-session-to-worklog`, the registry under `~/.config/claude-pro-skills/vaults.json`), swap in your own.
 
 ## Installation
 
 ```
-/plugin marketplace add bernardorubin/claude-plugins
-/plugin install claude-pro-tools@claude-pro
+/plugin marketplace add bernardorubin/claude-pro-skills
+/plugin install claude-pro-skills@claude-pro-skills
 /reload-plugins
 ```
 
 ## Skills only — no prefix
 
-Every entry below is a **skill** invocable as `/<name>` (no `claude-pro-tools:` prefix). Skills appear in the slash palette and **auto-trigger** when you describe the task in plain English.
+Every entry below is a **skill** invocable as `/<name>` (no `claude-pro-skills:` prefix). Skills appear in the slash palette and **auto-trigger** when you describe the task in plain English.
 
 ## Git
 
@@ -54,7 +54,7 @@ Breaks down a PRD, spec, or feature document into a Jira epic with well-structur
 ```
 
 ### `/save-session-to-worklog`
-Logs the current session's work into a monthly worklog file. **Vault-aware**: if the current project is registered in `~/.config/claude-pro-tools/vaults.json` (via `/vault-init` or the `vault-keeper` skill), the worklog lands in `{vault}/raw/work-logs/<user-slug>/` and an entry is appended to `{vault}/wiki/log.md`. Otherwise falls back to `~/Desktop/`. For standups and invoicing — not git history. Auto-detects the project; multiple repos belonging to the same project share one file.
+Logs the current session's work into a monthly worklog file. **Vault-aware**: if the current project is registered in `~/.config/claude-pro-skills/vaults.json` (via `/vault-init` or the `vault-keeper` skill), the worklog lands in `{vault}/raw/work-logs/<user-slug>/` and an entry is appended to `{vault}/wiki/log.md`. Otherwise falls back to `~/Desktop/`. For standups and invoicing — not git history. Auto-detects the project; multiple repos belonging to the same project share one file.
 
 ```
 /save-session-to-worklog                       # Auto-detect project
@@ -64,7 +64,7 @@ Logs the current session's work into a monthly worklog file. **Vault-aware**: if
 ## Knowledge vaults
 
 ### `/vault-init`
-Scaffold a Karpathy-style LLM Wiki vault for the current project. Interactive: asks for vault path, project path, git, and (optionally) a private GitHub repo. Writes a generic `CLAUDE.md` schema, sets up `raw/`/`wiki/`/`templates/`, and registers the project → vault mapping in `~/.config/claude-pro-tools/vaults.json` so the `vault-keeper` skill auto-engages.
+Scaffold a Karpathy-style LLM Wiki vault for the current project. Interactive: asks for vault path, project path, git, and (optionally) a private GitHub repo. Writes a generic `CLAUDE.md` schema, sets up `raw/`/`wiki/`/`templates/`, and registers the project → vault mapping in `~/.config/claude-pro-skills/vaults.json` so the `vault-keeper` skill auto-engages.
 
 ```
 /vault-init                            # Interactive
@@ -81,7 +81,7 @@ Auto-resolve merge/stash conflicts in vault markdown by keeping BOTH the incomin
 ```
 
 ### `/vault-keeper`
-Reads from and writes to a registered project's knowledge vault (Karpathy-style LLM Wiki). Auto-fires when documenting findings (architecture decisions, integration quirks, debugging discoveries, team facts), looking up domain context, ingesting raw sources, or asking for a vault lint. Resolves the current cwd against `~/.config/claude-pro-tools/vaults.json`; if no vault is registered for the project, the skill self-terminates silently. Each vault carries its own `CLAUDE.md` (the schema authority) — the skill defers to it for project-specific rules.
+Reads from and writes to a registered project's knowledge vault (Karpathy-style LLM Wiki). Auto-fires when documenting findings (architecture decisions, integration quirks, debugging discoveries, team facts), looking up domain context, ingesting raw sources, or asking for a vault lint. Resolves the current cwd against `~/.config/claude-pro-skills/vaults.json`; if no vault is registered for the project, the skill self-terminates silently. Each vault carries its own `CLAUDE.md` (the schema authority) — the skill defers to it for project-specific rules.
 
 **Four modes triggered by user intent:**
 
@@ -114,7 +114,7 @@ Read/update/comment/transition Jira tickets directly from the shell via the bund
 **First-time setup:** the skill self-installs on first use — Claude detects the missing binary, runs the bundled installer, and prompts you for credentials. If you'd rather set it up manually:
 
 ```
-bash "$(ls -dt ~/.claude/plugins/cache/*/claude-pro-tools/*/skills/jira-cli/scripts/jira-curl 2>/dev/null | head -1)" install
+bash "$(ls -dt ~/.claude/plugins/cache/*/claude-pro-skills/*/skills/jira-cli/scripts/jira-curl 2>/dev/null | head -1)" install
 jira-curl init <name>      # interactive: base URL + email + API token
 jira-curl list             # show configured instances
 ```

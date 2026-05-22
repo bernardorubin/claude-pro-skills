@@ -12,7 +12,7 @@ When asked to help migrate to a new computer, read `~/Desktop/claude-migration.m
 ## Available Tools
 
 ### Personal toolkit — `br-tools` plugin
-Single install covers everything below: `/plugin install br-tools@claude-pro`. Source repo: `bernardorubin/claude-plugins`.
+Single install covers everything below: `/plugin install br-tools@claude-pro-skills`. Source repo: `bernardorubin/claude-pro-skills`.
 
 **Slash commands** (explicit invocation only — namespaced):
 `/br-tools:git-acp`, `/br-tools:git-pull-reapply`, `/br-tools:claude-learn`, `/br-tools:claude-modularize`, `/br-tools:prd-to-jira`, `/br-tools:save-session-to-worklog`

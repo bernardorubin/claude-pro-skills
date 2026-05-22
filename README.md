@@ -1,18 +1,18 @@
-# claude-pro
+# claude-pro-skills
 
-A Claude Code plugin marketplace by Bernardo Rubin. One plugin (`claude-pro-tools`), everything bundled, no command/skill prefixes to type.
+A Claude Code plugin marketplace by Bernardo Rubin. One plugin (`claude-pro-skills`), everything bundled, no command/skill prefixes to type.
 
 ## Installation
 
 ```
-/plugin marketplace add bernardorubin/claude-plugins
-/plugin install claude-pro-tools@claude-pro
+/plugin marketplace add bernardorubin/claude-pro-skills
+/plugin install claude-pro-skills@claude-pro-skills
 /reload-plugins
 ```
 
-## What's inside `claude-pro-tools`
+## What's inside `claude-pro-skills`
 
-Everything is a **skill** — no `claude-pro-tools:` prefix needed when invoking. Skills appear in the slash palette as `/<name>` and auto-trigger on natural language.
+Everything is a **skill** — no `claude-pro-skills:` prefix needed when invoking. Skills appear in the slash palette as `/<name>` and auto-trigger on natural language.
 
 | Skill | Triggers on |
 |-------|-------------|
@@ -30,7 +30,7 @@ Everything is a **skill** — no `claude-pro-tools:` prefix needed when invoking
 | `/claude-learn` | "document what we learned", "update CLAUDE.md with this" |
 | `/claude-modularize` | "split up CLAUDE.md", "modularize CLAUDE.md" |
 
-See [`plugins/claude-pro-tools/README.md`](plugins/claude-pro-tools/README.md) for full details on every skill, the PR review modes (PR / local / full-repo), and the iterative review loop.
+See [`plugins/claude-pro-skills/README.md`](plugins/claude-pro-skills/README.md) for full details on every skill, the PR review modes (PR / local / full-repo), and the iterative review loop.
 
 ## License
 

@@ -17,7 +17,7 @@ You MUST resolve binary + instance before making any API call. Skipping this and
 ### 1. Make sure `jira-curl` is on PATH
 
 ```bash
-command -v jira-curl >/dev/null 2>&1 || bash "$(ls -dt ~/.claude/plugins/cache/*/claude-pro-tools/*/skills/jira-cli/scripts/jira-curl 2>/dev/null | head -1)" install
+command -v jira-curl >/dev/null 2>&1 || bash "$(ls -dt ~/.claude/plugins/cache/*/claude-pro-skills/*/skills/jira-cli/scripts/jira-curl 2>/dev/null | head -1)" install
 ```
 
 This is idempotent. The script self-symlinks into `~/.local/bin/jira-curl`. If it warns `~/.local/bin` isn't on `$PATH`, relay that message to the user — they need to update their shell rc and reopen the shell before `jira-curl` resolves from a fresh terminal. (Within this session, invoke via the absolute path `~/.local/bin/jira-curl …` to keep working.)
