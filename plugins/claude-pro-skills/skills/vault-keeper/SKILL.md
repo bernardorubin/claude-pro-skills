@@ -1,6 +1,6 @@
 ---
 name: vault-keeper
-description: Use when working in a project that has a registered second-brain knowledge vault (Karpathy-style LLM Wiki). Auto-fires when the user documents findings (architecture decisions, integration quirks, debugging discoveries, team facts, ticket epics), looks up domain context (team/integrations/flows/past decisions), ingests raw sources into the wiki, or asks for a vault lint/audit. Resolves the current working directory against `~/.config/claude-pro-tools/vaults.json`; if the project has no registered vault, the skill self-terminates without action. To set up a new vault, use `/vault-init`. Triggers on phrases like "save this to the vault", "what does the wiki say about X", "let's document this finding", "ingest this doc", "lint the wiki", "what's our second brain say about Y".
+description: Use when working in a project that has a registered second-brain knowledge vault (Karpathy-style LLM Wiki). Auto-fires when the user documents findings (architecture decisions, integration quirks, debugging discoveries, team facts, ticket epics), looks up domain context (team/integrations/flows/past decisions), ingests raw sources into the wiki, or asks for a vault lint/audit. Resolves the current working directory against `~/.config/claude-pro-skills/vaults.json`; if the project has no registered vault, the skill self-terminates without action. To set up a new vault, use `/vault-init`. Triggers on phrases like "save this to the vault", "what does the wiki say about X", "let's document this finding", "ingest this doc", "lint the wiki", "what's our second brain say about Y".
 allowed-tools: Read, Write, Edit, Bash(jq:*), Bash(cat:*), Bash(test:*), Bash(ls:*), Bash(date:*), Bash(grep:*), Bash(find:*)
 ---
 
@@ -19,7 +19,7 @@ If the user is in a project with no registered vault, this skill **silently term
 
 ## Step 1 — Resolve the current project to a vault path
 
-Read the registry at `~/.config/claude-pro-tools/vaults.json`. Schema:
+Read the registry at `~/.config/claude-pro-skills/vaults.json`. Schema:
 
 ```json
 {
@@ -31,8 +31,8 @@ Read the registry at `~/.config/claude-pro-tools/vaults.json`. Schema:
 ```
 
 ```bash
-test -f ~/.config/claude-pro-tools/vaults.json || { echo "no-registry"; exit 0; }
-cat ~/.config/claude-pro-tools/vaults.json
+test -f ~/.config/claude-pro-skills/vaults.json || { echo "no-registry"; exit 0; }
+cat ~/.config/claude-pro-skills/vaults.json
 ```
 
 Walk up the cwd directory tree (current working directory, then parent, then parent's parent, …) and look for an exact match against the registry keys. The first match wins. This means a session in `/Users/foo/apps/myproject/subdir/` matches an entry for `/Users/foo/apps/myproject`.
@@ -42,7 +42,7 @@ Walk up the cwd directory tree (current working directory, then parent, then par
 DIR="$(pwd)"
 VAULT=""
 while [ "$DIR" != "/" ] && [ -z "$VAULT" ]; do
-  VAULT=$(jq -r --arg d "$DIR" '.vaults[$d] // empty' ~/.config/claude-pro-tools/vaults.json 2>/dev/null)
+  VAULT=$(jq -r --arg d "$DIR" '.vaults[$d] // empty' ~/.config/claude-pro-skills/vaults.json 2>/dev/null)
   DIR="$(dirname "$DIR")"
 done
 echo "${VAULT:-(no vault for this project)}"
@@ -136,7 +136,7 @@ Report as a numbered list with suggested fixes.
 
 ## Step 4 — Hard rules (apply across all modes)
 
-1. **`{vault}/raw/` is per-file mutable.** Reference docs (e.g. external snapshots, sandbox notes) inside `raw/projects/<slug>/` are citation anchors — don't modify. Living plans in those same folders, and worklog files in `raw/work-logs/<user-slug>/`, ARE meant to be edited freely by both Claude and the user. **Worklog folders are user-scoped** — only edit files under the active user's slug (resolved by `/save-session-to-worklog` from `git config user.email` or `$CLAUDE_PRO_TOOLS_VAULT_USER`); treat other teammates' worklog folders as read-only references when they exist. Defer to each vault's own `CLAUDE.md` for project-specific conventions.
+1. **`{vault}/raw/` is per-file mutable.** Reference docs (e.g. external snapshots, sandbox notes) inside `raw/projects/<slug>/` are citation anchors — don't modify. Living plans in those same folders, and worklog files in `raw/work-logs/<user-slug>/`, ARE meant to be edited freely by both Claude and the user. **Worklog folders are user-scoped** — only edit files under the active user's slug (resolved by `/save-session-to-worklog` from `git config user.email` or `$CLAUDE_PRO_SKILLS_VAULT_USER`); treat other teammates' worklog folders as read-only references when they exist. Defer to each vault's own `CLAUDE.md` for project-specific conventions.
 2. **Always update `{vault}/wiki/index.md` and `{vault}/wiki/log.md`** after any wiki write.
 3. **Page names are lowercase-hyphenated** (with the rare exception of ticket IDs like `HPY-5611.md` if the vault's CLAUDE.md says so).
 4. **No empty wiki pages.** A stubbed page gets at least a summary line and a "Related pages" section.

@@ -9,7 +9,7 @@ Log today's work into a monthly worklog. For standups and invoicing — not git 
 
 Each project gets its own file. Multiple repos that belong to the same project (e.g., `happy-checkout-sk`, `hpy-api`, `hpy-onboarding` all belong to "happy") feed into a single log.
 
-**Vault-aware**: if the detected project is registered in `~/.config/claude-pro-tools/vaults.json`, the worklog is written into the vault's `raw/work-logs/<user-slug>/` folder instead of `~/Desktop/`, and a one-line entry is appended to the vault's `wiki/log.md` (single append-only operation log, Karpathy pattern). The per-user subfolder lets multiple teammates share the same vault (e.g. via a shared git remote) without overwriting each other's worklogs. Projects without a vault keep writing to the Desktop.
+**Vault-aware**: if the detected project is registered in `~/.config/claude-pro-skills/vaults.json`, the worklog is written into the vault's `raw/work-logs/<user-slug>/` folder instead of `~/Desktop/`, and a one-line entry is appended to the vault's `wiki/log.md` (single append-only operation log, Karpathy pattern). The per-user subfolder lets multiple teammates share the same vault (e.g. via a shared git remote) without overwriting each other's worklogs. Projects without a vault keep writing to the Desktop.
 
 ## Arguments
 
@@ -47,7 +47,7 @@ If no entry matches, the command falls back to the cwd's directory name as the p
 
 #### Vault routing (via shared registry)
 
-If the current working directory falls under a project that's registered in `~/.config/claude-pro-tools/vaults.json`, route the worklog into that vault's `raw/work-logs/<user-slug>/` folder. Otherwise, fall back to `~/Desktop/`.
+If the current working directory falls under a project that's registered in `~/.config/claude-pro-skills/vaults.json`, route the worklog into that vault's `raw/work-logs/<user-slug>/` folder. Otherwise, fall back to `~/Desktop/`.
 
 The registry is shared with the `vault-keeper` skill and `/vault-init` skill — single source of truth.
 
@@ -55,22 +55,22 @@ The registry is shared with the `vault-keeper` skill and `/vault-init` skill —
 # Resolve cwd → vault path. Walk up the directory tree looking for a registered project.
 DIR="$(pwd)"
 VAULT=""
-if [ -f ~/.config/claude-pro-tools/vaults.json ]; then
+if [ -f ~/.config/claude-pro-skills/vaults.json ]; then
   while [ "$DIR" != "/" ] && [ -z "$VAULT" ]; do
-    VAULT=$(jq -r --arg d "$DIR" '.vaults[$d] // empty' ~/.config/claude-pro-tools/vaults.json 2>/dev/null)
+    VAULT=$(jq -r --arg d "$DIR" '.vaults[$d] // empty' ~/.config/claude-pro-skills/vaults.json 2>/dev/null)
     DIR="$(dirname "$DIR")"
   done
 fi
 # If $VAULT is empty after this, fall back to ~/Desktop/. Otherwise use $VAULT/raw/work-logs/<user-slug>/.
 ```
 
-To register a vault for a new project, run `/vault-init` (or edit `~/.config/claude-pro-tools/vaults.json` directly).
+To register a vault for a new project, run `/vault-init` (or edit `~/.config/claude-pro-skills/vaults.json` directly).
 
 #### User-slug resolution (vault projects only)
 
 Each teammate sharing a vault writes into their own subfolder so worklogs don't collide. Resolve the slug from the first non-empty source in this cascade:
 
-1. `$CLAUDE_PRO_TOOLS_VAULT_USER` (explicit override — escape hatch)
+1. `$CLAUDE_PRO_SKILLS_VAULT_USER` (explicit override — escape hatch)
 2. `git config user.email`, take the local-part (before `@`), lowercase, replace anything outside `[a-z0-9-]` with `-`, collapse runs of `-`, trim leading/trailing `-`
 3. `git config user.name`, same slugify
 4. `whoami`
@@ -81,7 +81,7 @@ slugify() {
   echo "$1" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9-' '-' | sed 's/--*/-/g' | sed 's/^-//;s/-$//'
 }
 
-USER_SLUG="${CLAUDE_PRO_TOOLS_VAULT_USER:-}"
+USER_SLUG="${CLAUDE_PRO_SKILLS_VAULT_USER:-}"
 if [ -z "$USER_SLUG" ]; then
   EMAIL=$(git config user.email 2>/dev/null)
   [ -n "$EMAIL" ] && USER_SLUG=$(slugify "${EMAIL%@*}")
@@ -91,7 +91,7 @@ if [ -z "$USER_SLUG" ]; then
   [ -n "$NAME" ] && USER_SLUG=$(slugify "$NAME")
 fi
 [ -z "$USER_SLUG" ] && USER_SLUG=$(whoami)
-[ -z "$USER_SLUG" ] && { echo "ERROR: could not derive a user slug for the worklog (set CLAUDE_PRO_TOOLS_VAULT_USER to override)" >&2; exit 1; }
+[ -z "$USER_SLUG" ] && { echo "ERROR: could not derive a user slug for the worklog (set CLAUDE_PRO_SKILLS_VAULT_USER to override)" >&2; exit 1; }
 ```
 
 Skip slug resolution entirely when `$VAULT` is empty (Desktop fallback uses one file per project, no per-user split).

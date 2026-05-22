@@ -7,7 +7,7 @@ description: Use when the user has merge or stash conflicts in a registered vaul
 
 Auto-resolve merge/stash conflicts in a registered vault by keeping BOTH the incoming and local changes for every conflict block. Designed for vault files like `wiki/log.md` (append-only chronological), `wiki/index.md` (TOC), and other markdown content where union-merging is almost always the right call.
 
-**Vault-only**: this skill refuses to run outside a directory registered in `~/.config/claude-pro-tools/vaults.json`. Union-merging code files can produce syntactically broken output; markdown logs/lists tolerate it well.
+**Vault-only**: this skill refuses to run outside a directory registered in `~/.config/claude-pro-skills/vaults.json`. Union-merging code files can produce syntactically broken output; markdown logs/lists tolerate it well.
 
 ## When to use
 
@@ -22,18 +22,18 @@ Run the steps below in order. Stop and surface to the user if any diagnostic fai
 ### Step 1 — Resolve cwd to a registered vault
 
 ```bash
-test -f ~/.config/claude-pro-tools/vaults.json || { echo "❌ No vault registry at ~/.config/claude-pro-tools/vaults.json. Run /vault-init first."; exit 1; }
+test -f ~/.config/claude-pro-skills/vaults.json || { echo "❌ No vault registry at ~/.config/claude-pro-skills/vaults.json. Run /vault-init first."; exit 1; }
 
 DIR="$(pwd)"
 VAULT=""
 while [ "$DIR" != "/" ] && [ -z "$VAULT" ]; do
-  VAULT=$(jq -r --arg d "$DIR" '.vaults[$d] // empty' ~/.config/claude-pro-tools/vaults.json 2>/dev/null)
+  VAULT=$(jq -r --arg d "$DIR" '.vaults[$d] // empty' ~/.config/claude-pro-skills/vaults.json 2>/dev/null)
   DIR="$(dirname "$DIR")"
 done
 
 if [ -z "$VAULT" ]; then
   echo "❌ Current directory is not inside a registered vault. This skill is vault-only by design."
-  echo "   Registered vaults: $(jq -r '.vaults | keys | .[]' ~/.config/claude-pro-tools/vaults.json)"
+  echo "   Registered vaults: $(jq -r '.vaults | keys | .[]' ~/.config/claude-pro-skills/vaults.json)"
   exit 1
 fi
 

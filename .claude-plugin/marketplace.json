@@ -1,5 +1,5 @@
 {
-  "name": "claude-pro",
+  "name": "claude-pro-skills",
   "owner": {
     "name": "Bernardo Rubin",
     "url": "https://github.com/bernardorubin"
@@ -9,15 +9,15 @@
   },
   "plugins": [
     {
-      "name": "claude-pro-tools",
+      "name": "claude-pro-skills",
       "source": {
         "source": "git-subdir",
-        "url": "https://github.com/bernardorubin/claude-plugins.git",
-        "path": "plugins/claude-pro-tools",
+        "url": "https://github.com/bernardorubin/claude-pro-skills.git",
+        "path": "plugins/claude-pro-skills",
         "ref": "main"
       },
       "description": "Claude Code toolkit: confidence-scored code reviews (PR, local, or full-repo audit), git workflow shortcuts, PR/Slack helpers, Claude meta skills, Jira integration, and per-project knowledge vaults. 13 skills, all invocable with no prefix.",
-      "version": "2.0.0",
+      "version": "3.0.0",
       "author": {
         "name": "Bernardo Rubin"
       }

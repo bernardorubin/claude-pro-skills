@@ -1,15 +1,15 @@
-# claude-plugins (claude-pro marketplace)
+# claude-pro-skills (claude-pro-skills marketplace)
 
 This repo is a Claude Code **plugin marketplace**. It is not application code — there is no build, no test runner, and no package manager. Everything here is JSON manifests + markdown skill definitions consumed by the Claude Code harness.
 
 ## Repo layout
 
 ```
-claude-plugins/
+claude-pro-skills/
 ├── .claude-plugin/
 │   └── marketplace.json              # marketplace manifest — lists every plugin
 ├── plugins/
-│   └── claude-pro-tools/             # the single bundled plugin (see below)
+│   └── claude-pro-skills/             # the single bundled plugin (see below)
 │       ├── .claude-plugin/
 │       │   └── plugin.json           # plugin manifest
 │       ├── skills/                   # skill folders, each with SKILL.md
@@ -21,16 +21,16 @@ claude-plugins/
 
 ## How everything wires together
 
-- **Marketplace name**: `claude-pro` (set in `.claude-plugin/marketplace.json`)
-- **GitHub identifier**: `bernardorubin/claude-plugins` (used in `/plugin marketplace add`)
-- **Single plugin**: `claude-pro-tools` — bundles 13 skills (no commands). The `pr-review` skill itself supports three modes: PR review, local diff review, and full-repo audit.
-- **Install path** (after `/plugin install`): `~/.claude/plugins/cache/claude-pro/claude-pro-tools/<version>/`
+- **Marketplace name**: `claude-pro-skills` (set in `.claude-plugin/marketplace.json`)
+- **GitHub identifier**: `bernardorubin/claude-pro-skills` (used in `/plugin marketplace add`)
+- **Single plugin**: `claude-pro-skills` — bundles 13 skills (no commands). The `pr-review` skill itself supports three modes: PR review, local diff review, and full-repo audit.
+- **Install path** (after `/plugin install`): `~/.claude/plugins/cache/claude-pro-skills/claude-pro-skills/<version>/`
 
 When users update the marketplace and reinstall, the harness pulls from `main` of this repo via the `git-subdir` source defined in `marketplace.json`.
 
 ## Skills only — no commands
 
-This plugin uses **skills exclusively** (no commands). Skills appear in the slash palette as `/<name>` with no `claude-pro-tools:` prefix, and **auto-trigger** when Claude matches the user's natural language against the skill's `description`.
+This plugin uses **skills exclusively** (no commands). Skills appear in the slash palette as `/<name>` with no `claude-pro-skills:` prefix, and **auto-trigger** when Claude matches the user's natural language against the skill's `description`.
 
 The historic command/skill split was dropped because the prefix made commands painful to type. Skills cover both use cases:
 
@@ -41,7 +41,7 @@ The historic command/skill split was dropped because the prefix made commands pa
 
 ## Adding a new skill
 
-1. Create `plugins/claude-pro-tools/skills/<name>/SKILL.md` with frontmatter:
+1. Create `plugins/claude-pro-skills/skills/<name>/SKILL.md` with frontmatter:
    ```
    ---
    name: <name>
@@ -49,13 +49,13 @@ The historic command/skill split was dropped because the prefix made commands pa
    ---
    ```
 2. Optionally add `evals/`, `references/`, scripts, etc. as siblings of `SKILL.md`.
-3. Document in `plugins/claude-pro-tools/README.md` and the root `README.md`.
+3. Document in `plugins/claude-pro-skills/README.md` and the root `README.md`.
 
-The skill becomes invocable as `/<name>` (no prefix) and via the Skill tool as `claude-pro-tools:<name>`.
+The skill becomes invocable as `/<name>` (no prefix) and via the Skill tool as `claude-pro-skills:<name>`.
 
 ## Adding a new subagent
 
-1. Create `plugins/claude-pro-tools/agents/<name>.md` with frontmatter:
+1. Create `plugins/claude-pro-skills/agents/<name>.md` with frontmatter:
    ```
    ---
    name: <name>
@@ -66,15 +66,15 @@ The skill becomes invocable as `/<name>` (no prefix) and via the Skill tool as `
 2. Body is the agent's system prompt — what it specializes in, how it should behave.
 3. Document in the Subagents section of both READMEs.
 
-The agent becomes invocable via the Task tool as `subagent_type: claude-pro-tools:<name>`.
+The agent becomes invocable via the Task tool as `subagent_type: claude-pro-skills:<name>`.
 
 ## Conventions
 
 - **Naming**: keep skill names short and descriptive. They're invoked as `/<name>` with no prefix.
 - **No AI co-author lines** in commit messages (the user handles git operations themselves; never run `git commit` without being asked).
 - **README is the source of truth** for what each skill does — keep it in sync when behavior changes.
-- **Single source of truth**: skill files live ONLY here. The user's `~/.claude/commands/` and `~/.claude/skills/` should not contain copies of anything bundled in `claude-pro-tools` (avoids drift).
-- **Config paths**: shared config lives under `~/.config/claude-pro-tools/` (e.g., `vaults.json` for the vault registry). Env-var overrides are prefixed `CLAUDE_PRO_TOOLS_*` (e.g., `$CLAUDE_PRO_TOOLS_VAULT_USER`).
+- **Single source of truth**: skill files live ONLY here. The user's `~/.claude/commands/` and `~/.claude/skills/` should not contain copies of anything bundled in `claude-pro-skills` (avoids drift).
+- **Config paths**: shared config lives under `~/.config/claude-pro-skills/` (e.g., `vaults.json` for the vault registry). Env-var overrides are prefixed `CLAUDE_PRO_SKILLS_*` (e.g., `$CLAUDE_PRO_SKILLS_VAULT_USER`).
 
 ## Versioning
 
@@ -85,9 +85,9 @@ The agent becomes invocable via the Task tool as `subagent_type: claude-pro-tool
 1. Make changes, validate JSON files parse:
    ```bash
    python3 -c "import json; json.load(open('.claude-plugin/marketplace.json'))"
-   python3 -c "import json; json.load(open('plugins/claude-pro-tools/.claude-plugin/plugin.json'))"
+   python3 -c "import json; json.load(open('plugins/claude-pro-skills/.claude-plugin/plugin.json'))"
    ```
 2. Commit + push to `main`.
-3. On any machine that already has the marketplace: `/plugin marketplace update claude-pro` → `/plugin install claude-pro-tools@claude-pro` to pull updates.
+3. On any machine that already has the marketplace: `/plugin marketplace update claude-pro-skills` → `/plugin install claude-pro-skills@claude-pro-skills` to pull updates.
 
 There is no app store, approval process, or release pipeline — pushing to `main` is publishing.
