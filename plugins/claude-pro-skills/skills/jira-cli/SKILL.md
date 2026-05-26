@@ -178,15 +178,74 @@ If the user has multiple instances configured and their request doesn't include 
 
 If the user pastes a full URL, the host tells you the instance directly — match it against `jira-curl list`.
 
+## Output style for ADF content (descriptions, comments, summaries)
+
+The author of this skill has strong style preferences for any prose you write into Jira via `description`, `comment.body`, or a `summary` field. Follow these every time — they apply to ALL text the skill emits into a ticket, not just user-visible chat.
+
+### 1. Never use em dashes (—) or en dashes (–)
+
+Not in descriptions, not in comments, not in summaries, not in headings, not anywhere. The author types on a standard US keyboard and will never produce these characters naturally, so seeing one in a ticket they "wrote" is an immediate tell that an LLM drafted it sloppily.
+
+Use commas, colons, periods, or parentheses instead. If you find yourself reaching for an em dash to join two clauses, the clauses probably want to be two sentences anyway.
+
+```
+❌ Bad:  Fast-follow for HPY-5688 — surfaced 2026-05-26 on Eric's order.
+✅ Good: Fast-follow for HPY-5688. Surfaced 2026-05-26 on Eric's order.
+✅ Good: Fast-follow for HPY-5688 (surfaced 2026-05-26 on Eric's order).
+```
+
+### 2. Always link Jira ticket references with `inlineCard`, never plain text
+
+When a description, comment, or any ADF body mentions another Jira ticket key (e.g. `HPY-5688`, `WEB-456`), render it as an `inlineCard` ADF node pointing at the full ticket URL — Jira expands those to a clickable smart card showing the ticket's key + summary + status. Plain-text ticket keys are dead weight: the reader has to copy-paste them to follow up.
+
+This rule applies to EVERY occurrence of a ticket key in the body, not just the first mention. Also applies to the parent epic, "fast-follow for X", "sibling to Y", "blocks Z" call-outs, comment threads, and any sub-task lists.
+
+```jsonc
+// ❌ Bad — plain text key
+{"type": "paragraph", "content": [
+  {"type": "text", "text": "Fast-follow for HPY-5688. Sibling to HPY-5895."}
+]}
+
+// ✅ Good — inlineCard expands to clickable smart card
+{"type": "paragraph", "content": [
+  {"type": "text", "text": "Fast-follow for "},
+  {"type": "inlineCard", "attrs": {"url": "https://yourorg.atlassian.net/browse/HPY-5688"}},
+  {"type": "text", "text": ". Sibling to "},
+  {"type": "inlineCard", "attrs": {"url": "https://yourorg.atlassian.net/browse/HPY-5895"}},
+  {"type": "text", "text": "."}
+]}
+```
+
+The host (`yourorg.atlassian.net`) is the same Atlassian site as the instance you're posting against — pull it from the instance's `base_url` in `~/.config/jira/credentials` or from the URL the user pasted, never hardcode.
+
+**Fallback** if you need a clickable link in a context where `inlineCard` doesn't render (rare — almost never the case in modern Jira Cloud): use a `link` mark on a `text` node:
+
+```jsonc
+{"type": "text", "text": "HPY-5688", "marks": [{"type": "link", "attrs": {"href": "https://yourorg.atlassian.net/browse/HPY-5688"}}]}
+```
+
+Default to `inlineCard`. Only use the `link`-mark fallback if you've confirmed the rendering context strips smart cards.
+
+### 3. Quick self-check before POSTing
+
+Before you submit any `POST /rest/api/3/issue`, `PUT /rest/api/3/issue/<KEY>`, or `POST /rest/api/3/issue/<KEY>/comment`, grep your own payload:
+
+- Any `—` or `–` in the JSON? Replace before sending.
+- Any bare ticket key (`[A-Z]+-\d+`) sitting inside a `"text"` node that isn't already wrapped by an `inlineCard`? Convert it.
+
+It takes 5 seconds and avoids having to re-edit the ticket after the fact.
+
 ## Common mistakes
 
 | Mistake | Fix |
 |---------|-----|
 | Sending plain text for `description` or comment `body` | Wrap in ADF (`{type:"doc", version:1, content:[…]}`) |
+| Using em dashes (—) or en dashes (–) in any ADF text | See the "Output style" section above. Use commas, colons, or parens. |
+| Referencing another ticket as plain `HPY-1234` text in ADF | Render as `inlineCard` with the full browse URL. See "Output style" §2. |
 | Hardcoding transition IDs from one project in another | Always `GET …/transitions` first |
 | Calling `/search` (deprecated) | Use `/search/jql` |
 | Forgetting `?fields=` and getting a 200KB response | Always scope reads to the fields you need |
-| Editing creds file by hand to add an instance | Run `jira-curl init <name>` — it handles quoting and chmod 600 |
+| Editing creds file by hand to add an instance | Run `jira-curl init <name>`, it handles quoting and chmod 600 |
 | URL-encoding JQL incorrectly | Quote the path; encode spaces as `+`; encode `=` only inside values |
 
 ## Sensitive data
