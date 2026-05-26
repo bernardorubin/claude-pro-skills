@@ -8,6 +8,20 @@ allowed-tools: Bash(jira-curl:*) Bash(jq:*) Bash(cat:*) Bash(command:*) Bash(bas
 
 Talk to Jira from the shell via `jira-curl`, an authenticated wrapper around the Jira REST API v3. Supports multiple Jira instances per machine.
 
+> ## ⛔️ Non-negotiable writing rule
+>
+> **NEVER use an em dash (`—`, U+2014) or en dash (`–`, U+2013) in ANYTHING you POST or PUT to Jira.** Not in descriptions, not in comments, not in summaries, not in headings, not in code-block captions, not in inline parentheticals. Use a comma, colon, period, or parentheses instead. If you reach for an em dash to join two clauses, split them into two sentences.
+>
+> This rule has zero exceptions. The author types on a standard US keyboard and never produces these characters naturally; their presence is an immediate tell that an LLM drafted the text sloppily and didn't proofread.
+>
+> Before every `POST /rest/api/3/issue`, `PUT /rest/api/3/issue/<KEY>`, or `POST /rest/api/3/issue/<KEY>/comment`, **you MUST run this check on the payload file** and only proceed if it returns zero:
+>
+> ```bash
+> python3 -c "import sys; data = open('PAYLOAD_FILE').read(); print(sum(data.count(c) for c in ['—','–']))"
+> ```
+>
+> If the result is non-zero, rewrite the offending text before sending. Do not relax the rule. Do not ship the payload. See the full "Output style" section below for the rationale and rewrite examples.
+
 > **Note on examples**: the API examples below use `happy` and `horizon` as instance names (the plugin author's two Jira workspaces). When you set up your own with `jira-curl init <name>`, pick whatever names make sense (`work`, `personal`, etc.) and substitute them throughout — the actual API URLs and JSON payloads are identical.
 
 ## ⚠️ Preflight — run BEFORE any `jira-curl <instance>` API call
@@ -226,14 +240,25 @@ The host (`yourorg.atlassian.net`) is the same Atlassian site as the instance yo
 
 Default to `inlineCard`. Only use the `link`-mark fallback if you've confirmed the rendering context strips smart cards.
 
-### 3. Quick self-check before POSTing
+### 3. MANDATORY pre-POST self-check
 
-Before you submit any `POST /rest/api/3/issue`, `PUT /rest/api/3/issue/<KEY>`, or `POST /rest/api/3/issue/<KEY>/comment`, grep your own payload:
+Before you submit any `POST /rest/api/3/issue`, `PUT /rest/api/3/issue/<KEY>`, or `POST /rest/api/3/issue/<KEY>/comment`, you MUST grep your payload:
 
-- Any `—` or `–` in the JSON? Replace before sending.
+```bash
+# Replace PAYLOAD with your file path or heredoc-piped JSON.
+python3 -c "
+import sys, json
+data = open('PAYLOAD_FILE').read()
+dashes = sum(data.count(c) for c in ['—','–'])
+if dashes: sys.exit(f'BLOCKED: payload contains {dashes} em/en dashes — rewrite before POSTing')
+print('OK: no em/en dashes')
+"
+```
+
+- Any `—` (em dash, U+2014) or `–` (en dash, U+2013) in the JSON? **STOP. Rewrite. Do not POST.**
 - Any bare ticket key (`[A-Z]+-\d+`) sitting inside a `"text"` node that isn't already wrapped by an `inlineCard`? Convert it.
 
-It takes 5 seconds and avoids having to re-edit the ticket after the fact.
+The check is mandatory because the author has had to delete + repost comments multiple times to scrub em dashes that slipped through. Treat it as a precondition, not a polish step.
 
 ## Common mistakes
 
