@@ -1,6 +1,6 @@
 # claude-pro-skills
 
-A Claude Code toolkit — **13 skills, no prefix to type**. Code reviews (PR / local / full-repo audit), git workflow, Claude meta tasks, external integrations, and per-project knowledge vaults.
+A Claude Code toolkit — **14 skills, no prefix to type**. Code reviews (PR / local / full-repo audit), git workflow, Claude meta tasks, external integrations, and per-project knowledge vaults.
 
 > **Heads up for non-author users**: examples in the docs below reference my own projects (`happy`, `meyer`), Jira instance names (`happy`, `horizon`), and ticket prefixes (`HPY-####`). These are illustrative — the plugin works for any project. Where you see config that's literally my data (the **Project Map** in `/save-session-to-worklog`, the registry under `~/.config/claude-pro-skills/vaults.json`), swap in your own.
 
@@ -91,6 +91,16 @@ Reads from and writes to a registered project's knowledge vault (Karpathy-style 
 - **Lint** — surfaces orphans, contradictions, stub pages, stale claims, format violations, and index drift. Reports without auto-fixing.
 
 To set up a new vault, use `/vault-init`.
+
+### `/save-to-vault`
+A deliberate end-of-session sweep that files everything valuable from the **whole conversation** into the vault in one pass. Where `vault-keeper` writes facts incidentally as they surface during work, this is the explicit "we're done, capture what we learned" command — the session-level analogue of `vault-keeper`'s ingest mode, with the conversation itself as the source. It defers to `vault-keeper`'s write-mode rules and the vault's own `CLAUDE.md` for page format, citations, and the index/log update; its added value is scope (review the entire session) and dedup (skip anything `vault-keeper` already filed this session). If no vault is registered for the project, it says so and points to `/vault-init` rather than self-terminating silently.
+
+```
+/save-to-vault                                 # Sweep the whole session into the wiki
+/save-to-vault save whatever's valuable        # Same, natural-language form
+```
+
+Complementary to `/save-session-to-worklog`: the worklog records *what you did* (standups/invoicing, `raw/work-logs/`); `save-to-vault` records *what you learned* (cross-linked domain knowledge, `wiki/`). Running both at session end is a reasonable habit.
 
 ## PR helpers
 

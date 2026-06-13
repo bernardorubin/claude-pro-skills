@@ -22,6 +22,7 @@ Everything is a **skill** — no `claude-pro-skills:` prefix needed when invokin
 | `/prd-to-jira` | "create tickets from this PRD", "break this down into jira tasks" |
 | `/jira-cli` | Jira URL or key (HPY-1234, WEB-456), "update the description on ABC-123", "add a comment to …", "what's the status of …", "move this to in progress" |
 | `/vault-keeper` | "save this to the vault", "what does the wiki say about X", "ingest this doc", "lint the wiki" (auto-fires inside any registered vault project) |
+| `/save-to-vault` | "save whatever's valuable from this session", "dump this session to the wiki", "file everything worth keeping" — deliberate whole-session sweep |
 | `/vault-init` | "init a vault here", "set up a knowledge vault", "scaffold the wiki" |
 | `/vault-resolve-conflicts` | "resolve vault conflicts", "union merge the vault" |
 | `/git-ac` | "commit but don't push", "stage and commit locally" |
