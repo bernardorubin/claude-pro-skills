@@ -1,0 +1,7 @@
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <rect x="16" y="16" width="224" height="224" rx="48" fill="#0d1117" stroke="#e6e1d3" stroke-width="8"/>
+  <!-- slash: the /skill prompt -->
+  <path d="M150 78 L96 178" fill="none" stroke="#e6663b" stroke-width="20" stroke-linecap="round"/>
+  <!-- cursor block -->
+  <rect x="150" y="158" width="34" height="22" rx="4" fill="#e6e1d3"/>
+</svg>

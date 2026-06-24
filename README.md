@@ -1,4 +1,8 @@
-# claude-pro-skills
+<p align="center">
+  <img src="logo.svg" width="120" alt="claude-pro-skills logo">
+</p>
+
+<h1 align="center">claude-pro-skills</h1>
 
 A Claude Code plugin marketplace by Bernardo Rubin. One plugin (`claude-pro-skills`), everything bundled, no command/skill prefixes to type.
 
