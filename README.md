@@ -20,6 +20,8 @@ Everything is a **skill** — no `claude-pro-skills:` prefix needed when invokin
 
 | Skill | Triggers on |
 |-------|-------------|
+| `/ship-ticket` | "ship ABC-123", "take this ticket end to end", "implement ABC-456 and open a PR" — full pipeline: understand → implement → PR → log → Slack, stops before deploy |
+| `/investigate` | "investigate X", "look into why Y", "figure out what's going on with Z", pasting an incident/alert — evidence-grounded diagnosis, read-only |
 | `/pr-review` | "review this PR", "review my uncommitted changes", "audit the whole repo" — three modes: PR / local / full-repo |
 | `/pr-description` | "write a PR description", "draft the PR body", "update the PR" |
 | `/write-slack-message` | "draft a slack message", "how should I phrase this for slack" |
