@@ -1,6 +1,6 @@
 # claude-pro-skills
 
-A Claude Code toolkit — **14 skills, no prefix to type**. Code reviews (PR / local / full-repo audit), git workflow, Claude meta tasks, external integrations, and per-project knowledge vaults.
+A Claude Code toolkit — **16 skills, no prefix to type**. Code reviews (PR / local / full-repo audit), git workflow, Claude meta tasks, external integrations, and per-project knowledge vaults.
 
 > **Heads up for non-author users**: examples in the docs below reference my own projects (`happy`, `meyer`), Jira instance names (`happy`, `horizon`), and ticket prefixes (`HPY-####`). These are illustrative — the plugin works for any project. Where you see config that's literally my data (the **Project Map** in `/save-session-to-worklog`, the registry under `~/.config/claude-pro-skills/vaults.json`), swap in your own.
 
@@ -15,6 +15,14 @@ A Claude Code toolkit — **14 skills, no prefix to type**. Code reviews (PR / l
 ## Skills only — no prefix
 
 Every entry below is a **skill** invocable as `/<name>` (no `claude-pro-skills:` prefix). Skills appear in the slash palette and **auto-trigger** when you describe the task in plain English.
+
+## Ticket workflow
+
+### `/ship-ticket`
+The full ship pipeline for a Jira ticket (or a described feature/bugfix): understand → clarify (hard stop — no code until questions are answered) → implement on a `--no-track` branch → open the PR → address review → log to worklog + vault → draft a Slack update → hand back the deploy command. It's a **conductor** — it chains your other skills (`jira-cli`, `git-ac`, `pr-description`, `pr-review`, `save-session-to-worklog`, `save-to-vault`, `write-slack-message`) in order and holds two lines: do the work yourself instead of deferring it, and stop before anything that deploys. **Project-agnostic by design** — it reads the repo's `CLAUDE.md` for the base branch, quality gates, PR flow, designated reviewer, dashboards, and deploy command, so it adapts per project instead of hardcoding any. Auto-triggers on "ship ABC-123", "take this ticket end to end", "implement ABC-456 and open a PR".
+
+### `/investigate`
+Diagnose a production anomaly, bug report, or "why is X happening" — grounded in real evidence, not a guess. Built for the common shape: paste a Slack thread, get back a reply ready to drop into that same thread. Enforces the investigation discipline — **dashboard metrics → raw logs → code**, make zero assumptions, investigate yourself before asking anyone — and it's strictly **read-only** (surfaces a fix for you to decide; hands off to `/ship-ticket` if you want it built). Reads the repo's `CLAUDE.md` "Dashboards & Data Sources" section to know where the truth lives. Auto-triggers on "investigate X", "look into why Y", "figure out what's going on with Z", or pasting an incident/alert/error.
 
 ## Git
 
