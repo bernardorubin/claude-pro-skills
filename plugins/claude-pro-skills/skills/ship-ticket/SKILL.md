@@ -132,6 +132,14 @@ are no open questions (a trivial, unambiguous fix), say so and proceed — but a
 first. If new ambiguity surfaces mid-implementation, stop and clarify it the same way rather
 than assuming your way past it.
 
+Once the questions are resolved, **for any non-trivial ticket, present the plan in plan mode
+and get it approved before writing code** — this is how the user starts tickets, and it catches
+approach-level tradeoffs (which the clarify gate above doesn't, since that only surfaces *open
+questions*, not *which way to build*). Enter plan mode, lay out the approach and the files
+you'll touch, and wait for approval before Phase 3. For greenfield or open-ended work, run the
+`brainstorming` skill first to shape intent, then plan. Skip this only for a trivial,
+unambiguous fix where the approach is obvious.
+
 ### 3. Implement on a branch
 
 Create the branch **without tracking the base** — this has burned the user repeatedly:
