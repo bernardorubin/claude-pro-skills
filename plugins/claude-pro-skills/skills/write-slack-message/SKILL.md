@@ -28,7 +28,7 @@ Based on the user's request, write a Slack message following these guidelines:
 - **Never use `~` as shorthand for "approximately"** - write "about 40%", "around 40%", or just "40%", not `~40%`. The tilde as an approximation symbol is not a character this user would ever type. Strikethrough markdown (`~text~`) is still fine when strikethrough is actually the intent
 
 ### Formatting Rules (Slack-compatible)
-- Use `` `code` `` for inline code, file names, commands
+- Use `` `code` `` for inline code, file names, commands, **and every technical identifier** — event/field/variable names, snake_case or camelCase tokens, repo names, IDs, env vars, template strings (e.g. `event_id`, `sleeper_id`, `in_check`, `hpy-api`, `registration_complete_{{DL - foo}}`, `META_CAPI_ACCESS_TOKEN`). Rule of thumb: if it's a token the code/system would recognize rather than a plain English word, backtick it. Leaving identifiers as bare prose is the most common drift — scan every draft for them before saving.
 - Use ``` for code blocks (triple backticks)
 - Use `>` for quotes only when quoting someone
 - Avoid excessive bullet points - Slack is conversational
