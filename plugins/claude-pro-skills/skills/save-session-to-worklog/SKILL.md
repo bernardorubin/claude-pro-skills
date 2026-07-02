@@ -224,12 +224,32 @@ The slug is included so a shared vault's log reflects who wrote what. Don't summ
 
 If `$VAULT/wiki/log.md` doesn't exist, the vault wasn't fully scaffolded; skip this step silently (the worklog write itself still happened).
 
+### Step 5.7: Sync the vault to its remote (git-backed vaults only)
+
+If the worklog went into a vault (`$VAULT` is set) and that vault is a git repo with an `origin` remote, commit and push what you just wrote (the worklog file, any archived files from Step 3.5, and the `wiki/log.md` line), auto-resolving conflicts by **union-merge**. This keeps a shared vault in sync across machines/teammates with no manual git step. The vault is its own repo, separate from any code repo, and is meant to be synced continuously, so **push it without asking** (this does not affect code-repo push approvals). Skip silently for the Desktop fallback (`$VAULT` empty) or a vault with no remote.
+
+```bash
+if [ -n "$VAULT" ] && git -C "$VAULT" rev-parse --git-dir >/dev/null 2>&1 \
+   && git -C "$VAULT" remote get-url origin >/dev/null 2>&1; then
+  if [ -n "$(git -C "$VAULT" status --porcelain)" ]; then
+    git -C "$VAULT" add -A
+    git -C "$VAULT" commit -q -m "worklog: $PROJECT $USER_SLUG $(date +%Y-%m-%d)"
+  fi
+  BRANCH="$(git -C "$VAULT" rev-parse --abbrev-ref HEAD)"
+  git -C "$VAULT" pull --rebase origin "$BRANCH"   # sync teammates first
+  git -C "$VAULT" push origin "$BRANCH"
+fi
+```
+
+**Auto-resolve conflicts by union-merge.** If the `pull --rebase` conflicts (a teammate wrote to `wiki/log.md` or their own worklog), keep **BOTH** sides — never discard either. `wiki/log.md` and the per-user worklogs are append-only and union cleanly (interleave the entries). This is the [[vault-resolve-conflicts]] behavior — invoke that skill, or apply it inline: replace each `<<<<<<< / ======= / >>>>>>>` block with both sides concatenated, then `git -C "$VAULT" add -A && git -C "$VAULT" rebase --continue`, then push. Only stop and surface if a conflict genuinely can't be union-merged. Use `git -C "$VAULT"` (never `cd`) so the ops stay scoped to the vault.
+
 ### Step 6: Confirm
 
 Tell the user:
 - The file path
 - How many items were logged
 - A quick preview of the bullets added
+- Whether the vault was committed + pushed (from Step 5.7)
 
 Keep it brief.
 

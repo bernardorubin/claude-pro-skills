@@ -1,7 +1,7 @@
 ---
 name: vault-keeper
 description: Use when working in a project that has a registered second-brain knowledge vault (Karpathy-style LLM Wiki). Auto-fires when the user documents findings (architecture decisions, integration quirks, debugging discoveries, team facts, ticket epics), looks up domain context (team/integrations/flows/past decisions), ingests raw sources into the wiki, or asks for a vault lint/audit. Resolves the current working directory against `~/.config/claude-pro-skills/vaults.json`; if the project has no registered vault, the skill self-terminates without action. To set up a new vault, use `/vault-init`. Triggers on phrases like "save this to the vault", "what does the wiki say about X", "let's document this finding", "ingest this doc", "lint the wiki", "what's our second brain say about Y".
-allowed-tools: Read, Write, Edit, Bash(jq:*), Bash(cat:*), Bash(test:*), Bash(ls:*), Bash(date:*), Bash(grep:*), Bash(find:*)
+allowed-tools: Read, Write, Edit, Bash(jq:*), Bash(cat:*), Bash(test:*), Bash(ls:*), Bash(date:*), Bash(grep:*), Bash(find:*), Bash(git:*)
 ---
 
 # Vault Keeper
@@ -141,6 +141,22 @@ Report as a numbered list with suggested fixes.
 3. **Page names are lowercase-hyphenated** (with the rare exception of ticket IDs like `HPY-5611.md` if the vault's CLAUDE.md says so).
 4. **No empty wiki pages.** A stubbed page gets at least a summary line and a "Related pages" section.
 5. **When uncertain about categorization, ask the user.** Better to pause than to file something in the wrong folder.
+6. **Auto-sync the vault to its remote after a write.** Once a write is complete (the finding filed + `index.md`/`log.md` updated), commit and push it, union-merging any conflict. The vault is its own git repo (separate from any code repo) and is meant to sync continuously, so push without asking; this never affects code-repo push approvals. Skip silently for a non-git or remote-less vault. Always use `git -C "$VAULT"` (never `cd`).
+
+   ```bash
+   if git -C "$VAULT" rev-parse --git-dir >/dev/null 2>&1 \
+      && git -C "$VAULT" remote get-url origin >/dev/null 2>&1; then
+     if [ -n "$(git -C "$VAULT" status --porcelain)" ]; then
+       git -C "$VAULT" add -A
+       git -C "$VAULT" commit -q -m "vault: <short summary of the finding>"
+     fi
+     B="$(git -C "$VAULT" rev-parse --abbrev-ref HEAD)"
+     git -C "$VAULT" pull --rebase origin "$B"   # sync teammates first
+     git -C "$VAULT" push origin "$B"
+   fi
+   ```
+
+   On a `pull --rebase` conflict, **union-merge** (keep BOTH sides, never discard) per the [[vault-resolve-conflicts]] skill: append-only `log.md`/worklogs union cleanly; a page edited on both sides keeps both statements (mark the contradiction per rule 1). Then `git -C "$VAULT" add -A`, `git -C "$VAULT" rebase --continue`, and push. Only stop and surface if a conflict genuinely can't be union-merged. (To batch many rapid ambient writes, it's fine to sync once after the last one rather than after each.)
 
 ## Step 5 — Tell the user what you did (briefly)
 
