@@ -34,6 +34,7 @@ Everything is a **skill** — no `claude-pro-skills:` prefix needed when invokin
 | `/git-ac` | "commit but don't push", "stage and commit locally" |
 | `/git-pull-reapply` | "pull and reapply", "safe pull", "rebase from remote" |
 | `/save-session-to-worklog` | "save this session", "log to worklog", "update my standup notes" |
+| `/wrap-session` | "wrap up the session", "save to worklog and vault", "do both" — runs `/save-session-to-worklog` then `/save-to-vault` in one pass |
 | `/claude-learn` | "document what we learned", "update CLAUDE.md with this" |
 | `/claude-modularize` | "split up CLAUDE.md", "modularize CLAUDE.md" |
 

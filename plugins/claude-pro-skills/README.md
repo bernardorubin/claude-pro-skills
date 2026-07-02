@@ -1,6 +1,6 @@
 # claude-pro-skills
 
-A Claude Code toolkit — **16 skills, no prefix to type**. Code reviews (PR / local / full-repo audit), git workflow, Claude meta tasks, external integrations, and per-project knowledge vaults.
+A Claude Code toolkit — **17 skills, no prefix to type**. Code reviews (PR / local / full-repo audit), git workflow, Claude meta tasks, external integrations, and per-project knowledge vaults.
 
 > **Heads up for non-author users**: examples in the docs below reference my own projects (`happy`, `meyer`), Jira instance names (`happy`, `horizon`), and ticket prefixes (`HPY-####`). These are illustrative — the plugin works for any project. Where you see config that's literally my data (the **Project Map** in `/save-session-to-worklog`, the registry under `~/.config/claude-pro-skills/vaults.json`), swap in your own.
 
@@ -109,6 +109,15 @@ A deliberate end-of-session sweep that files everything valuable from the **whol
 ```
 
 Complementary to `/save-session-to-worklog`: the worklog records *what you did* (standups/invoicing, `raw/work-logs/`); `save-to-vault` records *what you learned* (cross-linked domain knowledge, `wiki/`). Running both at session end is a reasonable habit.
+
+### `/wrap-session`
+The "do both" end-of-session command, for when you'd otherwise type `/save-session-to-worklog` and `/save-to-vault` back to back. It's a thin conductor: it invokes `save-session-to-worklog` first (forwarding any args — freetext notes, `--project`, `--dry`), then `save-to-vault`, then gives one combined report. It reimplements neither; each sub-skill's rules (project detection, vault routing, dedup, git-sync) apply unchanged. `--dry` previews the worklog and skips the vault write.
+
+```
+/wrap-session                                  # Worklog + vault sweep in one pass
+/wrap-session also paired with Ana on the API  # Forwards the note to the worklog step
+/wrap-session --dry                            # Preview the worklog, write nothing
+```
 
 ## PR helpers
 
