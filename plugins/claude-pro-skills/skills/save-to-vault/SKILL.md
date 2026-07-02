@@ -1,7 +1,7 @@
 ---
 name: save-to-vault
 description: Use when the user wants a deliberate end-of-session sweep that files everything valuable from the WHOLE conversation into the project's knowledge vault (Karpathy-style LLM Wiki) in one pass — not the ambient single-fact writes that [[vault-keeper]] does during normal work. Reviews the entire session, dedupes against what's already filed, and writes each worth-keeping finding into the right wiki page. Resolves the cwd against `~/.config/claude-pro-skills/vaults.json`; if no vault is registered it says so and points to `/vault-init`. Triggers on phrases like "save to vault", "save this session to the vault", "save whatever's valuable from this session", "dump this session to the wiki", "file everything worth keeping", "/save-to-vault".
-allowed-tools: Read, Write, Edit, Bash(jq:*), Bash(cat:*), Bash(test:*), Bash(ls:*), Bash(date:*), Bash(grep:*), Bash(find:*)
+allowed-tools: Read, Write, Edit, Bash(jq:*), Bash(cat:*), Bash(test:*), Bash(ls:*), Bash(date:*), Bash(grep:*), Bash(find:*), Bash(git:*)
 ---
 
 # Save to Vault
@@ -70,9 +70,29 @@ After all writes, per the vault's hard rules:
    # e.g. ## [2026-06-13] update | playbooks/<topic> | <what changed>
    ```
 
-## Step 6 — Report
+## Step 6 — Sync the vault to its remote (git-backed vaults only)
 
-Tell the user briefly what was filed — one line per page touched, in the form `Filed [[page-name]] — <hook>`. If nothing cleared the bar (e.g. a short or purely conversational session, or everything was already filed by `vault-keeper`), say so plainly instead of forcing entries.
+If the vault is a git repo with a remote, commit and push everything you just wrote, and auto-resolve any conflict by **union-merge**. This keeps a shared vault in sync across machines/teammates with no manual git step. The vault is its own repo, separate from any code repo, and is designed to be synced continuously, so **push it without asking** (this does not affect code-repo push approvals). Skip silently if the vault isn't a git repo or has no `origin` remote (a local-only vault).
+
+```bash
+# $VAULT was resolved in Step 1. Always use `git -C "$VAULT"`, never cd.
+if git -C "$VAULT" rev-parse --git-dir >/dev/null 2>&1 \
+   && git -C "$VAULT" remote get-url origin >/dev/null 2>&1; then
+  if [ -n "$(git -C "$VAULT" status --porcelain)" ]; then
+    git -C "$VAULT" add -A
+    git -C "$VAULT" commit -q -m "vault: <short summary of what this sweep filed>"
+  fi
+  BRANCH="$(git -C "$VAULT" rev-parse --abbrev-ref HEAD)"
+  git -C "$VAULT" pull --rebase origin "$BRANCH"   # sync teammates first
+  git -C "$VAULT" push origin "$BRANCH"
+fi
+```
+
+**Auto-resolve conflicts by union-merge.** If the `pull --rebase` conflicts (a teammate edited the same page/log), keep **BOTH** sides — never discard either. `wiki/log.md` and per-user worklogs are append-only and union cleanly; a wiki page edited on both sides keeps both statements (mark the contradiction per the vault's hard rules). This is exactly the [[vault-resolve-conflicts]] behavior — invoke that skill, or apply it inline: for each conflicted file replace the `<<<<<<< / ======= / >>>>>>>` block with both sides concatenated, then `git -C "$VAULT" add -A && git -C "$VAULT" rebase --continue`, then push. Only stop and surface if a conflict genuinely can't be union-merged.
+
+## Step 7 — Report
+
+Tell the user briefly what was filed — one line per page touched, in the form `Filed [[page-name]] — <hook>`. If nothing cleared the bar (e.g. a short or purely conversational session, or everything was already filed by `vault-keeper`), say so plainly instead of forcing entries. If the vault was synced, note it in one line (e.g. `Committed + pushed to the vault remote.`).
 
 ---
 
