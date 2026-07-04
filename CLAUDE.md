@@ -49,7 +49,7 @@ The historic command/skill split was dropped because the prefix made commands pa
    ---
    ```
 2. Optionally add `evals/`, `references/`, scripts, etc. as siblings of `SKILL.md`.
-3. Document in `plugins/claude-pro-skills/README.md` and the root `README.md`.
+3. Document in `plugins/claude-pro-skills/README.md` and the root `README.md`, and bump the skill count in the plugin README's headline (the manifests deliberately carry no count).
 
 The skill becomes invocable as `/<name>` (no prefix) and via the Skill tool as `claude-pro-skills:<name>`.
 
