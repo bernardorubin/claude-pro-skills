@@ -75,6 +75,7 @@ The agent becomes invocable via the Task tool as `subagent_type: claude-pro-skil
 - **README is the source of truth** for what each skill does — keep it in sync when behavior changes.
 - **Single source of truth**: skill files live ONLY here. The user's `~/.claude/commands/` and `~/.claude/skills/` should not contain copies of anything bundled in `claude-pro-skills` (avoids drift).
 - **Config paths**: shared config lives under `~/.config/claude-pro-skills/` (e.g., `vaults.json` for the vault registry). Env-var overrides are prefixed `CLAUDE_PRO_SKILLS_*` (e.g., `$CLAUDE_PRO_SKILLS_VAULT_USER`).
+- **Shared vault plumbing is intentionally duplicated** so each skill stays self-contained. Two blocks: the vault-registry resolver (canonical: `vault-keeper` Step 1; copies in save-to-vault, vault-resolve-conflicts, save-session-to-worklog) and the git-sync/union-merge block (canonical: `vault-keeper` hard rule 6; copies in save-to-vault Step 6, save-session-to-worklog Step 5.7). Every copy carries an HTML-comment marker. When editing either block, edit the canonical first and propagate to every marked satellite in the same change.
 
 ## Versioning
 

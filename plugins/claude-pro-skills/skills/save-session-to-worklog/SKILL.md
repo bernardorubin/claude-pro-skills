@@ -51,6 +51,7 @@ If the current working directory falls under a project that's registered in `~/.
 
 The registry is shared with the `vault-keeper` skill and `/vault-init` skill — single source of truth.
 
+<!-- Copy of the vault-registry resolver — canonical lives in vault-keeper Step 1. Keep in sync (see repo CLAUDE.md "Shared vault plumbing"). -->
 ```bash
 # Resolve cwd → vault path. Walk up the directory tree looking for a registered project.
 DIR="$(pwd)"
@@ -228,6 +229,7 @@ If `$VAULT/wiki/log.md` doesn't exist, the vault wasn't fully scaffolded; skip t
 
 If the worklog went into a vault (`$VAULT` is set) and that vault is a git repo with an `origin` remote, commit and push what you just wrote (the worklog file, any archived files from Step 3.5, and the `wiki/log.md` line), auto-resolving conflicts by **union-merge**. This keeps a shared vault in sync across machines/teammates with no manual git step. The vault is its own repo, separate from any code repo, and is meant to be synced continuously, so **push it without asking** (this does not affect code-repo push approvals). Skip silently for the Desktop fallback (`$VAULT` empty) or a vault with no remote.
 
+<!-- Copy of the vault git-sync block — canonical lives in vault-keeper hard rule 6. Keep in sync (see repo CLAUDE.md "Shared vault plumbing"). -->
 ```bash
 if [ -n "$VAULT" ] && git -C "$VAULT" rev-parse --git-dir >/dev/null 2>&1 \
    && git -C "$VAULT" remote get-url origin >/dev/null 2>&1; then

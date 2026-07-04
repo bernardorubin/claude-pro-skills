@@ -21,6 +21,7 @@ Run the steps below in order. Stop and surface to the user if any diagnostic fai
 
 ### Step 1 — Resolve cwd to a registered vault
 
+<!-- Copy of the vault-registry resolver — canonical lives in vault-keeper Step 1. Keep in sync (see repo CLAUDE.md "Shared vault plumbing"). -->
 ```bash
 test -f ~/.config/claude-pro-skills/vaults.json || { echo "❌ No vault registry at ~/.config/claude-pro-skills/vaults.json. Run /vault-init first."; exit 1; }
 

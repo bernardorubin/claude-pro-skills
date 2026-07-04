@@ -37,6 +37,7 @@ cat ~/.config/claude-pro-skills/vaults.json
 
 Walk up the cwd directory tree (current working directory, then parent, then parent's parent, …) and look for an exact match against the registry keys. The first match wins. This means a session in `/Users/foo/apps/myproject/subdir/` matches an entry for `/Users/foo/apps/myproject`.
 
+<!-- CANONICAL vault-registry resolver. Satellites: save-to-vault Step 1, vault-resolve-conflicts Step 1, save-session-to-worklog "Vault routing". Edit here first, then propagate to all satellites (see repo CLAUDE.md "Shared vault plumbing"). -->
 ```bash
 # Inline resolver (Claude can run this verbatim):
 DIR="$(pwd)"
@@ -143,6 +144,7 @@ Report as a numbered list with suggested fixes.
 5. **When uncertain about categorization, ask the user.** Better to pause than to file something in the wrong folder.
 6. **Auto-sync the vault to its remote after a write.** Once a write is complete (the finding filed + `index.md`/`log.md` updated), commit and push it, union-merging any conflict. The vault is its own git repo (separate from any code repo) and is meant to sync continuously, so push without asking; this never affects code-repo push approvals. Skip silently for a non-git or remote-less vault. Always use `git -C "$VAULT"` (never `cd`).
 
+   <!-- CANONICAL vault git-sync block. Satellites: save-to-vault Step 6, save-session-to-worklog Step 5.7. Edit here first, then propagate (see repo CLAUDE.md "Shared vault plumbing"). -->
    ```bash
    if git -C "$VAULT" rev-parse --git-dir >/dev/null 2>&1 \
       && git -C "$VAULT" remote get-url origin >/dev/null 2>&1; then

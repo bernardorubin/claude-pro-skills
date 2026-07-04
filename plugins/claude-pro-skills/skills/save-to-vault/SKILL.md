@@ -16,6 +16,7 @@ This skill does NOT reinvent the vault's mechanics. It **defers to `vault-keeper
 
 Same registry lookup as `vault-keeper`. Walk up the cwd directory tree against `~/.config/claude-pro-skills/vaults.json`:
 
+<!-- Copy of the vault-registry resolver — canonical lives in vault-keeper Step 1. Keep in sync (see repo CLAUDE.md "Shared vault plumbing"). -->
 ```bash
 test -f ~/.config/claude-pro-skills/vaults.json || { echo "no-registry"; exit 0; }
 DIR="$(pwd)"
@@ -74,6 +75,7 @@ After all writes, per the vault's hard rules:
 
 If the vault is a git repo with a remote, commit and push everything you just wrote, and auto-resolve any conflict by **union-merge**. This keeps a shared vault in sync across machines/teammates with no manual git step. The vault is its own repo, separate from any code repo, and is designed to be synced continuously, so **push it without asking** (this does not affect code-repo push approvals). Skip silently if the vault isn't a git repo or has no `origin` remote (a local-only vault).
 
+<!-- Copy of the vault git-sync block — canonical lives in vault-keeper hard rule 6. Keep in sync (see repo CLAUDE.md "Shared vault plumbing"). -->
 ```bash
 # $VAULT was resolved in Step 1. Always use `git -C "$VAULT"`, never cd.
 if git -C "$VAULT" rev-parse --git-dir >/dev/null 2>&1 \
