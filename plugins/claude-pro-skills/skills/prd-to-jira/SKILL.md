@@ -47,7 +47,7 @@ If the PRD is long, read it completely before starting analysis. Missing context
 
 ## Step 2: Ask Which Jira Project
 
-Always ask the user which project to use before creating anything. Available projects depend on the user's `jira-curl` config (check `~/.config/jira/credentials` for project aliases).
+Always ask the user which project to use before creating anything. List the configured instances with `jira-curl list` (never read `~/.config/jira/credentials` directly — it holds live API tokens; see jira-cli's Sensitive Data rule).
 
 ## Step 3: Analyze & Decompose
 
@@ -118,7 +118,7 @@ Wait for the user to review and approve before creating tickets. They may want t
 
 ## Step 5-7: Create Tickets in Jira
 
-Once approved, create everything using `jira-curl`. The wrapper lives at `~/.local/bin/jira-curl`.
+Once approved, create everything using `jira-curl` — **under the jira-cli skill's rules**. This skill decides *what* tickets to create; the jira-cli skill owns *how* to talk to Jira. Before any API call, run jira-cli's preflight (ensure the binary is on PATH, resolve the right instance for this request). And every ADF payload you write here — descriptions, summaries, comments — is governed by jira-cli's Output Style rules: **no em/en dashes anywhere** (run its mandatory pre-POST payload check on every payload), and **every ticket-key mention rendered as an `inlineCard`**, never plain text. Read those sections of jira-cli's SKILL.md; don't improvise them from memory.
 
 **Never hardcode Jira IDs** — issue type IDs, link type IDs, and Epic Link customfield IDs all vary per Atlassian site (same rule as jira-cli's "never hardcode transition IDs"). Use **names**, which Jira resolves per-project, and the modern `parent` field for epic membership.
 
@@ -275,3 +275,4 @@ Tickets with open questions: HPY-101, HPY-103
 - **Vague ACs** — "It works" is not an AC. Be specific about what "works" means.
 - **Questions everywhere** — Only add questions when there are genuine PRD gaps for that specific ticket. Most tickets shouldn't need a questions section.
 - **Forgetting to link dependencies** — This is the whole point of flagging them. Create the links in Jira, don't just mention them in descriptions.
+- **Skipping jira-cli's writing rules** — Em/en dashes in ADF text or plain-text ticket keys are hard violations. Run jira-cli's pre-POST payload check on every ticket you create; render ticket references as `inlineCard` nodes.
