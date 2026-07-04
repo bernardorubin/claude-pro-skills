@@ -119,14 +119,14 @@ Read relevant CLAUDE.md files for project-specific standards.
 
 Look for an existing review file on the Desktop (or custom output dir) AND in the current conversation. The filename pattern depends on `source_mode`:
 
-- **PR**: `{output_dir}/pr-review-{PR_NUMBER}-{YYYY-MM-DD}.md`
-- **Local**: `{output_dir}/pr-review-{branch-name}-{YYYY-MM-DD}.md`
-- **Full repo**: `{output_dir}/code-audit-{repo-name}-{YYYY-MM-DD}.md`
+- **PR**: `{output_dir}/pr-review-{PR_NUMBER}.md`
+- **Local**: `{output_dir}/pr-review-{branch-name}.md`
+- **Full repo**: `{output_dir}/code-audit-{repo-name}.md`
 
-1. **Output file**: Look for the pattern matching the current mode. Read it if it exists.
+1. **Output file**: Look for the pattern matching the current mode. Read it if it exists. If it doesn't, also glob for legacy date-suffixed files from older versions (`pr-review-{PR_NUMBER}-*.md`, etc.) — read the newest as the prior review, write updates to the new undated name, and mention the old dated file in the terminal summary so the user can delete it.
 2. **Conversation**: Scan for any prior `/pr-review` output (identifiable by `## Code Review` heading).
 
-Skip incremental tracking for full-repo mode if the prior file is older than 7 days (the codebase has likely shifted enough to warrant a fresh review).
+Skip incremental tracking for full-repo mode if the prior file's **Last reviewed** timestamp is older than 7 days (the codebase has likely shifted enough to warrant a fresh review).
 
 If a prior review is found (from either source):
 
@@ -311,10 +311,10 @@ After all agents complete (or after direct review for small PRs):
 
 **Otherwise**: Write the consolidated review to a markdown file.
 
-**File path** depends on `source_mode`:
-- **PR mode**: `{output_dir}/pr-review-{PR_NUMBER}-{YYYY-MM-DD}.md` (e.g. `pr-review-69-2026-02-10.md`)
-- **Local mode**: `{output_dir}/pr-review-{branch-name}-{YYYY-MM-DD}.md`
-- **Full repo mode**: `{output_dir}/code-audit-{repo-name}-{YYYY-MM-DD}.md` (e.g. `code-audit-happy-checkout-sk-2026-05-01.md`)
+**File path** depends on `source_mode` — one stable file per PR/branch/repo, no date suffix (dates live in the `Last reviewed` header and the Revision Log):
+- **PR mode**: `{output_dir}/pr-review-{PR_NUMBER}.md` (e.g. `pr-review-69.md`)
+- **Local mode**: `{output_dir}/pr-review-{branch-name}.md`
+- **Full repo mode**: `{output_dir}/code-audit-{repo-name}.md` (e.g. `code-audit-happy-checkout-sk.md`)
 
 **If the file already exists (re-run / incremental review):**
 

@@ -247,7 +247,7 @@ If 2+ agents independently flag the same issue, severity gets boosted one tier (
 
 #### Output Format
 
-Reviews saved as `pr-review-{PR_NUMBER}-{YYYY-MM-DD}.md` containing:
+Reviews saved as `pr-review-{PR_NUMBER}.md` (one stable file per PR — re-runs update it incrementally; dates live in the header and revision log) containing:
 - Risk assessment (🟢 LOW / 🟡 MEDIUM / 🔴 HIGH / ⛔ CRITICAL)
 - Issues grouped by severity with location, confidence score, impact
 - Before/after code snippets (full mode only)
