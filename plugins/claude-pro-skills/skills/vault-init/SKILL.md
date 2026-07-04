@@ -205,6 +205,11 @@ Report as a numbered list. Don't auto-fix — surface and let the user decide.
 ## Hard rules
 
 1. **`raw/` is per-file mutable.** Reference docs (anything inside `raw/projects/<slug>/` that's not flagged as a living plan) are citation anchors and shouldn't be modified. Living plans (typically the execution-plan file within each project folder) and worklog files (`raw/work-logs/<user-slug>/`) ARE meant to be edited freely by both Claude and the user. The immutability principle is per-file, not per-`raw/`. **Worklog folders are user-scoped** — only edit worklogs under your own `<user-slug>/` (resolved by `/save-session-to-worklog`); other teammates' folders are read-only to you.
+2. **Always update `wiki/index.md` and `wiki/log.md`** after any wiki write.
+3. **Page names are lowercase-hyphenated** (except ticket IDs).
+4. **No empty wiki pages** — at least a summary line and a "Related pages" section.
+5. **When uncertain about categorization, ask the user.**
+6. **The vault auto-syncs to its remote.** The vault is its own git repo, separate from any code repo, and is meant to stay continuously synced. The claude-pro-skills vault skills commit + push after every write, union-merging any conflict (keep BOTH sides, never discard — see the vault-resolve-conflicts skill). If you edit the vault directly, do the same: commit, `pull --rebase` (union-merge any conflict), push. This is a deliberate vault-only exception to per-push approval; code repos keep theirs. Skip if the vault has no remote.
 
 ## Epic-shipped workflow (when work for a project completes)
 
@@ -221,10 +226,6 @@ Claude:
 6. Confirms: "archived [and deleted]; citations are filename-only and remain valid"
 
 Default behavior is archive (reversible). Deletion is explicit because re-ingestion is sometimes useful later.
-2. **Always update `wiki/index.md` and `wiki/log.md`** after any wiki write.
-3. **Page names are lowercase-hyphenated** (except ticket IDs).
-4. **No empty wiki pages** — at least a summary line and a "Related pages" section.
-5. **When uncertain about categorization, ask the user.**
 ````
 
 > Replace `{Project}` with the project basename (e.g., "Happy", "MyApp"). Do this textual substitution, not literally.
