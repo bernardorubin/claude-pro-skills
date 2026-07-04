@@ -120,6 +120,8 @@ Wait for the user to review and approve before creating tickets. They may want t
 
 Once approved, create everything using `jira-curl`. The wrapper lives at `~/.local/bin/jira-curl`.
 
+**Never hardcode Jira IDs** — issue type IDs, link type IDs, and Epic Link customfield IDs all vary per Atlassian site (same rule as jira-cli's "never hardcode transition IDs"). Use **names**, which Jira resolves per-project, and the modern `parent` field for epic membership.
+
 ### Create the Epic
 
 ```bash
@@ -127,7 +129,7 @@ Once approved, create everything using `jira-curl`. The wrapper lives at `~/.loc
   "fields": {
     "project": {"key": "<PROJECT_KEY>"},
     "summary": "<Epic title>",
-    "issuetype": {"id": "10000"},
+    "issuetype": {"name": "Epic"},
     "description": <ADF description>
   }
 }'
@@ -135,19 +137,21 @@ Once approved, create everything using `jira-curl`. The wrapper lives at `~/.loc
 
 ### Create Tasks under the Epic
 
-Use issue type Task (id: `10002`). Link to epic via `customfield_10014`.
+Use issue type Task by name. Parent each task to the epic with the `parent` field — it works on both company-managed and team-managed Jira Cloud projects (the legacy Epic Link customfield does not).
 
 ```bash
 ~/.local/bin/jira-curl <project> POST "/rest/api/3/issue" -d '{
   "fields": {
     "project": {"key": "<PROJECT_KEY>"},
     "summary": "[Area] Task title",
-    "issuetype": {"id": "10002"},
-    "customfield_10014": "<EPIC_KEY>",
+    "issuetype": {"name": "Task"},
+    "parent": {"key": "<EPIC_KEY>"},
     "description": <ADF description>
   }
 }'
 ```
+
+**If a name is rejected** (translated site language, custom type scheme, no "Task" type): list the project's real issue types with `GET /rest/api/3/issue/createmeta/<PROJECT_KEY>/issuetypes` and use what's there (e.g. "Story"). **If `parent` is rejected** (rare — old Jira Server): find the Epic Link field with `GET /rest/api/3/field` (search for "Epic Link") and use that customfield ID instead.
 
 ### Ticket Description Format (ADF)
 
@@ -232,15 +236,17 @@ Jira uses Atlassian Document Format. Structure each ticket description as:
 
 ### Link Dependencies
 
-After all tickets are created, link dependent tickets using "Blocks" (link type id: `10000`):
+After all tickets are created, link dependent tickets using the "Blocks" link type by name:
 
 ```bash
 ~/.local/bin/jira-curl <project> POST "/rest/api/3/issueLink" -d '{
-  "type": {"id": "10000"},
+  "type": {"name": "Blocks"},
   "outwardIssue": {"key": "<BLOCKER_KEY>"},
   "inwardIssue": {"key": "<BLOCKED_KEY>"}
 }'
 ```
+
+If the site's link scheme rejects the name, list the available types with `GET /rest/api/3/issueLinkType` and pick the blocks-style one.
 
 This creates "BLOCKER_KEY blocks BLOCKED_KEY" / "BLOCKED_KEY is blocked by BLOCKER_KEY".
 
