@@ -38,6 +38,8 @@ Everything is a **skill** — no `claude-pro-skills:` prefix needed when invokin
 | `/claude-learn` | "document what we learned", "update CLAUDE.md with this" |
 | `/claude-modularize` | "split up CLAUDE.md", "modularize CLAUDE.md" |
 
+The plugin also bundles one subagent: `code-reviewer`, the parallel review agent `/pr-review` launches for its focus-area passes.
+
 See [`plugins/claude-pro-skills/README.md`](plugins/claude-pro-skills/README.md) for full details on every skill, the PR review modes (PR / local / full-repo), and the iterative review loop.
 
 ## License

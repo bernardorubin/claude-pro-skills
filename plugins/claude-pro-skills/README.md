@@ -262,6 +262,12 @@ Reviews saved as `pr-review-{PR_NUMBER}.md` (one stable file per PR — re-runs 
 
 ![Comparison](comparison.png)
 
+## Subagents
+
+### `code-reviewer`
+
+The bundled review agent behind `/pr-review` (launched as `claude-pro-skills:code-reviewer`). Each parallel instance reviews one focus area — security, correctness, quality, performance, or a specialist pass — and returns confidence-scored, high-signal findings. Not meant to be invoked directly; the skill dispatches it with a full prompt.
+
 ## License
 
 MIT

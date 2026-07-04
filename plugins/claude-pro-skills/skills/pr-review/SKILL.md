@@ -160,7 +160,7 @@ These specialist agents run **in addition to** the core agents when triggered. T
 
 ### Step 7: Launch Parallel Review Agents (when needed per Step 6)
 
-Using the Task tool, launch agents in parallel with `subagent_type: feature-dev:code-reviewer`.
+Using the Task tool, launch agents in parallel with `subagent_type: claude-pro-skills:code-reviewer` (the plugin's bundled review agent). If that agent type is unavailable for any reason, fall back to `general-purpose`.
 
 **Full review_mode**: Launch **4 core agents**. Pass each agent: the path to the diff file (or full file list for full-repo mode), the list of files in scope, project standards from CLAUDE.md, the current `source_mode`, and the "Already Fixed" list (if any from Step 5).
 
