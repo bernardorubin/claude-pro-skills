@@ -217,7 +217,7 @@ Think like a senior reviewer on the team. Focus on maintainability and standards
 - Proper abstractions and component structure
 - Test coverage gaps
 - **Missing companion changes**: Flag if any of these were missed:
-  - Sanity schema changed but `pnpm sanity:typegen` may not have been run (check if `sanity.types.ts` was updated)
+  - Stale codegen outputs — a source-of-truth schema changed (CMS schema, GraphQL/OpenAPI spec, DB schema, protobuf) but the generated artifacts (types, clients) weren't regenerated alongside it. The project's CLAUDE.md (from Step 4) names the codegen commands and output files.
   - New environment variables added but not documented
   - New API routes without proper error handling patterns
   - Server component converted to client component without loading/error states
@@ -316,7 +316,7 @@ After all agents complete (or after direct review for small PRs):
 **File path** depends on `source_mode` — one stable file per PR/branch/repo, no date suffix (dates live in the `Last reviewed` header and the Revision Log):
 - **PR mode**: `{output_dir}/pr-review-{PR_NUMBER}.md` (e.g. `pr-review-69.md`)
 - **Local mode**: `{output_dir}/pr-review-{branch-name}.md`
-- **Full repo mode**: `{output_dir}/code-audit-{repo-name}.md` (e.g. `code-audit-happy-checkout-sk.md`)
+- **Full repo mode**: `{output_dir}/code-audit-{repo-name}.md` (e.g. `code-audit-my-app.md`)
 
 **If the file already exists (re-run / incremental review):**
 
