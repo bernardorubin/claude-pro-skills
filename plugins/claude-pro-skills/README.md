@@ -160,9 +160,9 @@ Runs multiple focused review agents in parallel, each examining the code from a 
 
 | Mode | When | Input | Output filename |
 |------|------|-------|-----------------|
-| **PR** (default) | A PR number is given or auto-detected from the current branch | The PR's diff | `pr-review-{number}-{date}.md` |
-| **Local** | No PR exists, OR `--local` flag, OR you ask to "review my uncommitted work" / "review my branch" | `git diff origin/main...HEAD` + uncommitted | `pr-review-{branch}-{date}.md` |
-| **Full repo** | `--full-repo` flag, OR you ask for a "full repo audit" / "audit the whole codebase" | Every source file (with sensible exclusions) — confirms before running on >50 files | `code-audit-{repo}-{date}.md` |
+| **PR** (default) | A PR number is given or auto-detected from the current branch | The PR's diff | `pr-review-{number}.md` |
+| **Local** | No PR exists, OR `--local` flag, OR you ask to "review my uncommitted work" / "review my branch" | `git diff origin/main...HEAD` + uncommitted | `pr-review-{branch}.md` |
+| **Full repo** | `--full-repo` flag, OR you ask for a "full repo audit" / "audit the whole codebase" | Every source file (with sensible exclusions) — confirms before running on >50 files | `code-audit-{repo}.md` |
 
 #### Usage
 
@@ -184,7 +184,10 @@ Or invoke explicitly via slash with flags:
 /pr-review --local
 /pr-review --full-repo
 /pr-review --full-repo --lite
+/pr-review 463 --comment
 ```
+
+**GitHub-comment ready.** The review file renders cleanly as a PR comment: compact header, findings linked to the PR's head commit, minor sections collapsed in `<details>`. Pass `--comment` (PR mode) to post it directly — the skill maintains one living review comment per PR, updated in place on every re-run.
 
 #### Modes
 
