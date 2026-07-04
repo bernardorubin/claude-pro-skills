@@ -1,7 +1,7 @@
 ---
 name: jira-cli
 description: Use when the user mentions a Jira ticket, pastes a Jira URL (e.g. https://yourorg.atlassian.net/browse/ABC-123), pastes a ticket key (HPY-1234, WEB-456, ABC-789), or asks to read, update, comment on, transition, assign, link, or search Jira issues. Triggers on phrases like "work on this jira ticket", "update the description in jira", "add a comment to ABC-123", "what's the status of WEB-456", "move this to in progress", "find tickets assigned to me". Wraps the `jira-curl` CLI.
-allowed-tools: Bash(jira-curl:*) Bash(jq:*) Bash(cat:*) Bash(command:*) Bash(bash:*)
+allowed-tools: Bash(jira-curl:*), Bash(jq:*), Bash(cat:*), Bash(command:*), Bash(bash:*), Bash(python3:*), Bash(ls:*)
 ---
 
 # Jira CLI
