@@ -360,10 +360,10 @@ Open in [Obsidian](https://obsidian.md). Entry point: `wiki/index.md`. The vault
 ### Step 5 — Init git (if requested)
 
 ```bash
-cd {vault}
-git init -q
-git add -A
-git commit -q -m "Scaffold {Project} vault"
+# Always git -C, never cd — the shell's cwd persists across the session
+git init -q {vault}
+git -C {vault} add -A
+git -C {vault} commit -q -m "Scaffold {Project} vault"
 ```
 
 ### Step 6 — Create GitHub repo (if requested)
@@ -378,7 +378,7 @@ If yes, create the repo:
 
 ```bash
 gh repo create "{vault-basename}" --private \
-  --source=. --remote=origin --push \
+  --source={vault} --remote=origin --push \
   --description="Personal LLM Wiki / second brain for {Project} work (Karpathy pattern)"
 ```
 

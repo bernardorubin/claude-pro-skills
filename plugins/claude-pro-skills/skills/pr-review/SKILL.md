@@ -1,6 +1,6 @@
 ---
 name: pr-review
-description: Confidence-scored review with parallel agents, incremental tracking, and desktop file output. Three modes — (1) PR mode reviews a GitHub PR by number or auto-detected from the current branch. (2) Local mode reviews uncommitted changes plus commits ahead of main when no PR exists. (3) Full-repo mode reviews the entire codebase when the user explicitly asks for a full audit ("audit the whole repo", "review the entire codebase", "full repo audit"). Auto-triggers on phrases like "review this PR", "review my changes", "audit my code", "review my uncommitted work", "audit the whole repo".
+description: Use when the user wants code reviewed — a GitHub PR, their local/uncommitted changes, or a whole-repo audit. Confidence-scored review with parallel agents, incremental tracking, and GitHub-comment-ready file output (optionally posted to the PR with --comment). Three modes — (1) PR mode reviews a GitHub PR by number or auto-detected from the current branch. (2) Local mode reviews uncommitted changes plus commits ahead of main when no PR exists. (3) Full-repo mode reviews the entire codebase when the user explicitly asks for a full audit ("audit the whole repo", "review the entire codebase", "full repo audit"). Auto-triggers on phrases like "review this PR", "review my changes", "audit my code", "review my uncommitted work", "audit the whole repo".
 ---
 
 # PR Review

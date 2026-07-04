@@ -1,6 +1,7 @@
 ---
 name: vault-resolve-conflicts
 description: Use when the user has merge or stash conflicts in a registered vault and wants to auto-resolve by union-merging both sides (keep both incoming and local changes). Vault-only — refuses to run outside registered vaults. Triggers on phrases like "resolve vault conflicts", "union merge the vault", "keep both in vault conflicts", "vault-resolve-conflicts", "fix my vault conflicts".
+allowed-tools: Read, Bash(jq:*), Bash(test:*), Bash(git:*), Bash(mktemp:*), Bash(cp:*), Bash(echo:*)
 ---
 
 # Resolve Vault Conflicts (Keep Both Sides)
@@ -63,24 +64,23 @@ For each unmerged path, extract the three stages from the index (base, ours, the
 TMP=$(mktemp -d)
 trap "rm -rf $TMP" EXIT
 
-cd "$VAULT"
-
+# Always git -C "$VAULT", never cd — the shell's cwd persists across the session
 echo "$UNMERGED" | while IFS= read -r f; do
   [ -z "$f" ] && continue
 
   # Extract the three stages. If a stage is missing (added on one side only),
   # fall back to /dev/null so merge-file still has 3 inputs.
-  git show ":1:$f" > "$TMP/base" 2>/dev/null || : > "$TMP/base"
-  git show ":2:$f" > "$TMP/ours" 2>/dev/null || : > "$TMP/ours"
-  git show ":3:$f" > "$TMP/theirs" 2>/dev/null || : > "$TMP/theirs"
+  git -C "$VAULT" show ":1:$f" > "$TMP/base" 2>/dev/null || : > "$TMP/base"
+  git -C "$VAULT" show ":2:$f" > "$TMP/ours" 2>/dev/null || : > "$TMP/ours"
+  git -C "$VAULT" show ":3:$f" > "$TMP/theirs" 2>/dev/null || : > "$TMP/theirs"
 
   # --union concatenates both halves of every conflict block, no markers left.
   # Result is written into the "ours" file (first arg).
   git merge-file --union -L "ours" -L "base" -L "theirs" \
     "$TMP/ours" "$TMP/base" "$TMP/theirs"
 
-  cp "$TMP/ours" "$f"
-  git add "$f"
+  cp "$TMP/ours" "$VAULT/$f"
+  git -C "$VAULT" add "$f"
   echo "  ✅ $f"
 done
 ```

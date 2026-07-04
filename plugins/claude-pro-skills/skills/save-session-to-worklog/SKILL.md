@@ -1,6 +1,7 @@
 ---
 name: save-session-to-worklog
 description: Use when the user wants to log today's session work into a monthly worklog file (for standups and invoicing, not git history). Auto-detects project from cwd, vault-aware (routes into the registered vault's raw/work-logs/<user-slug>/ folder when applicable). Triggers on phrases like "save session", "save this session to worklog", "log to worklog", "update my worklog", "add to standup notes", "save-session-to-worklog".
+allowed-tools: Read, Write, Edit, Bash(jq:*), Bash(cat:*), Bash(test:*), Bash(ls:*), Bash(date:*), Bash(grep:*), Bash(find:*), Bash(git:*), Bash(gh:*), Bash(mkdir:*)
 ---
 
 # Save Session to Worklog
