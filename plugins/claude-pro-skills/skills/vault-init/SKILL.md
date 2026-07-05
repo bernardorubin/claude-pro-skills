@@ -87,7 +87,7 @@ The human curates sources, asks questions, and directs analysis. **Claude mainta
 ```
 raw/                    ← source documents
   projects/             ← EPIC/INITIATIVE-SCOPED bundles — refs + plans for one project
-    <epic-slug>/        ← e.g. eve-integration/, mobile-redesign/, etc.
+    <epic-slug>/        ← e.g. payments-integration/, mobile-redesign/, etc.
       *.md              ← reference docs (immutable) AND living plans together
   work-logs/            ← per-user worklog folders (created lazily by /save-session-to-worklog)
     <user-slug>/        ← e.g. bernardorubin/, alice/ — one folder per teammate
@@ -138,7 +138,7 @@ Every factual claim that came from a source gets a citation: Some claim (source:
 - [[related-page-2]]
 ```
 
-**Page-name conventions**: lowercase, hyphenated. Tickets are the exception (e.g., `HPY-5611.md`).
+**Page-name conventions**: lowercase, hyphenated. Tickets are the exception (e.g., `ACME-5611.md`).
 
 ## When to write to the vault (auto-update triggers)
 
@@ -228,7 +228,7 @@ Claude:
 Default behavior is archive (reversible). Deletion is explicit because re-ingestion is sometimes useful later.
 ````
 
-> Replace `{Project}` with the project basename (e.g., "Happy", "MyApp"). Do this textual substitution, not literally.
+> Replace `{Project}` with the project basename (e.g., "Acme", "MyApp"). Do this textual substitution, not literally.
 
 #### `{vault}/wiki/index.md`
 

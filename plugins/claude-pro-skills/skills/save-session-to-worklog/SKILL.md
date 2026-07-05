@@ -8,7 +8,7 @@ allowed-tools: Read, Write, Edit, Bash(jq:*), Bash(cat:*), Bash(test:*), Bash(ls
 
 Log today's work into a monthly worklog. For standups and invoicing — not git history. Auto-detects project, newest entries at the top.
 
-Each project gets its own file. Multiple repos that belong to the same project (e.g., `happy-checkout-sk`, `hpy-api`, `hpy-onboarding` all belong to "happy") feed into a single log.
+Each project gets its own file. Multiple repos that belong to the same project (e.g., `acme-web`, `acme-api`, `acme-admin` all belong to "acme") feed into a single log.
 
 **Vault-aware**: if the detected project is registered in `~/.config/claude-pro-skills/vaults.json`, the worklog is written into the vault's `raw/work-logs/<user-slug>/` folder instead of `~/Desktop/`, and a one-line entry is appended to the vault's `wiki/log.md` (single append-only operation log, Karpathy pattern). The per-user subfolder lets multiple teammates share the same vault (e.g. via a shared git remote) without overwriting each other's worklogs. Projects without a vault keep writing to the Desktop.
 
@@ -20,7 +20,7 @@ Each project gets its own file. Multiple repos that belong to the same project (
 
 ```
 /save-session                                    → auto-detect project, log session work
-/save-session --project happy                    → explicitly target the "happy" file
+/save-session --project acme                     → explicitly target the "acme" file
 /save-session also helped onboard new dev today  → log session work + manual note
 /save-session --dry                              → preview what would be logged without writing
 ```
@@ -41,8 +41,8 @@ The project name decides which file gets updated. Resolve it in this order:
 
 | Directory pattern | Project name |
 |---|---|
-| `horizon-meyer`, `meyer` | `meyer` |
-| `happy`, `hpy`, `happy-checkout`, `hpy-api`, `hpy-onboarding` | `happy` |
+| `beacon-web`, `beacon` | `beacon` |
+| `acme`, `acme-web`, `acme-api`, `acme-admin` | `acme` |
 
 If no entry matches, the command falls back to the cwd's directory name as the project — so the map is purely for canonicalizing aliases (e.g., several repos that should share one worklog).
 
@@ -170,7 +170,7 @@ done
 
 Each entry should be:
 - **Concise, action-oriented** (start with a verb)
-- **Include ticket IDs** when available (e.g., "HPY-5633: Built smart insurance lookup")
+- **Include ticket IDs** when available (e.g., "ACME-5633: Built smart product lookup")
 - **Include PR references** when relevant
 - **Mention people** when collaboration happened
 - **Note blockers**
@@ -180,7 +180,7 @@ Each entry should be:
 Group 2+ related bullets under a parent with indented sub-bullets:
 
 ```markdown
-- HPY-5649: Investigated patient payment-after-timeout bug
+- ACME-5649: Investigated cart payment-after-timeout bug
   - Root cause: timer uses setInterval which browsers throttle when backgrounded
   - Fix: wall-clock time with visibilitychange listener
   - Created Jira ticket and assigned to self
@@ -259,21 +259,21 @@ Keep it brief.
 ## Format Reference
 
 ```markdown
-# April 2026 — Happy Work Summary
+# April 2026 — Acme Work Summary
 
 **Wednesday, April 8**
-- HPY-5678: Implemented CIO events for smart insurance discovery, created PR #557
-- HPY-5679: Coordinated Mixpanel event approach with Haris
-  - Initially built direct mixpanel_track() calls, Haris clarified SNS → eventx pattern
+- ACME-5678: Implemented analytics events for smart product discovery, created PR #557
+- ACME-5679: Coordinated Mixpanel event approach with Priya
+  - Initially built direct mixpanel_track() calls, Priya clarified SNS → event router pattern
   - Closed backend PR, kept frontend skip proxy PR open
 
 **Tuesday, April 7**
-- HPY-5668: Fixed Stripe payment errors not surfaced to UI
+- ACME-5668: Fixed Stripe payment errors not surfaced to UI
   - Root cause: Stripe error objects aren't Error instances, instanceof check failed
   - Fix: extract result.error.message directly, display inline for retry
 
 **Monday, April 6**
-- HPY-5633: Built smart insurance lookup feature
+- ACME-5633: Built smart product lookup feature
   - 10 new files, 6 modified, PR #551 targeting staging
 ```
 

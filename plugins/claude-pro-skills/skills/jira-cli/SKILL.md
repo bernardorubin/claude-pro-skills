@@ -1,6 +1,6 @@
 ---
 name: jira-cli
-description: Use when the user mentions a Jira ticket, pastes a Jira URL (e.g. https://yourorg.atlassian.net/browse/ABC-123), pastes a ticket key (HPY-1234, WEB-456, ABC-789), or asks to read, update, comment on, transition, assign, link, or search Jira issues. Triggers on phrases like "work on this jira ticket", "update the description in jira", "add a comment to ABC-123", "what's the status of WEB-456", "move this to in progress", "find tickets assigned to me". Wraps the `jira-curl` CLI.
+description: Use when the user mentions a Jira ticket, pastes a Jira URL (e.g. https://yourorg.atlassian.net/browse/ABC-123), pastes a ticket key (ACME-1234, WEB-456, ABC-789), or asks to read, update, comment on, transition, assign, link, or search Jira issues. Triggers on phrases like "work on this jira ticket", "update the description in jira", "add a comment to ABC-123", "what's the status of WEB-456", "move this to in progress", "find tickets assigned to me". Wraps the `jira-curl` CLI.
 allowed-tools: Bash(jira-curl:*), Bash(jq:*), Bash(cat:*), Bash(command:*), Bash(bash:*), Bash(python3:*), Bash(ls:*)
 ---
 
@@ -22,7 +22,7 @@ Talk to Jira from the shell via `jira-curl`, an authenticated wrapper around the
 >
 > If the result is non-zero, rewrite the offending text before sending. Do not relax the rule. Do not ship the payload. See the full "Output style" section below for the rationale and rewrite examples.
 
-> **Note on examples**: the API examples below use `happy` and `horizon` as instance names (the plugin author's two Jira workspaces). When you set up your own with `jira-curl init <name>`, pick whatever names make sense (`work`, `personal`, etc.) and substitute them throughout — the actual API URLs and JSON payloads are identical.
+> **Note on examples**: the API examples below use `acme` and `work` as placeholder instance names. When you set up your own with `jira-curl init <name>`, pick whatever names make sense (`work`, `personal`, etc.) and substitute them throughout — the actual API URLs and JSON payloads are identical.
 
 ## ⚠️ Preflight — run BEFORE any `jira-curl <instance>` API call
 
@@ -45,7 +45,7 @@ jira-curl list 2>/dev/null || true
 | Output | What to do next |
 |--------|----------------|
 | Empty / "No instances configured" | The user has nothing set up. Ask them to run `jira-curl init <name>` themselves (the API token is sensitive — never have them paste it into chat). Suggest a name based on their URL/org, but let them confirm. |
-| One or more instances listed | Match the URL host the user pasted (e.g. `meyer-us.atlassian.net`) against the URL column. If a single match exists, use that instance name. If multiple match or none match, **ask the user** which instance — don't guess from prior conversation memory. |
+| One or more instances listed | Match the URL host the user pasted (e.g. `acme.atlassian.net`) against the URL column. If a single match exists, use that instance name. If multiple match or none match, **ask the user** which instance — don't guess from prior conversation memory. |
 
 Only after both checks pass do you call `jira-curl <instance> <METHOD> <path>`.
 
@@ -55,12 +55,12 @@ Plain-language requests should "just work" — recognize a Jira URL, key, or any
 
 | User says | What to do |
 |-----------|------------|
-| "Work on HPY-1234 next" / pastes URL | `GET /rest/api/3/issue/<KEY>` to load context |
+| "Work on ACME-1234 next" / pastes URL | `GET /rest/api/3/issue/<KEY>` to load context |
 | "Update the description on ABC-123 to …" | `PUT /rest/api/3/issue/<KEY>` with ADF body |
 | "Add a comment: …" | `POST /rest/api/3/issue/<KEY>/comment` with ADF body |
 | "What's the status of WEB-456?" | `GET …?fields=status,summary,assignee` |
 | "Move it to In Progress" / "transition to Done" | `GET …/transitions` to get id, then `POST …/transitions` |
-| "Assign HPY-1234 to me" | `PUT …` with `{"fields":{"assignee":{"accountId":"<me>"}}}` |
+| "Assign ACME-1234 to me" | `PUT …` with `{"fields":{"assignee":{"accountId":"<me>"}}}` |
 | "Find my open tickets" | `GET /rest/api/3/search/jql?jql=…` |
 
 ## Quick reference
@@ -72,13 +72,13 @@ jira-curl init [name]                 # set up a new instance interactively
 jira-curl install [dest]              # symlink onto PATH (default: ~/.local/bin/jira-curl)
 ```
 
-The instance name is the lowercased label the user picked at setup (e.g. `happy`, `work`). One credentials file (`~/.config/jira/credentials`, mode 600) holds all instances. Multiple project keys (HPY-, WEB-, ABC-) within the same Atlassian site share one instance — only the host matters for routing.
+The instance name is the lowercased label the user picked at setup (e.g. `acme`, `work`). One credentials file (`~/.config/jira/credentials`, mode 600) holds all instances. Multiple project keys (ACME-, WEB-, ABC-) within the same Atlassian site share one instance — only the host matters for routing.
 
 ## Adding more instances later
 
 ```bash
-jira-curl init happy           # first instance
-jira-curl init horizon         # second instance — repeat for each
+jira-curl init acme            # first instance
+jira-curl init work            # second instance — repeat for each
 jira-curl init personal        # any name; lowercase recommended
 jira-curl list                 # confirm
 ```
@@ -90,7 +90,7 @@ Each `init` prompts for base URL (`https://yourorg.atlassian.net`), email, and A
 ### Read a ticket
 
 ```bash
-jira-curl happy GET /rest/api/3/issue/HPY-1234?fields=summary,status,assignee,description
+jira-curl acme GET /rest/api/3/issue/ACME-1234?fields=summary,status,assignee,description
 ```
 
 For just a few fields, always pass `?fields=…` — the default response is huge.
@@ -100,7 +100,7 @@ For just a few fields, always pass `?fields=…` — the default response is hug
 Descriptions use **ADF (Atlassian Document Format)** — plain strings won't work. Wrap text in the ADF envelope:
 
 ```bash
-jira-curl happy PUT /rest/api/3/issue/HPY-1234 -d '{
+jira-curl acme PUT /rest/api/3/issue/ACME-1234 -d '{
   "fields": {
     "description": {
       "type": "doc",
@@ -118,7 +118,7 @@ For multi-paragraph or formatted descriptions, build the ADF in a temp file and 
 ### Add a comment
 
 ```bash
-jira-curl happy POST /rest/api/3/issue/HPY-1234/comment -d '{
+jira-curl acme POST /rest/api/3/issue/ACME-1234/comment -d '{
   "body": {
     "type": "doc", "version": 1,
     "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Deployed in v1.42.0."}]}]
@@ -132,10 +132,10 @@ Two-step: list available transitions for the issue, then POST the chosen `id`.
 
 ```bash
 # 1. find the id for "In Progress"
-jira-curl happy GET /rest/api/3/issue/HPY-1234/transitions | jq '.transitions[] | {id, name}'
+jira-curl acme GET /rest/api/3/issue/ACME-1234/transitions | jq '.transitions[] | {id, name}'
 
 # 2. apply it
-jira-curl happy POST /rest/api/3/issue/HPY-1234/transitions -d '{"transition":{"id":"21"}}'
+jira-curl acme POST /rest/api/3/issue/ACME-1234/transitions -d '{"transition":{"id":"21"}}'
 ```
 
 Transition IDs vary per project workflow — always look them up; never hardcode.
@@ -144,19 +144,19 @@ Transition IDs vary per project workflow — always look them up; never hardcode
 
 ```bash
 # assign to a specific user (need their accountId)
-jira-curl happy PUT /rest/api/3/issue/HPY-1234 -d '{"fields":{"assignee":{"accountId":"5b10ac8d82e05b22cc7d4ef5"}}}'
+jira-curl acme PUT /rest/api/3/issue/ACME-1234 -d '{"fields":{"assignee":{"accountId":"5b10ac8d82e05b22cc7d4ef5"}}}'
 
 # unassign
-jira-curl happy PUT /rest/api/3/issue/HPY-1234 -d '{"fields":{"assignee":null}}'
+jira-curl acme PUT /rest/api/3/issue/ACME-1234 -d '{"fields":{"assignee":null}}'
 
 # look up your own accountId
-jira-curl happy GET /rest/api/3/myself | jq '.accountId'
+jira-curl acme GET /rest/api/3/myself | jq '.accountId'
 ```
 
 ### Search with JQL
 
 ```bash
-jira-curl happy GET '/rest/api/3/search/jql?jql=assignee=currentUser()+AND+statusCategory!=Done&fields=summary,status&maxResults=20'
+jira-curl acme GET '/rest/api/3/search/jql?jql=assignee=currentUser()+AND+statusCategory!=Done&fields=summary,status&maxResults=20'
 ```
 
 URL-encode JQL spaces as `+` or `%20`. Quote the path so the shell doesn't expand `&`.
@@ -164,9 +164,9 @@ URL-encode JQL spaces as `+` or `%20`. Quote the path so the shell doesn't expan
 ### Create a ticket
 
 ```bash
-jira-curl happy POST /rest/api/3/issue -d '{
+jira-curl acme POST /rest/api/3/issue -d '{
   "fields": {
-    "project": {"key": "HPY"},
+    "project": {"key": "ACME"},
     "summary": "Fix login redirect on Safari",
     "issuetype": {"name": "Task"},
     "description": {"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"Repro: …"}]}]}
@@ -178,17 +178,17 @@ jira-curl happy POST /rest/api/3/issue -d '{
 
 ```bash
 # add labels (replaces full list)
-jira-curl happy PUT /rest/api/3/issue/HPY-1234 -d '{"fields":{"labels":["frontend","p1"]}}'
+jira-curl acme PUT /rest/api/3/issue/ACME-1234 -d '{"fields":{"labels":["frontend","p1"]}}'
 
 # change priority
-jira-curl happy PUT /rest/api/3/issue/HPY-1234 -d '{"fields":{"priority":{"name":"High"}}}'
+jira-curl acme PUT /rest/api/3/issue/ACME-1234 -d '{"fields":{"priority":{"name":"High"}}}'
 ```
 
 ## Multi-instance disambiguation
 
 If the user has multiple instances configured and their request doesn't include a URL, ask which one:
 
-> You have `happy` and `work` configured — which Jira is HPY-1234 in?
+> You have `acme` and `work` configured — which Jira is ACME-1234 in?
 
 If the user pastes a full URL, the host tells you the instance directly — match it against `jira-curl list`.
 
@@ -203,29 +203,29 @@ Not in descriptions, not in comments, not in summaries, not in headings, not any
 Use commas, colons, periods, or parentheses instead. If you find yourself reaching for an em dash to join two clauses, the clauses probably want to be two sentences anyway.
 
 ```
-❌ Bad:  Fast-follow for HPY-5688 — surfaced 2026-05-26 on Eric's order.
-✅ Good: Fast-follow for HPY-5688. Surfaced 2026-05-26 on Eric's order.
-✅ Good: Fast-follow for HPY-5688 (surfaced 2026-05-26 on Eric's order).
+❌ Bad:  Fast-follow for ACME-5688 — surfaced 2026-05-26 on Eric's order.
+✅ Good: Fast-follow for ACME-5688. Surfaced 2026-05-26 on Eric's order.
+✅ Good: Fast-follow for ACME-5688 (surfaced 2026-05-26 on Eric's order).
 ```
 
 ### 2. Always link Jira ticket references with `inlineCard`, never plain text
 
-When a description, comment, or any ADF body mentions another Jira ticket key (e.g. `HPY-5688`, `WEB-456`), render it as an `inlineCard` ADF node pointing at the full ticket URL — Jira expands those to a clickable smart card showing the ticket's key + summary + status. Plain-text ticket keys are dead weight: the reader has to copy-paste them to follow up.
+When a description, comment, or any ADF body mentions another Jira ticket key (e.g. `ACME-5688`, `WEB-456`), render it as an `inlineCard` ADF node pointing at the full ticket URL — Jira expands those to a clickable smart card showing the ticket's key + summary + status. Plain-text ticket keys are dead weight: the reader has to copy-paste them to follow up.
 
 This rule applies to EVERY occurrence of a ticket key in the body, not just the first mention. Also applies to the parent epic, "fast-follow for X", "sibling to Y", "blocks Z" call-outs, comment threads, and any sub-task lists.
 
 ```jsonc
 // ❌ Bad — plain text key
 {"type": "paragraph", "content": [
-  {"type": "text", "text": "Fast-follow for HPY-5688. Sibling to HPY-5895."}
+  {"type": "text", "text": "Fast-follow for ACME-5688. Sibling to ACME-5895."}
 ]}
 
 // ✅ Good — inlineCard expands to clickable smart card
 {"type": "paragraph", "content": [
   {"type": "text", "text": "Fast-follow for "},
-  {"type": "inlineCard", "attrs": {"url": "https://yourorg.atlassian.net/browse/HPY-5688"}},
+  {"type": "inlineCard", "attrs": {"url": "https://yourorg.atlassian.net/browse/ACME-5688"}},
   {"type": "text", "text": ". Sibling to "},
-  {"type": "inlineCard", "attrs": {"url": "https://yourorg.atlassian.net/browse/HPY-5895"}},
+  {"type": "inlineCard", "attrs": {"url": "https://yourorg.atlassian.net/browse/ACME-5895"}},
   {"type": "text", "text": "."}
 ]}
 ```
@@ -235,7 +235,7 @@ The host (`yourorg.atlassian.net`) is the same Atlassian site as the instance yo
 **Fallback** if you need a clickable link in a context where `inlineCard` doesn't render (rare — almost never the case in modern Jira Cloud): use a `link` mark on a `text` node:
 
 ```jsonc
-{"type": "text", "text": "HPY-5688", "marks": [{"type": "link", "attrs": {"href": "https://yourorg.atlassian.net/browse/HPY-5688"}}]}
+{"type": "text", "text": "ACME-5688", "marks": [{"type": "link", "attrs": {"href": "https://yourorg.atlassian.net/browse/ACME-5688"}}]}
 ```
 
 Default to `inlineCard`. Only use the `link`-mark fallback if you've confirmed the rendering context strips smart cards.
@@ -266,7 +266,7 @@ The check is mandatory because the author has had to delete + repost comments mu
 |---------|-----|
 | Sending plain text for `description` or comment `body` | Wrap in ADF (`{type:"doc", version:1, content:[…]}`) |
 | Using em dashes (—) or en dashes (–) in any ADF text | See the "Output style" section above. Use commas, colons, or parens. |
-| Referencing another ticket as plain `HPY-1234` text in ADF | Render as `inlineCard` with the full browse URL. See "Output style" §2. |
+| Referencing another ticket as plain `ACME-1234` text in ADF | Render as `inlineCard` with the full browse URL. See "Output style" §2. |
 | Hardcoding transition IDs from one project in another | Always `GET …/transitions` first |
 | Calling `/search` (deprecated) | Use `/search/jql` |
 | Forgetting `?fields=` and getting a 200KB response | Always scope reads to the fields you need |

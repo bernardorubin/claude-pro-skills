@@ -16,10 +16,10 @@ Usage:
 
 Examples:
   jira-curl install
-  jira-curl init happy
+  jira-curl init acme
   jira-curl list
-  jira-curl happy GET /rest/api/3/issue/HPY-1234?fields=status,summary
-  jira-curl happy POST /rest/api/3/issue/HPY-1234/comment -d @comment.json
+  jira-curl acme GET /rest/api/3/issue/ACME-1234?fields=status,summary
+  jira-curl acme POST /rest/api/3/issue/ACME-1234/comment -d @comment.json
 
 Credentials file: $CREDS_FILE
 EOF
@@ -102,7 +102,7 @@ list_instances() {
 init_instance() {
   local name="${1:-}"
   if [[ -z "$name" ]]; then
-    read -rp "Instance name (e.g. happy, work, personal): " name
+    read -rp "Instance name (e.g. acme, work, personal): " name
   fi
   if [[ -z "$name" ]]; then
     echo "Instance name is required." >&2
@@ -155,7 +155,7 @@ esac
 
 INSTANCE="$1"
 METHOD="${2:?Missing HTTP method (GET, POST, PUT, DELETE, PATCH)}"
-API_PATH="${3:?Missing API path (e.g. /rest/api/3/issue/HPY-1234)}"
+API_PATH="${3:?Missing API path (e.g. /rest/api/3/issue/ACME-1234)}"
 shift 3
 
 UPPER="$(to_upper "$INSTANCE")"

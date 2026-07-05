@@ -75,7 +75,7 @@ Triggered by: "what does X do?", "how does Y work?", "who owns Z?", "what's our 
 
 1. Read `{vault}/wiki/index.md` first
 2. Follow `[[wiki-links]]` to relevant pages
-3. Synthesize the answer **with citations to specific wiki pages**: "see `[[eve-financing]]`"
+3. Synthesize the answer **with citations to specific wiki pages**: "see `[[payments-provider]]`"
 4. If the answer isn't in the wiki, say so clearly. Then offer to investigate (read code, web search, ask user) and **file the answer back as a new wiki page**
 
 ### Write mode — proactive auto-update (no permission needed for small touches)
@@ -109,7 +109,7 @@ Follow the workflow defined in `{vault}/CLAUDE.md` (it's typically: read full so
 
 ### Epic-shipped mode (final ingest + archive)
 
-Triggered by phrases like: *"do a final ingest of `raw/projects/<slug>/` then archive it"*, *"the eve epic is done, wrap it up"*, *"archive the {project} folder"*.
+Triggered by phrases like: *"do a final ingest of `raw/projects/<slug>/` then archive it"*, *"the payments epic is done, wrap it up"*, *"archive the {project} folder"*.
 
 Steps:
 1. List every file in `{vault}/raw/projects/<slug>/`
@@ -139,7 +139,7 @@ Report as a numbered list with suggested fixes.
 
 1. **`{vault}/raw/` is per-file mutable.** Reference docs (e.g. external snapshots, sandbox notes) inside `raw/projects/<slug>/` are citation anchors — don't modify. Living plans in those same folders, and worklog files in `raw/work-logs/<user-slug>/`, ARE meant to be edited freely by both Claude and the user. **Worklog folders are user-scoped** — only edit files under the active user's slug (resolved by `/save-session-to-worklog` from `git config user.email` or `$CLAUDE_PRO_SKILLS_VAULT_USER`); treat other teammates' worklog folders as read-only references when they exist. Defer to each vault's own `CLAUDE.md` for project-specific conventions.
 2. **Always update `{vault}/wiki/index.md` and `{vault}/wiki/log.md`** after any wiki write.
-3. **Page names are lowercase-hyphenated** (with the rare exception of ticket IDs like `HPY-5611.md` if the vault's CLAUDE.md says so).
+3. **Page names are lowercase-hyphenated** (with the rare exception of ticket IDs like `ACME-5611.md` if the vault's CLAUDE.md says so).
 4. **No empty wiki pages.** A stubbed page gets at least a summary line and a "Related pages" section.
 5. **When uncertain about categorization, ask the user.** Better to pause than to file something in the wrong folder.
 6. **Auto-sync the vault to its remote after a write.** Once a write is complete (the finding filed + `index.md`/`log.md` updated), commit and push it, union-merging any conflict. The vault is its own git repo (separate from any code repo) and is meant to sync continuously, so push without asking; this never affects code-repo push approvals. Skip silently for a non-git or remote-less vault. Always use `git -C "$VAULT"` (never `cd`).

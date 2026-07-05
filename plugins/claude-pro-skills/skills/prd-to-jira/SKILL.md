@@ -255,16 +255,16 @@ This creates "BLOCKER_KEY blocks BLOCKED_KEY" / "BLOCKED_KEY is blocked by BLOCK
 After creating everything, present a clean summary:
 
 ```
-## Created: [Epic Title] (HPY-XXX)
+## Created: [Epic Title] (ACME-XXX)
 
 | # | Ticket | Area | Blocked By |
 |---|--------|------|------------|
-| 1 | HPY-101 [Frontend] Build insurance form | Frontend | — |
-| 2 | HPY-102 [Backend] Eligibility endpoint | Backend | — |
-| 3 | HPY-103 [Frontend] Integrate eligibility | Frontend | HPY-102 |
-| 4 | HPY-104 [Ops] Monitoring setup | Ops | HPY-102 |
+| 1 | ACME-101 [Frontend] Build insurance form | Frontend | — |
+| 2 | ACME-102 [Backend] Eligibility endpoint | Backend | — |
+| 3 | ACME-103 [Frontend] Integrate eligibility | Frontend | ACME-102 |
+| 4 | ACME-104 [Ops] Monitoring setup | Ops | ACME-102 |
 
-Tickets with open questions: HPY-101, HPY-103
+Tickets with open questions: ACME-101, ACME-103
 ```
 
 ## Common Mistakes

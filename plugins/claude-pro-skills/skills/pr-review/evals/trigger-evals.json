@@ -11,7 +11,7 @@
   {"query": "pr 89 needs a review, post it as a comment on the pr when you're done", "should_trigger": true},
   {"query": "write a PR description for 463", "should_trigger": false},
   {"query": "update the PR description to mention the new env vars", "should_trigger": false},
-  {"query": "review the jira ticket HPY-1234 and tell me if the acceptance criteria make sense", "should_trigger": false},
+  {"query": "review the jira ticket ACME-1234 and tell me if the acceptance criteria make sense", "should_trigger": false},
   {"query": "how do i review a PR from the gh cli?", "should_trigger": false},
   {"query": "leave a comment on PR 512 saying I'll pick this up tomorrow", "should_trigger": false},
   {"query": "review my resume, it's in ~/Desktop/resume.md", "should_trigger": false},
