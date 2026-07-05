@@ -435,15 +435,18 @@ The file is formatted to live as a PR comment. Posting maintains **one living re
 - **`--comment` passed outside PR mode**: note that it only applies to PRs and continue.
 
 ```bash
-# 1. Find the existing marker-tracked comment (empty if none)
+# 1. Find the existing marker-tracked comment (empty string if none — the `// empty`
+#    ensures no literal "null" is returned when there's no match)
 COMMENT_ID=$(gh api "repos/{owner}/{repo}/issues/{pr}/comments" --paginate \
-  --jq '[.[] | select(.body | startswith("<!-- pr-review -->"))][0].id')
+  --jq 'first(.[] | select(.body | startswith("<!-- pr-review -->")) | .id) // empty')
 
-# 2a. Update it in place…
-gh api -X PATCH "repos/{owner}/{repo}/issues/comments/$COMMENT_ID" -F body=@"{review-file}"
-
-# 2b. …or create it if none exists
-gh pr comment {pr} --body-file "{review-file}"
+if [ -n "$COMMENT_ID" ]; then
+  # 2a. Update it in place…
+  gh api -X PATCH "repos/{owner}/{repo}/issues/comments/$COMMENT_ID" -F body=@"{review-file}"
+else
+  # 2b. …or create it if none exists
+  gh pr comment {pr} --body-file "{review-file}"
+fi
 ```
 
 Never use `gh pr comment --edit-last` — it edits the user's most recent comment on the PR, which may not be the review.
