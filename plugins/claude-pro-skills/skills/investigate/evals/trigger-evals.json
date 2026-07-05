@@ -1,0 +1,22 @@
+[
+  {"query": "investigate why checkout is throwing 500s since this morning", "should_trigger": true},
+  {"query": "from #eng-alerts: 'anyone know why conversion dropped 40% on /pricing since the 2pm deploy? cart adds look fine' — investigate this and give me something to reply with", "should_trigger": true},
+  {"query": "emails stopped sending from the app yesterday, look into why", "should_trigger": true},
+  {"query": "figure out what's going on with the vercel build failing on main", "should_trigger": true},
+  {"query": "someone reported the dashboard renders blank on prod for admin users. find out why", "should_trigger": true},
+  {"query": "why is mixpanel missing purchase events since tuesday? dig into it", "should_trigger": true},
+  {"query": "traffic to the blog spiked 10x overnight, is something wrong? get to the bottom of it", "should_trigger": true},
+  {"query": "stripe says the payment_intent succeeded but our orders table shows nothing for order 8841, can you look into why", "should_trigger": true},
+  {"query": "is this a bug? users say the promo code field ignores the first click. investigate", "should_trigger": true},
+  {"query": "prod alert: p95 latency on /api/search doubled in the last hour. why", "should_trigger": true},
+  {"query": "ship HPY-2210", "should_trigger": false},
+  {"query": "fix this bug: TypeError: cannot read properties of undefined at cart.ts:88 when applying a gift card", "should_trigger": false},
+  {"query": "what does the resolveVault function in vault-keeper do?", "should_trigger": false},
+  {"query": "investigate which charting library we should use for the analytics page", "should_trigger": false},
+  {"query": "look into upgrading to next 15, what would break for us?", "should_trigger": false},
+  {"query": "add error logging to the payment webhook so we can investigate failures later", "should_trigger": false},
+  {"query": "write a postmortem doc for yesterday's outage, root cause was the redis eviction policy", "should_trigger": false},
+  {"query": "check if the staging deploy finished", "should_trigger": false},
+  {"query": "review PR 512, something feels off about the error handling", "should_trigger": false},
+  {"query": "what's the status of HPY-1234?", "should_trigger": false}
+]

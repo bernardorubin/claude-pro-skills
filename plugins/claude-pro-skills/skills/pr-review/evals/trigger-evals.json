@@ -1,0 +1,22 @@
+[
+  {"query": "review PR 512", "should_trigger": true},
+  {"query": "can you review this pr https://github.com/acme-co/storefront/pull/218", "should_trigger": true},
+  {"query": "i just finished the checkout refactor on this branch, review my changes before i open a pr", "should_trigger": true},
+  {"query": "review my uncommitted work, i've been hacking on src/lib/pricing.ts and want a sanity check", "should_trigger": true},
+  {"query": "run a code review on the diff vs main", "should_trigger": true},
+  {"query": "audit the whole repo, we just inherited this codebase from an agency and idk what state it's in", "should_trigger": true},
+  {"query": "do a lite review of PR 463, just the important stuff", "should_trigger": true},
+  {"query": "give my branch a security-focused once-over before I request review from the team", "should_trigger": true},
+  {"query": "review the entire codebase and tell me what's risky", "should_trigger": true},
+  {"query": "pr 89 needs a review, post it as a comment on the pr when you're done", "should_trigger": true},
+  {"query": "write a PR description for 463", "should_trigger": false},
+  {"query": "update the PR description to mention the new env vars", "should_trigger": false},
+  {"query": "review the jira ticket HPY-1234 and tell me if the acceptance criteria make sense", "should_trigger": false},
+  {"query": "how do i review a PR from the gh cli?", "should_trigger": false},
+  {"query": "leave a comment on PR 512 saying I'll pick this up tomorrow", "should_trigger": false},
+  {"query": "review my resume, it's in ~/Desktop/resume.md", "should_trigger": false},
+  {"query": "can you check if my branch is behind main and pull safely? i have local changes i don't want to lose", "should_trigger": false},
+  {"query": "merge PR 218 if CI is green", "should_trigger": false},
+  {"query": "explain what changed in the last 5 commits", "should_trigger": false},
+  {"query": "review this slack message draft before i send it to #eng", "should_trigger": false}
+]
