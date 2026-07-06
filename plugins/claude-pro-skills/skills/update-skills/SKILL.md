@@ -66,9 +66,15 @@ Tell the user briefly:
 - **old → new version** (e.g. "Updated 3.9.1 → 3.10.0"). If it was already latest,
   say "Already on the latest (3.x.y) — nothing to update."
 - **Apply it**: the update lands on disk, but the running session needs a reload to
-  pick it up — tell the user to run `/reload-plugins` (or restart Claude Code; the CLI
-  itself notes "restart to apply"). You can't run those yourself — they're
-  interactive. It's live automatically in the next session regardless.
+  pick it up. Tell the user to run **`/reload-plugins`** (that reloads the plugin and
+  its skills) — and if a **new or renamed** skill still doesn't show up (a rename like
+  `ship-build` → `cut-release` sometimes needs it), **`/reload-skills`** too. Or just
+  restart Claude Code (the CLI notes "restart to apply"), which always works. You can't
+  run any of those yourself — they're interactive commands. It's live automatically in
+  the next session regardless.
+
+  **Word the reminder to the user with both, e.g.:** "Run `/reload-plugins` to apply it
+  (and `/reload-skills` if the renamed/new skills don't appear), or restart."
 
 ## If the CLI isn't available or a step fails
 
