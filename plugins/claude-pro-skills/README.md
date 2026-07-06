@@ -1,6 +1,6 @@
 # claude-pro-skills
 
-A Claude Code toolkit — **20 skills, no prefix to type**. Code reviews (PR / local / full-repo audit), git workflow, Claude meta tasks, external integrations, and per-project knowledge vaults.
+A Claude Code toolkit — **21 skills, no prefix to type**. Code reviews (PR / local / full-repo audit), git workflow, Claude meta tasks, external integrations, and per-project knowledge vaults.
 
 > **Heads up**: examples throughout use placeholder names — `acme`/`beacon` projects, `acme`/`work` Jira instances, `ACME-####` ticket prefixes. They're illustrative; the plugin works for any project. Two spots hold config you replace with your own: the **Project Map** in `/save-session-to-worklog` and the vault registry under `~/.config/claude-pro-skills/vaults.json`.
 
@@ -53,6 +53,9 @@ Reviews the current session and documents valuable learnings into the right CLAU
 
 ### `/claude-modularize`
 Breaks down a large, monolithic CLAUDE.md into smaller, scoped files distributed across the project's directory structure (component-specific guidelines move next to components, etc.).
+
+### `/update-skills`
+Updates this toolkit to its latest published version without you remembering the `/plugin` incantations. Runs the non-interactive `claude plugin` CLI — `marketplace update claude-pro-skills` then `install claude-pro-skills@claude-pro-skills` — reports the old → new version, and reminds you to run `/reload-plugins` to apply it in the current session (it's automatic next session; a skill can't run `/reload-plugins` itself since that's interactive UI). Falls back to handing you the manual slash commands if the CLI isn't available. Just pulls the newest published build — for changing what a skill *does*, that's an edit to its SKILL.md. Auto-triggers on "update the claude pro skills", "update my skills to the latest", "update the toolkit".
 
 ## Integrations
 

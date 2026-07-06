@@ -40,6 +40,7 @@ Everything is a **skill** — no `claude-pro-skills:` prefix needed when invokin
 | `/wrap-session` | "wrap up the session", "save to worklog and vault", "do both" — runs `/save-session-to-worklog` then `/save-to-vault` in one pass |
 | `/claude-learn` | "document what we learned", "update CLAUDE.md with this" |
 | `/claude-modularize` | "split up CLAUDE.md", "modularize CLAUDE.md" |
+| `/update-skills` | "update the claude pro skills", "update my skills to the latest", "update the toolkit" — pulls the newest published version of this plugin via the `claude plugin` CLI |
 
 The plugin also bundles one subagent: `code-reviewer`, the parallel review agent `/pr-review` launches for its focus-area passes.
 
