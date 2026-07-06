@@ -21,7 +21,7 @@ Everything is a **skill** — no `claude-pro-skills:` prefix needed when invokin
 | Skill | Triggers on |
 |-------|-------------|
 | `/ship-ticket` | "ship ABC-123", "take this ticket end to end", "implement ABC-456 and open a PR" — full pipeline: understand → implement → PR → log → Slack, stops before deploy |
-| `/ship-build` | "cut a release", "ship a build", "prep the release", "new App Store build" — per-release: pre-flight the gates (version train / build slot / CI), bump, build, release notes, hand back the submit command |
+| `/cut-release` | "cut a release", "ship a build", "prep the release", "new App Store build" — per-release: pre-flight the gates (version train / build slot / CI), bump, build, release notes, hand back the submit command |
 | `/investigate` | "investigate X", "look into why Y", "figure out what's going on with Z", pasting an incident/alert — evidence-grounded diagnosis, read-only |
 | `/pr-review` | "review this PR", "review my uncommitted changes", "audit the whole repo" — three modes: PR / local / full-repo |
 | `/pr-description` | "write a PR description", "draft the PR body", "update the PR" |

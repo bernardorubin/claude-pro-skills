@@ -1,12 +1,12 @@
 ---
-name: ship-build
+name: cut-release
 description: >-
   Use when cutting a RELEASE — turning already-merged code into a submittable
   build. Triggers on "cut a release", "ship a build", "prep the release",
   "release the app", "build and submit", "cut a build for TestFlight", "new App
   Store build", "ship version 1.3", "release notes and build". This is the
   per-RELEASE complement to ship-ticket (which is per-TICKET and stops at a
-  review-ready PR): many ship-tickets merge, then one ship-build cuts the
+  review-ready PR): many ship-tickets merge, then one cut-release cuts the
   version. It pre-flights the release gates (version train / build slot / CI
   green / version bump), builds the artifact, generates release notes from the
   merged tickets, and hands back the exact submit command. Enforces the two hard
@@ -17,7 +17,7 @@ description: >-
   ship-ticket); this is for shipping a version made of already-merged work.
 ---
 
-# Ship Build
+# Cut Release
 
 This is the pipeline you run when you **cut a release**: take the code that's
 already merged, confirm it's actually shippable, build the artifact, and get it
@@ -26,10 +26,10 @@ Connect — you know them. It's to **hold the one discipline that keeps releases
 from blowing up at the upload step**: pre-flight the gates *before* you build, and
 **stop before the actual publish** so you (never Claude) run that command.
 
-`ship-build` is the per-**release** half; [[ship-ticket]] is the per-**ticket**
-half. They don't overlap: `ship-ticket` ends at a review-ready PR; `ship-build`
+`cut-release` is the per-**release** half; [[ship-ticket]] is the per-**ticket**
+half. They don't overlap: `ship-ticket` ends at a review-ready PR; `cut-release`
 begins after those PRs are merged, when you're turning a pile of merged work into
-one versioned build. A week of `ship-ticket` runs → one `ship-build`.
+one versioned build. A week of `ship-ticket` runs → one `cut-release`.
 
 Like `ship-ticket`, this is a conductor, not the orchestra. Lean on:
 
