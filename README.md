@@ -21,6 +21,7 @@ Everything is a **skill** — no `claude-pro-skills:` prefix needed when invokin
 | Skill | Triggers on |
 |-------|-------------|
 | `/ship-ticket` | "ship ABC-123", "take this ticket end to end", "implement ABC-456 and open a PR" — full pipeline: understand → implement → PR → log → Slack, stops before deploy |
+| `/ship-build` | "cut a release", "ship a build", "prep the release", "new App Store build" — per-release: pre-flight the gates (version train / build slot / CI), bump, build, release notes, hand back the submit command |
 | `/investigate` | "investigate X", "look into why Y", "figure out what's going on with Z", pasting an incident/alert — evidence-grounded diagnosis, read-only |
 | `/pr-review` | "review this PR", "review my uncommitted changes", "audit the whole repo" — three modes: PR / local / full-repo |
 | `/pr-description` | "write a PR description", "draft the PR body", "update the PR" |
@@ -34,6 +35,7 @@ Everything is a **skill** — no `claude-pro-skills:` prefix needed when invokin
 | `/git-ac` | "commit but don't push", "stage and commit locally" |
 | `/git-pull-reapply` | "pull and reapply", "safe pull", "rebase from remote" |
 | `/save-session-to-worklog` | "save this session", "log to worklog", "update my standup notes" |
+| `/standup` | "write my standup", "standup update", "what did I do yesterday for standup" — drafts a Slack standup from the worklog (ground truth, not memory) |
 | `/wrap-session` | "wrap up the session", "save to worklog and vault", "do both" — runs `/save-session-to-worklog` then `/save-to-vault` in one pass |
 | `/claude-learn` | "document what we learned", "update CLAUDE.md with this" |
 | `/claude-modularize` | "split up CLAUDE.md", "modularize CLAUDE.md" |
