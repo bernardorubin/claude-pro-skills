@@ -44,14 +44,15 @@ claude plugin marketplace update claude-pro-skills
 This re-fetches `bernardorubin/claude-pro-skills` so the newest published version
 becomes available to install.
 
-### 3. Reinstall the latest
+### 3. Update the plugin to the latest
 
 ```bash
-claude plugin install claude-pro-skills@claude-pro-skills
+claude plugin update claude-pro-skills@claude-pro-skills
 ```
 
-Installs at `user` scope by default (matches how it's installed). This pulls
-whatever version the marketplace now points at.
+This is the command that actually upgrades it — it prints e.g. `updated from 3.9.1
+to 3.10.0`. **Use `update`, not `install`**: `claude plugin install` no-ops with
+"already installed" when the plugin is present and does NOT upgrade it.
 
 ### 4. Confirm the new version
 
@@ -64,8 +65,10 @@ claude plugin list 2>/dev/null | grep -iA2 'claude-pro-skills@claude-pro-skills'
 Tell the user briefly:
 - **old → new version** (e.g. "Updated 3.9.1 → 3.10.0"). If it was already latest,
   say "Already on the latest (3.x.y) — nothing to update."
-- **Run `/reload-plugins`** to apply it in this session (or it's live next session).
-  You can't run that yourself — it's an interactive command.
+- **Apply it**: the update lands on disk, but the running session needs a reload to
+  pick it up — tell the user to run `/reload-plugins` (or restart Claude Code; the CLI
+  itself notes "restart to apply"). You can't run those yourself — they're
+  interactive. It's live automatically in the next session regardless.
 
 ## If the CLI isn't available or a step fails
 
@@ -74,9 +77,11 @@ themselves:
 
 ```
 /plugin marketplace update claude-pro-skills
-/plugin install claude-pro-skills@claude-pro-skills
 /reload-plugins
 ```
+
+(The interactive `/plugin` menu updates the plugin and `/reload-plugins` applies it —
+that's the by-hand flow this skill automates.)
 
 ## Notes
 
