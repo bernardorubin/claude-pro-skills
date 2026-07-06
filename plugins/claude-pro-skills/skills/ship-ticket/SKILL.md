@@ -197,23 +197,13 @@ hasn't stated (he shares PRs widely and has pushed back hard on fabricated proce
 Before marking it ready, **ask the user whether to run the self-review cycle** — a small or
 trivial PR (a one-line fix, a copy tweak, a config bump) often doesn't need it, so don't force
 it. Ask something like: *"Run the self-review cycle on this PR, or is it small enough to skip?"*
-If they skip, mark it ready without the loop. If they want it (the sensible default for anything
-non-trivial), run the loop below and leave the review as a single living comment on the PR — a
-visible audit trail that everything flagged got addressed:
 
-1. **Post the review to the PR** — run `/pr-review --comment` (the default reviewer; check the
-   repo's CLAUDE.md for a specialized reviewer some repos define instead). This reviews your diff
-   and posts the findings as one PR comment.
-2. **Fix the findings** — make the code changes the review calls for (address critical and
-   improvement items).
-3. **Push** the follow-up commits.
-4. **Re-run `/pr-review --comment`** — incremental mode updates the review doc (strikes through
-   what you fixed, surfaces anything the fixes introduced) **and edits that same PR comment in
-   place** (it's marker-tracked, so it never posts a second review comment or leaves a stale one).
-5. **Repeat** until the review comes back clean.
-
-Only mark the PR ready once the loop is clean. The end state is one PR comment that tracked the
-review to resolution — mostly struck-through — not a pile of stale review comments.
+- **If they want it** (the sensible default for anything non-trivial): invoke the
+  [[review-cycle]] skill. It posts the review as one living PR comment, fixes the findings worth
+  fixing, runs the gates, pushes, and updates that same comment until clean — a visible audit
+  trail that everything flagged got addressed. It honors the repo's designated reviewer (from its
+  CLAUDE.md) if one is defined. **Don't reimplement the loop here — `review-cycle` owns it.**
+- **If they skip**: mark it ready without the loop.
 
 If the ticket asked for specific info to live on the PR or the Jira ticket, put it in the
 **description / ticket body by default**, not a comment — the user has had to ask for this
@@ -223,8 +213,8 @@ redo before. Use a comment only when they specifically say "comment."
 
 When review comes back, make the fixes and post the response with `gh pr comment` yourself.
 Push the follow-up commits. Update the PR description if the change set materially shifted. If
-you re-review after these fixes, run `/pr-review --comment` again so the living review comment
-and the review doc stay current (it edits the same comment in place, per Phase 4's loop).
+you re-review after these fixes, run the [[review-cycle]] skill again so the living review
+comment and the review doc stay current (it edits the same comment in place).
 
 ### 6. Log the work — always, at the end of every ticket
 

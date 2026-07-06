@@ -1,6 +1,6 @@
 # claude-pro-skills
 
-A Claude Code toolkit — **19 skills, no prefix to type**. Code reviews (PR / local / full-repo audit), git workflow, Claude meta tasks, external integrations, and per-project knowledge vaults.
+A Claude Code toolkit — **20 skills, no prefix to type**. Code reviews (PR / local / full-repo audit), git workflow, Claude meta tasks, external integrations, and per-project knowledge vaults.
 
 > **Heads up**: examples throughout use placeholder names — `acme`/`beacon` projects, `acme`/`work` Jira instances, `ACME-####` ticket prefixes. They're illustrative; the plugin works for any project. Two spots hold config you replace with your own: the **Project Map** in `/save-session-to-worklog` and the vault registry under `~/.config/claude-pro-skills/vaults.json`.
 
@@ -19,7 +19,7 @@ Every entry below is a **skill** invocable as `/<name>` (no `claude-pro-skills:`
 ## Ticket workflow
 
 ### `/ship-ticket`
-The full ship pipeline for a Jira ticket (or a described feature/bugfix): understand → clarify (hard stop — no code until questions are answered) → implement on a `--no-track` branch → open the PR → self-review loop (posts + updates one living PR comment via `/pr-review --comment`, fixing findings and pushing until clean) → address external review → log to worklog + vault → draft a Slack update → hand back the deploy command. It's a **conductor** — it chains your other skills (`jira-cli`, `git-ac`, `pr-description`, `pr-review`, `save-session-to-worklog`, `save-to-vault`, `write-slack-message`) in order and holds two lines: do the work yourself instead of deferring it, and stop before anything that deploys. **Project-agnostic by design** — it reads the repo's `CLAUDE.md` for the base branch, quality gates, PR flow, designated reviewer, dashboards, and deploy command, so it adapts per project instead of hardcoding any. Auto-triggers on "ship ABC-123", "take this ticket end to end", "implement ABC-456 and open a PR".
+The full ship pipeline for a Jira ticket (or a described feature/bugfix): understand → clarify (hard stop — no code until questions are answered) → implement on a `--no-track` branch → open the PR → self-review loop (asks first, then runs `/review-cycle`: living PR comment, fix, push, until clean) → address external review → log to worklog + vault → draft a Slack update → hand back the deploy command. It's a **conductor** — it chains your other skills (`jira-cli`, `git-ac`, `pr-description`, `pr-review`, `save-session-to-worklog`, `save-to-vault`, `write-slack-message`) in order and holds two lines: do the work yourself instead of deferring it, and stop before anything that deploys. **Project-agnostic by design** — it reads the repo's `CLAUDE.md` for the base branch, quality gates, PR flow, designated reviewer, dashboards, and deploy command, so it adapts per project instead of hardcoding any. Auto-triggers on "ship ABC-123", "take this ticket end to end", "implement ABC-456 and open a PR".
 
 ### `/cut-release`
 The per-**release** complement to `/ship-ticket` (which is per-**ticket** and stops at a review-ready PR). When you cut a release, this takes the already-merged code to a submittable build: **pre-flight the release gates first** (is the App Store version train open? build slot free? CI green? version bumped?) — the check that kills the "the version train was already released" upload failure — then bump if needed, build the artifact (you allow `eas build` / local builds / `expo export`), generate release notes from the merged tickets, log it, draft the ship update, and **hand back the exact submit command**. Holds the same hard line as `/ship-ticket`: Claude builds to ready, **never runs the submit / OTA / store publish** — you run that. Multi-target and project-agnostic: reads the repo's `CLAUDE.md` for the release target(s), version scheme, build vs submit commands, and gate dashboards. Auto-triggers on "cut a release", "ship a build", "prep the release", "new App Store build". Many `/ship-ticket` runs merge → one `/cut-release` cuts the version.
@@ -270,6 +270,9 @@ Reviews saved as `pr-review-{PR_NUMBER}.md` (one stable file per PR — re-runs 
 `pr-review` vs Anthropic's built-in `review-pr` toolkit:
 
 ![Comparison](comparison.png)
+
+### `/review-cycle`
+The review-**and-fix** loop, where `/pr-review` only reviews. It's a thin conductor over `/pr-review`: it reviews the PR and posts the findings as **one living PR comment**, then fixes the findings it judges worth fixing (critical + solid improvements — it leaves nitpicks/false-positives/out-of-scope with a noted reason, not a blind fix-everything), runs the repo's quality gates, pushes, and **edits that same comment in place** on each pass (strikes through what's fixed, surfaces anything new) — looping until clean. The end state is one PR comment that tracked the review to resolution, plus a short summary of what was fixed vs deliberately left. Reach for it when you want the issues *fixed and pushed*, not just listed. `/ship-ticket` invokes it as its self-review step (after asking whether the PR even needs a cycle). Auto-triggers on "run the review cycle", "review and fix this PR", "do the review loop". Never deploys/publishes — a review cycle fixes and pushes, nothing more.
 
 ## Subagents
 

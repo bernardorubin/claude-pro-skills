@@ -24,6 +24,7 @@ Everything is a **skill** — no `claude-pro-skills:` prefix needed when invokin
 | `/cut-release` | "cut a release", "ship a build", "prep the release", "new App Store build" — per-release: pre-flight the gates (version train / build slot / CI), bump, build, release notes, hand back the submit command |
 | `/investigate` | "investigate X", "look into why Y", "figure out what's going on with Z", pasting an incident/alert — evidence-grounded diagnosis, read-only |
 | `/pr-review` | "review this PR", "review my uncommitted changes", "audit the whole repo" — three modes: PR / local / full-repo |
+| `/review-cycle` | "run the review cycle", "review and fix this PR", "do the review loop" — reviews → posts a living PR comment → fixes what's worth fixing → pushes → updates the comment, until clean (reuses `/pr-review`) |
 | `/pr-description` | "write a PR description", "draft the PR body", "update the PR" |
 | `/write-slack-message` | "draft a slack message", "how should I phrase this for slack" |
 | `/prd-to-jira` | "create tickets from this PRD", "break this down into jira tasks" |
