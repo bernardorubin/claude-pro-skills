@@ -31,8 +31,7 @@ orchestra. Lean on:
 | Stage + commit locally (no push) | `git-ac` |
 | Generate / update the PR description | `pr-description` |
 | Self-review before marking ready | `pr-review` (default — a repo may name a specialized reviewer in its CLAUDE.md) |
-| Log the session for standups/invoicing | `save-session-to-worklog` |
-| Sweep the session into the knowledge vault | `save-to-vault` (or `vault-keeper` inline) |
+| Log the session (worklog + vault) at the end | `wrap-session` (runs `save-session-to-worklog` + `save-to-vault`) |
 | Draft the Slack message | `write-slack-message` |
 
 Don't reimplement what those already do. Invoke them.
@@ -219,16 +218,16 @@ comment and the review doc stay current (it edits the same comment in place).
 ### 6. Log the work — always, at the end of every ticket
 
 Close the loop — the user treats work as unfinished until it's captured, and wants **both**
-of these run at the end of every ticket without being reminded:
+the worklog and the vault written at the end of every ticket without being reminded. Invoke the
+[[wrap-session]] skill — it's the "do both" conductor that runs `save-session-to-worklog` (the
+standup/invoice worklog) then `save-to-vault` (the deliberate end-of-ticket sweep of the whole
+session into the knowledge vault — debugging root causes, integration quirks, ownership facts,
+architectural decisions, cross-linked so they're traceable later). **Don't reimplement the two
+here — `wrap-session` owns that pairing.**
 
-- `save-session-to-worklog` for the standup/invoice worklog.
-- `save-to-vault` for the knowledge vault — sweep the whole session for anything worth
-  keeping cross-session (a debugging root cause, an integration quirk, an ownership fact, an
-  architectural decision) and file it with cross-links so it's traceable later.
-
-Run these even for a one-line fix. The worklog needs every ticket for standups and invoicing,
-and the vault only stays useful if it's fed consistently. (`vault-keeper` fires ambiently
-during the work; `save-to-vault` is the deliberate end-of-ticket sweep — run it regardless.)
+Run it even for a one-line fix. The worklog needs every ticket for standups and invoicing, and
+the vault only stays useful if it's fed consistently. (`vault-keeper` also fires ambiently
+during the work; the end-of-ticket `wrap-session` sweep runs regardless.)
 
 ### 7. Draft the Slack update — then stop
 
