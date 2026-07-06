@@ -1,10 +1,10 @@
 ---
-name: update-skills
+name: update-claude-pro-skills
 description: >-
   Use when the user wants to update the claude-pro-skills plugin (this toolkit)
   to its latest published version. Triggers on "update the claude pro skills",
   "update my skills to the latest", "update the plugin to latest", "pull the
-  latest claude-pro-skills", "update the toolkit", "update-skills", "get the
+  latest claude-pro-skills", "update the toolkit", "update-claude-pro-skills", "get the
   newest skills". Runs the non-interactive `claude plugin` CLI to update the
   marketplace from its GitHub source and reinstall the latest version, reports
   the old → new version, and reminds the user to run /reload-plugins to apply it
@@ -12,7 +12,7 @@ description: >-
   skill-creator) — this only pulls the newest published build of the plugin.
 ---
 
-# Update Skills
+# Update Claude Pro Skills
 
 Pull the latest published version of the **claude-pro-skills** plugin. The user
 has been updating it by hand with the interactive `/plugin` slash commands; this
