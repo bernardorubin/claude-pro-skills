@@ -1,6 +1,6 @@
 # claude-pro-skills
 
-A Claude Code toolkit — **21 skills, no prefix to type**. Code reviews (PR / local / full-repo audit), git workflow, Claude meta tasks, external integrations, and per-project knowledge vaults.
+A Claude Code toolkit — **22 skills, no prefix to type**. Code reviews (PR / local / full-repo audit), git workflow, Claude meta tasks, external integrations, and per-project knowledge vaults.
 
 > **Heads up**: examples throughout use placeholder names — `acme`/`beacon` projects, `acme`/`work` Jira instances, `ACME-####` ticket prefixes. They're illustrative; the plugin works for any project. Two spots hold config you replace with your own: the **Project Map** in `/save-session-to-worklog` and the vault registry under `~/.config/claude-pro-skills/vaults.json`.
 
@@ -53,6 +53,9 @@ Reviews the current session and documents valuable learnings into the right CLAU
 
 ### `/claude-modularize`
 Breaks down a large, monolithic CLAUDE.md into smaller, scoped files distributed across the project's directory structure (component-specific guidelines move next to components, etc.).
+
+### `/handoff`
+Compacts the current conversation into a self-contained handoff document at `~/Desktop/handoff-<slug>.md` so a fresh `claude` session or another agent can pick up exactly where this one left off. Captures the task, current git/PR state (committed vs pushed vs built vs waiting-to-publish), key decisions and ruled-out approaches, gotchas (confirmed vs suspected), concrete next steps, key files/artifacts by reference, and a suggested-skills list. References other artifacts (PRDs, plans, diffs) instead of restating them, and redacts secrets. Optional argument describes what the next session will focus on. Auto-triggers on "write a handoff doc", "hand this off to a new session", "context is getting long, write a handoff".
 
 ### `/update-claude-pro-skills`
 Updates this toolkit to its latest published version without you remembering the `/plugin` incantations. Runs the non-interactive `claude plugin` CLI — `marketplace update claude-pro-skills` then `update claude-pro-skills@claude-pro-skills` (the verb that actually upgrades; `install` no-ops when already installed) — reports the old → new version, and reminds you to run `/reload-plugins` (or restart) to apply it in the current session (it's automatic next session; a skill can't run `/reload-plugins` itself since that's interactive UI). Falls back to handing you the manual slash commands if the CLI isn't available. Just pulls the newest published build — for changing what a skill *does*, that's an edit to its SKILL.md. Auto-triggers on "update the claude pro skills", "update my skills to the latest", "update the toolkit".

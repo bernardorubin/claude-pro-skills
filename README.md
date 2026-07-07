@@ -38,6 +38,7 @@ Everything is a **skill** — no `claude-pro-skills:` prefix needed when invokin
 | `/save-session-to-worklog` | "save this session", "log to worklog", "update my standup notes" |
 | `/standup` | "write my standup", "standup update", "what did I do yesterday for standup" — drafts a Slack standup from the worklog (ground truth, not memory) |
 | `/wrap-session` | "wrap up the session", "save to worklog and vault", "do both" — runs `/save-session-to-worklog` then `/save-to-vault` in one pass |
+| `/handoff` | "write a handoff doc", "hand this off to a new session", "context is getting long" — compacts the conversation into `~/Desktop/handoff-<slug>.md` for a fresh session to pick up |
 | `/claude-learn` | "document what we learned", "update CLAUDE.md with this" |
 | `/claude-modularize` | "split up CLAUDE.md", "modularize CLAUDE.md" |
 | `/update-claude-pro-skills` | "update the claude pro skills", "update my skills to the latest", "update the toolkit" — pulls the newest published version of this plugin via the `claude plugin` CLI |
