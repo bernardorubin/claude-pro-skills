@@ -1,6 +1,6 @@
 # claude-pro-skills
 
-A Claude Code toolkit — **22 skills, no prefix to type**. Code reviews (PR / local / full-repo audit), git workflow, Claude meta tasks, external integrations, and per-project knowledge vaults.
+A Claude Code toolkit — **23 skills, no prefix to type**. Shipping pipelines (new app / ticket / release), code reviews (PR / local / full-repo audit), git workflow, Claude meta tasks, external integrations, and per-project knowledge vaults.
 
 > **Heads up**: examples throughout use placeholder names — `acme`/`beacon` projects, `acme`/`work` Jira instances, `ACME-####` ticket prefixes. They're illustrative; the plugin works for any project. Two spots hold config you replace with your own: the **Project Map** in `/save-session-to-worklog` and the vault registry under `~/.config/claude-pro-skills/vaults.json`.
 
@@ -16,7 +16,10 @@ A Claude Code toolkit — **22 skills, no prefix to type**. Code reviews (PR / l
 
 Every entry below is a **skill** invocable as `/<name>` (no `claude-pro-skills:` prefix). Skills appear in the slash palette and **auto-trigger** when you describe the task in plain English.
 
-## Ticket workflow
+## Shipping pipelines
+
+### `/create-app`
+Zero to **first** release. The one-time gauntlet that `/ship-ticket` and `/cut-release` assume is already done: shape the idea into an approved spec (`brainstorming` → `writing-plans`), build it, then survive the seams between services where first releases actually die. It exists for one repeated failure shape — **a dashboard shows a provider "enabled" while its credentials, allowlists, integrations and native app registrations were never copied from dev**, so the app shows no error, just a blank screen or an empty list, and you debug working code for a day. Carries three loaded checklists: `production-auth.md` (the "nothing was copied" audit, plus the client traps where an unauthenticated query returns `[]` and a returning user looks brand new), `foundations.md` (the day-0 calls that later cost a full review cycle — chiefly that **OTA support must be compiled into the binary before the first submission**), and `store-submission.md` (privacy policy, in-app account deletion, App Privacy answers, DSA trader status, and the silent trap of a version keeping an **older** build attached). Holds the same hard line as the other two: builds freely, **never submits, publishes, or ships an OTA** — and "Add for Review" is always your click. Hands off to `/cut-release` the moment v1 is approved. Auto-triggers on "let's build an app", "new app idea", "take this app to the App Store".
 
 ### `/ship-ticket`
 The full ship pipeline for a Jira ticket (or a described feature/bugfix): understand → clarify (hard stop — no code until questions are answered) → implement on a `--no-track` branch → open the PR → self-review loop (asks first, then runs `/review-cycle`: living PR comment, fix, push, until clean) → address external review → log to worklog + vault → draft a Slack update → hand back the deploy command. It's a **conductor** — it chains your other skills (`jira-cli`, `git-ac`, `pr-description`, `pr-review`, `save-session-to-worklog`, `save-to-vault`, `write-slack-message`) in order and holds two lines: do the work yourself instead of deferring it, and stop before anything that deploys. **Project-agnostic by design** — it reads the repo's `CLAUDE.md` for the base branch, quality gates, PR flow, designated reviewer, dashboards, and deploy command, so it adapts per project instead of hardcoding any. Auto-triggers on "ship ABC-123", "take this ticket end to end", "implement ABC-456 and open a PR".
@@ -79,7 +82,7 @@ Logs the current session's work into a monthly worklog file. **Vault-aware**: if
 ```
 
 ### `/standup`
-The read-back companion to `/save-session-to-worklog`: it drafts a daily-standup Slack message **from the worklog** (the ground truth the worklog skill wrote), so the update reflects what actually got done rather than what you half-remember. Reads the last working day's entries (vault-aware, same source), optionally confirms ticket status with `jira-cli`, pulls "today" from your in-progress tickets or a quick ask, and hands off to `/write-slack-message` for the draft (ticket links, no em dashes). If the worklog has nothing logged for the last working day, it says so instead of inventing a standup. Auto-triggers on "write my standup", "standup update", "what did I do yesterday for standup".
+The read-back companion to `/save-session-to-worklog`: it writes daily-standup notes **from the worklog** (the ground truth the worklog skill wrote) to `~/Desktop/standup-YYYY-MM-DD.pdf`, so the update reflects what actually got done rather than what you half-remember. Reads the last working day's entries (vault-aware, same source), optionally confirms ticket status with `jira-cli`, pulls "today" from your in-progress tickets or a quick ask, and keeps it to 3-6 one-line bullets (Yesterday / Today / Blockers). PDF conversion uses macOS's built-in `cupsfilter` — no extra tooling. If the worklog has nothing logged for the last working day, it says so instead of inventing a standup. Auto-triggers on "write my standup", "standup update", "what did I do yesterday for standup".
 
 ## Knowledge vaults
 

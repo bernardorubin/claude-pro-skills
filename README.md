@@ -20,6 +20,7 @@ Everything is a **skill** — no `claude-pro-skills:` prefix needed when invokin
 
 | Skill | Triggers on |
 |-------|-------------|
+| `/create-app` | "let's build an app", "new app idea", "take this app to the App Store" — zero-to-**first**-release: spec → build → production auth → store readiness → submittable build, stops before submitting |
 | `/ship-ticket` | "ship ABC-123", "take this ticket end to end", "implement ABC-456 and open a PR" — full pipeline: understand → implement → PR → log → Slack, stops before deploy |
 | `/cut-release` | "cut a release", "ship a build", "prep the release", "new App Store build" — per-release: pre-flight the gates (version train / build slot / CI), bump, build, release notes, hand back the submit command |
 | `/investigate` | "investigate X", "look into why Y", "figure out what's going on with Z", pasting an incident/alert — evidence-grounded diagnosis, read-only |
@@ -36,7 +37,7 @@ Everything is a **skill** — no `claude-pro-skills:` prefix needed when invokin
 | `/git-ac` | "commit but don't push", "stage and commit locally" |
 | `/git-pull-reapply` | "pull and reapply", "safe pull", "rebase from remote" |
 | `/save-session-to-worklog` | "save this session", "log to worklog", "update my standup notes" |
-| `/standup` | "write my standup", "standup update", "what did I do yesterday for standup" — drafts a Slack standup from the worklog (ground truth, not memory) |
+| `/standup` | "write my standup", "standup update", "what did I do yesterday for standup" — writes a short standup-notes PDF from the worklog (ground truth, not memory) |
 | `/wrap-session` | "wrap up the session", "save to worklog and vault", "do both" — runs `/save-session-to-worklog` then `/save-to-vault` in one pass |
 | `/handoff` | "write a handoff doc", "hand this off to a new session", "context is getting long" — compacts the conversation into `~/Desktop/handoff-<slug>.md` for a fresh session to pick up |
 | `/claude-learn` | "document what we learned", "update CLAUDE.md with this" |
