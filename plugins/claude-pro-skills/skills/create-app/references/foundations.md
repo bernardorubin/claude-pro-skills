@@ -95,6 +95,43 @@ If a native build breaks in a way that makes no sense, bisect against a bare
 `create-*` app on the same toolchain. If the bare app works, the toolchain is fine and
 the difference is your config.
 
+## A syntax check on native code is not a compile
+
+If the project has its own native module, the tempting local check is the compiler's
+parse-only mode. It proves the file is syntactically valid and nothing else — it never
+resolves the platform SDK, so every wrong type, wrong return value and wrong argument
+label passes clean and then fails twenty minutes into the remote build.
+
+The platform SDK is usually installed locally even when the *simulator runtimes* are
+not, and that is enough to typecheck properly:
+
+- Stub the framework bridge in a scratch file — the module base class, the promise
+  type, the function-registration helpers.
+- Strip the bridge import from a copy of the real source.
+- Typecheck the pair against the **device** SDK, targeting the project's minimum OS.
+
+Errors naming your stubs are noise; errors naming a platform type are real. This turns
+a 20-minute build failure into a few seconds, and it catches the entire class of "this
+call returns void but the code assigns it to a handle" mistakes that parse fine.
+
+Write the exact command into the project's `CLAUDE.md`. Anyone who reads "native code
+cannot be compiled on this machine" will otherwise believe it and ship the parse check.
+
+## A dev client reconnects to the last dev server it saw, not the one you started
+
+Development builds cache the dev-server URL and reconnect to it on launch. On a machine
+running more than one project of the same framework, **app A can silently load app B's
+JavaScript** — the native shell is yours, every screen is not.
+
+The tell is bizarre: crashes naming packages your app does not depend on, or a sign-in
+screen in an app with no accounts. Passing a different port to the run command does not
+prevent it, because the cached URL wins.
+
+When two projects share a machine, build **release** for anything you need to trust —
+store screenshots, a demo, verifying a fix. A release build embeds its bundle and
+cannot be hijacked. Use the dev client only when you actively want hot reload, and
+check which server it attached to before believing what you see.
+
 ## Nothing reachable from a route may throw at import
 
 Router frameworks evaluate route modules to build the route tree. A native module that
