@@ -23,7 +23,7 @@ claude-pro-skills/
 
 - **Marketplace name**: `claude-pro-skills` (set in `.claude-plugin/marketplace.json`)
 - **GitHub identifier**: `bernardorubin/claude-pro-skills` (used in `/plugin marketplace add`)
-- **Single plugin**: `claude-pro-skills` — bundles 22 skills (no commands). The `pr-review` skill itself supports three modes: PR review, local diff review, and full-repo audit.
+- **Single plugin**: `claude-pro-skills` — bundles 23 skills (no commands). The `pr-review` skill itself supports three modes: PR review, local diff review, and full-repo audit.
 - **Install path** (after `/plugin install`): `~/.claude/plugins/cache/claude-pro-skills/claude-pro-skills/<version>/`
 
 When users update the marketplace and reinstall, the harness pulls from `main` of this repo via the `git-subdir` source defined in `marketplace.json`.
