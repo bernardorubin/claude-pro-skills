@@ -25,6 +25,7 @@ Based on the user's request, write a Slack message following these guidelines:
 - Avoid corporate jargon and filler words
 - **Never use em dashes (—) or en dashes (–)** - no human types those in Slack. Use commas, colons, or parentheses instead
 - **Never use bold** - no `*bold*` / `**bold**` anywhere. Bold reads as corporate in casual Slack. Lean on short sentences and natural emphasis instead
+- **Write words out, don't clip them** - "backwards-compatibility" not "back compat", "authentication" not "auth", "configuration" not "config" when you mean the concept. Established short forms that are the normal spoken name are fine (`repo`, `PR`, `API`, `CI`, `env var`). The test is whether you'd say the short form out loud to a coworker, not whether it saves characters. Clipping a word to save three letters reads as sloppy, not brisk
 - **Never use `~` as shorthand for "approximately"** - write "about 40%", "around 40%", or just "40%", not `~40%`. The tilde as an approximation symbol is not a character this user would ever type. Strikethrough markdown (`~text~`) is still fine when strikethrough is actually the intent
 
 ### Formatting Rules (Slack-compatible)
@@ -73,11 +74,20 @@ When including code, format exactly like this (copy-pasteable to Slack):
 code here
 ```
 
-### Length Guidelines
+### Length — short is the default
+
+Two short paragraphs is the target, four is the ceiling, and hitting the ceiling needs a reason. Most messages are shorter than you think they need to be.
+
 - Status update: 1-3 sentences
-- Question: 1-2 sentences + context if needed
-- Sharing work: Brief intro + code block
-- Request: What you need + why (briefly)
+- Question: 1-2 sentences + only the context needed to answer it
+- Sharing work: brief intro + code block
+- Request: what you need + why, briefly
+
+**When a companion doc exists** (a handoff, a PR, a ticket, an `.md` file), the message is a pointer, not a summary. Say what the doc is, plus the two or three things the recipient needs at a glance. The detail lives in the doc.
+
+**One job per message.** Never hedge a decision to fill space: state what you did, or ask the question. "I did X, but it's easy to revert if you'd rather Y" is both at once and reads as wishy-washy. If there's a real open question, ask it plainly, address it to the one person who can settle it, and let the rest stay short.
+
+**Before saving, cut it.** Reread the draft and delete every sentence the recipient doesn't need in order to act. Your reasoning is usually the first thing to go, they can ask. This pass is mandatory and it almost always finds something.
 
 ## Output
 
@@ -88,9 +98,23 @@ code here
 3. After writing the file, tell the user: "Slack message saved to ~/Desktop/slack-message.md"
 4. Do NOT also print the message in the terminal response. The file IS the output.
 
-## Reference Example — what a great ship-update message looks like
+## Reference examples
 
-This is a real ship-update Slack message the user confirmed they were happy with. Pattern-match against it for shape, link formatting, recipient call-outs, and the blocker-but-not-blocking framing.
+### The default shape — short
+
+Most messages look like this. A real review request doing two jobs (a review ask for the engineers, an open question for the analytics owner) in two short paragraphs:
+
+```
+@jordan @sam review when you get a chance: [PR #423](https://github.com/org/repo/pull/423), [ACME-6236](https://yourorg.atlassian.net/browse/ACME-6236). Unattributed checkout traffic moves off `house_brand` to the PRD's fallback: `partner_name` `Unknown`, `program` `Direct`, `line_of_business` `DTC`, `partner_id` null. One handler file plus tests, CI green.
+
+@riley one question: the PRD names `partner_name` but not `partner`, its backwards-compatibility alias. Should `partner` move to `Unknown` too, or stay `house_brand` so your saved reports keep matching? One line either way.
+```
+
+Why it works: the ask is the first four words. The change is one sentence of concrete values, not a paragraph of narration. The open question is asked plainly instead of pre-answered with a hedge, and it goes to the one person who can settle it. Nothing explains reasoning the reader didn't ask for.
+
+### The exception — a long ship update
+
+The message below is longer because it genuinely carries more: five tickets, a GTM change, a verification result, and an access blocker, for three different audiences. That is what earns the length, and most messages don't. **Do not reach for this shape by default.** Pattern-match it for link formatting, recipient call-outs, and blocker-but-not-blocking framing, not for length.
 
 ```
 Late ship update for the SEM tracking epic ([ACME-5855](https://yourorg.atlassian.net/browse/ACME-5855)):
