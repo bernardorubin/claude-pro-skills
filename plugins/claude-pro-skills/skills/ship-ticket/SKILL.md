@@ -104,6 +104,26 @@ already written down. Then split by type:
 - **Feature:** search the codebase for existing patterns and reusable components first (their
   CLAUDE.md pre-implementation planning). Outline the approach briefly before writing code.
 
+**Then claim the ticket.** Before moving on, assign it to the user and move it to In Progress
+with `jira-cli`. Don't ask first and don't leave it for later: an unassigned ticket sitting in
+To Do while a PR is already open is invisible to standup and to anyone looking for its owner.
+Do this even when the user opened the ticket themselves.
+
+```bash
+# assignee: look the accountId up fresh, never hardcode or recall it
+jira-curl <instance> GET /rest/api/3/myself | jq -r '.accountId'
+jira-curl <instance> PUT /rest/api/3/issue/<KEY> -d '{"fields":{"assignee":{"accountId":"<id>"}}}'
+
+# status: transition ids differ per issue type, so always list before posting
+jira-curl <instance> GET /rest/api/3/issue/<KEY>/transitions | jq '.transitions[] | {id, name}'
+jira-curl <instance> POST /rest/api/3/issue/<KEY>/transitions -d '{"transition":{"id":"<id>"}}'
+```
+
+**Re-read the issue afterwards to confirm both landed.** A wrong transition id returns the same
+empty 204 as a correct one, so the status you read back is the only proof. Skip whichever half
+is already correct, and if the ticket is assigned to someone else, flag that instead of
+reassigning it.
+
 ### 2. Clarify — make no assumptions before any code
 
 Investigation is done, but before a single line of implementation: gather **every** open
