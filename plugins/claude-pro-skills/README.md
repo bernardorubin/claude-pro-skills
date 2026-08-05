@@ -1,6 +1,6 @@
 # claude-pro-skills
 
-A Claude Code toolkit — **23 skills, no prefix to type**. Shipping pipelines (new app / ticket / release), code reviews (PR / local / full-repo audit), git workflow, Claude meta tasks, external integrations, and per-project knowledge vaults.
+A Claude Code toolkit — **24 skills, no prefix to type**. Shipping pipelines (new app / ticket / release), code reviews (PR / local / full-repo audit), git workflow, Claude meta tasks, external integrations, and per-project knowledge vaults.
 
 > **Heads up**: examples throughout use placeholder names — `acme`/`beacon` projects, `acme`/`work` Jira instances, `ACME-####` ticket prefixes. They're illustrative; the plugin works for any project. Two spots hold config you replace with your own: the **Project Map** in `/save-session-to-worklog` and the vault registry under `~/.config/claude-pro-skills/vaults.json`.
 
@@ -29,6 +29,9 @@ The per-**release** complement to `/ship-ticket` (which is per-**ticket** and st
 
 ### `/investigate`
 Diagnose a production anomaly, bug report, or "why is X happening" — grounded in real evidence, not a guess. Built for the common shape: paste a Slack thread, get back a reply ready to drop into that same thread. Enforces the investigation discipline — **dashboard metrics → raw logs → code**, make zero assumptions, investigate yourself before asking anyone — and it's strictly **read-only** (surfaces a fix for you to decide; hands off to `/ship-ticket` if you want it built). Reads the repo's `CLAUDE.md` "Dashboards & Data Sources" section to know where the truth lives. Auto-triggers on "investigate X", "look into why Y", "figure out what's going on with Z", or pasting an incident/alert/error.
+
+### `/qa`
+QA a ticket or PR and **prove** it — exercise every acceptance criterion against the real running system, capture evidence per AC, then post a pass / fail / **could not verify** report as a comment on the Jira ticket and/or the GitHub PR with screenshots embedded inline. Enforces three lines: evidence per AC or it isn't a pass, a **baseline before you conclude** (so a pre-existing failure never gets called a regression), and never claiming more than you proved. Opens the source spec when the ticket cites one, because a ticket's paraphrase of a PRD is not the PRD. Reports only — never merges or deploys. Auto-triggers on "QA this ticket", "verify the ACs", "test this and show me it works", "can we QA it ourselves before shipping".
 
 ## Git
 
