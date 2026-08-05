@@ -1,6 +1,6 @@
 ---
 name: qa
-description: Use when the user wants a ticket, PR, or change QA'd and proven — "QA this ticket", "QA HPY-1234", "verify the ACs", "test this and show me it works", "can we QA it ourselves", "check this passes before we ship", "prove it works on staging". Takes acceptance criteria from a Jira ticket (via jira-cli), a PR, or pasted text; exercises each one against the real running system; captures screenshots and payloads as evidence; then posts a per-AC pass/fail/could-not-verify report as a comment on the Jira ticket and/or the GitHub PR with the evidence embedded inline. Enforces the QA discipline: every AC needs evidence or it is not a pass, a baseline before you conclude, and anything you could not prove is stated plainly rather than folded into "passed". NOT for writing the fix (that's ship-ticket) or for diagnosing a production anomaly (that's investigate).
+description: Use when the user wants a ticket, PR, or change QA'd and proven — "QA this ticket", "QA HPY-1234", "verify the ACs", "test this and show me it works", "can we QA it ourselves", "check this passes before we ship", "prove it works on staging". Takes acceptance criteria from a Jira ticket (via jira-cli), a PR, or pasted text; exercises each one against the real running system; captures screenshots and payloads as evidence; then PUBLISHES a per-AC pass/fail/could-not-verify report with the evidence embedded inline — to the Jira ticket, the GitHub PR, both, or a Slack thread, asking the user where when it isn't obvious rather than silently picking. Enforces the QA discipline: every AC needs evidence or it is not a pass, a baseline before you conclude, and anything you could not prove is stated plainly rather than folded into "passed". NOT for writing the fix (that's ship-ticket) or for diagnosing a production anomaly (that's investigate).
 ---
 
 # QA
@@ -128,10 +128,32 @@ Also flag anything you noticed that isn't an AC — a pre-existing bug, a spec t
 contradicts itself, a value that looks wrong. Mark it clearly as out of scope so it's
 visible without muddying the verdict.
 
-### 6. Post it where the team looks
+### 6. Decide where the findings get published — ask if it isn't obvious
 
-Default to the **Jira ticket** and/or the **open PR**. Ask which if it's ambiguous; if the
-user says "comment", they mean a comment, not the description.
+The report is the deliverable, so it has to land somewhere the team will actually see.
+**Never sit on it, and never silently pick a destination.**
+
+Infer only when the answer is unambiguous:
+
+| Situation | Publish to |
+|---|---|
+| You were given a ticket key and nothing else | that Jira ticket |
+| You were given a PR (or QA'd a branch with one open) | that PR |
+| Both exist and both audiences care | both, same content |
+| The user named a place ("comment on the ticket", "put it on the PR") | exactly that |
+
+**In every other case, ask** — and ask with the options spelled out rather than an
+open-ended question. Destinations worth offering:
+
+- **Jira ticket comment** — the default for AC sign-off; QA history lives with the ticket
+- **GitHub PR comment** — best when the PR is the open gate someone reviews before merging
+- **Both** — when reviewers and stakeholders are different people
+- **Slack thread** — when a specific person asked for the QA; draft it with `write-slack-message`
+- **A local doc** — when it's a one-off for the user rather than the team
+- **Nowhere yet** — the user wants to read it in chat first and decide
+
+If the user says **"comment"**, they mean a comment, not the description. Respect that
+literally; overwriting a description when a comment was asked for means a redo.
 
 **Embed the evidence inline** — a reviewer should not have to open attachments one by one.
 
@@ -186,5 +208,6 @@ verdict, name what couldn't be verified, keep it short.
 
 Every AC has a verdict and, for each pass, evidence a reader can see without re-running
 anything. Anything unprovable is called out as unprovable, with the reason. The report is
-posted where the team will find it, with images rendering inline, and confirmed to have
-landed. Nothing was merged or deployed.
+**published** — to the destination the user chose or the one the situation made obvious,
+never left sitting in chat by default — with images rendering inline, and confirmed to
+have landed by reading it back. Nothing was merged or deployed.
