@@ -273,6 +273,9 @@ A review-ready PR with a complete description, review addressed, the session log
 worklog and vault, a drafted Slack update ready to paste, and the deploy command handed back
 for the user to run.
 
+If the ticket needs its acceptance criteria *proven* — evidence per AC, published to the ticket
+or the PR — that's `qa`, run after this. Don't reinvent it here.
+
 **Verify before you call it done.** Run the project's verification — its tests/build/lint (the
 exact command lives in the repo's CLAUDE.md), and for UI actually render it and capture
 screenshots. Static checks alone are not "tested." If you genuinely can't verify in this
