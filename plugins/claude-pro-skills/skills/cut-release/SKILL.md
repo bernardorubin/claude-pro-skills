@@ -109,6 +109,11 @@ This is the crux. Run the checks the repo's CLAUDE.md lists; the common ones:
   that should be in the build, no unmerged work that was supposed to land.
 - **Changeset / release metadata present** if the repo's flow requires it.
 - **Credentials/profile valid** for the target (e.g. `eas` logged in, signing set).
+- **Right environment will actually resolve into the build.** Confirm the build
+  profile maps to the production env vars — read the resolved values, don't trust
+  the profile name. If the repo has a bundler with a persistent cache (Metro,
+  Turbopack, Vite), clear it before a release build; a stale cache silently bakes
+  the previous run's env into the artifact.
 
 Surface the gate results plainly. Fix what blocks the build (bump version, wait on
 CI) before proceeding. If a gate is genuinely blocked and you can't clear it, stop
@@ -126,6 +131,15 @@ Run the **build** command from the repo's CLAUDE.md (`eas build`, local build,
 `expo export`, etc.). This is allowed — it doesn't publish. Watch it to completion;
 if the build itself fails, that's a real finding — surface the actual error, don't
 guess. For a UI release, sanity-check the build renders where you can.
+
+**Then scan the artifact before it goes anywhere.** Grep the built bundle for
+dev/staging markers — `dev`/`test`/`staging` in service URLs, non-production API
+keys and project IDs (Convex, Clerk, Supabase, Stripe `pk_test`/`sk_test`,
+Firebase), and localhost hosts. Compare what's actually in the bundle against the
+production values, and confirm the build number/fingerprint matches what you just
+committed. This is the last point where a wrong-env build is still cheap to throw
+away; after it publishes it is a credential rotation. If anything mismatches, clear
+the bundler cache, rebuild, and re-scan — don't rationalize it.
 
 ### 5. Generate release notes
 
@@ -151,7 +165,8 @@ every publish, always, unless they explicitly tell you to in the moment.
 ## What "done" looks like
 
 The release preconditions verified up front (version train open / bumped, CI green,
-branch clean), the artifact **built**, release notes written, the work logged, a
+branch clean), the artifact **built** and **scanned clean** for dev credentials and
+wrong-env markers, release notes written, the work logged, a
 Slack update drafted, and the **exact submit command handed back** for the user to
 run. Nothing submitted, nothing pushed to users or the store. State the real state:
 what's built, what's logged, and what's waiting on the user to publish — never imply
