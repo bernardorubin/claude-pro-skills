@@ -74,29 +74,36 @@ When including code, format exactly like this (copy-pasteable to Slack):
 code here
 ```
 
-### Length — short is the default
+### Length — hard cap
 
-Two short paragraphs is the target, four is the ceiling, and hitting the ceiling needs a reason. Most messages are shorter than you think they need to be.
+**5 sentences, one paragraph. That is the ceiling, not the target.** Going over needs a stated reason, and you state it to the user after the draft, not inside the message.
 
 - Status update: 1-3 sentences
 - Question: 1-2 sentences + only the context needed to answer it
 - Sharing work: brief intro + code block
 - Request: what you need + why, briefly
 
+Cut on sight, no exceptions:
+- Any sentence explaining WHY you did it, unless someone asked
+- Any recap of what the reader already knows (the thread, the ticket, yesterday's message)
+- Any hedge or softener ("wanted to flag", "just circling back", "let me know if", "happy to")
+- Any detail that lives in a linked PR / ticket / doc. Link it instead
+- Any sentence that would not change what the reader does next
+
 **When a companion doc exists** (a handoff, a PR, a ticket, an `.md` file), the message is a pointer, not a summary. Say what the doc is, plus the two or three things the recipient needs at a glance. The detail lives in the doc.
 
 **One job per message.** Never hedge a decision to fill space: state what you did, or ask the question. "I did X, but it's easy to revert if you'd rather Y" is both at once and reads as wishy-washy. If there's a real open question, ask it plainly, address it to the one person who can settle it, and let the rest stay short.
 
-**Before saving, cut it.** Reread the draft and delete every sentence the recipient doesn't need in order to act. Your reasoning is usually the first thing to go, they can ask. This pass is mandatory and it almost always finds something.
+**Before saving, cut it — mandatory, and it always finds something.** Count the sentences in the draft. Delete until you are at or under 5, starting with the cut-on-sight list. Then read what is left and ask: could the recipient act on this if I deleted one more sentence? If yes, delete it.
+
+After showing the draft, list what you cut in one line so the user can add anything back. Never preemptively keep something because they might want it.
 
 ## Output
 
-**IMPORTANT: Always write the message to a file, never print it to the terminal.**
-
 1. Use the Write tool to save the message to `~/Desktop/slack-message.md`
 2. The file should contain ONLY the Slack message content, no preamble or instructions
-3. After writing the file, tell the user: "Slack message saved to ~/Desktop/slack-message.md"
-4. Do NOT also print the message in the terminal response. The file IS the output.
+3. Paste the full draft inline in the chat reply too, so the user can read and correct it without opening the file. The file is the copy-paste source, the inline draft is the delivery
+4. Below the draft, one line: sentence count, and what you cut
 
 ## Reference examples
 
@@ -112,35 +119,9 @@ Most messages look like this. A real review request doing two jobs (a review ask
 
 Why it works: the ask is the first four words. The change is one sentence of concrete values, not a paragraph of narration. The open question is asked plainly instead of pre-answered with a hedge, and it goes to the one person who can settle it. Nothing explains reasoning the reader didn't ask for.
 
-### The exception — a long ship update
+### When a message genuinely carries more
 
-The message below is longer because it genuinely carries more: five tickets, a GTM change, a verification result, and an access blocker, for three different audiences. That is what earns the length, and most messages don't. **Do not reach for this shape by default.** Pattern-match it for link formatting, recipient call-outs, and blocker-but-not-blocking framing, not for length.
+Multi-ticket ship updates, incident summaries, anything with several audiences: it still leads with one sentence naming the topic, then a numbered list of one line per item, then one `@person` call-out per paragraph where that person has to act. No narration between items, no closing summary. If it runs past 5 sentences of prose, the extra content belongs in a linked doc or ticket, not the message.
 
-```
-Late ship update for the SEM tracking epic ([ACME-5855](https://yourorg.atlassian.net/browse/ACME-5855)):
+There is deliberately no long example here. Long examples get pattern-matched into every draft, which is how messages got verbose in the first place.
 
-Shipped to prod tonight ~11pm:
-
-1. PR #605 (staging > main) bundles all 4 code tickets: [ACME-5856](https://yourorg.atlassian.net/browse/ACME-5856) PII strip, [ACME-5858](https://yourorg.atlassian.net/browse/ACME-5858) GA4 ecommerce funnel events (view_cart, begin_checkout, add_payment_info, purchase), [ACME-5860](https://yourorg.atlassian.net/browse/ACME-5860) cross-domain linker, [ACME-5863](https://yourorg.atlassian.net/browse/ACME-5863) Mixpanel userID identity stitching
-2. GTM container update ([ACME-5876](https://yourorg.atlassian.net/browse/ACME-5876)): swapped Begin Checkout trigger from URL to Custom Event, added GA4 - View Cart + GA4 - Add Payment Info tags, paused 2 dead tags (Add to Cart + Completed Checkout), and fixed a critical Send Ecommerce data flag on GA4 - Purchase that was silently dropping value / transaction_id / items since this morning's ACME-5873 ship
-
-Verified all 4 GA4 events fire correctly on prod with full ecommerce payload (synthetic dataLayer pushes against `staging.example.com`, network tab confirmed 4 hits to GA4 property `G-XXXXXXXXXX` with value=396, currency=USD, items, transaction_id, all returned 204).
-
-All 5 tickets ([ACME-5856](https://yourorg.atlassian.net/browse/ACME-5856), [ACME-5858](https://yourorg.atlassian.net/browse/ACME-5858), [ACME-5860](https://yourorg.atlassian.net/browse/ACME-5860), [ACME-5863](https://yourorg.atlassian.net/browse/ACME-5863), [ACME-5876](https://yourorg.atlassian.net/browse/ACME-5876)) are now in Ready for QA on prod with step-by-step QA instructions added as comments. @jordan whenever you're online, each ticket has its own checklist for what to validate, most can be done via DevTools Network tab / Console (no GA4 admin access required), so they're not blocked on the access issue below.
-
-@sam we're good to go for tomorrow's SEM launch from a tracking perspective. The Purchase tag is now actually sending value, which Google Ads needs for conversion-value bidding.
-
-Still missing for the full GA4 cleanup punchlist ([ACME-5873](https://yourorg.atlassian.net/browse/ACME-5873)): URL query parameter redaction + referral exclusions for stripe.com + partner-pay.com. Both need GA4 Property Admin access. @jordan mentioned earlier she used to have admin but is now restricted to limited access (possibly an SSO account change?), and my you@example.com account lands on the provisioning page with zero access. So we're blocked on whoever can grant Property Admin to one of us. Not blocking for tomorrow's launch since the tracking layer is live, but worth resolving soon so Jordan can finish the cleanup and we don't bottleneck on access next time.
-```
-
-What this example gets right (pattern-match to these qualities):
-
-- **Lead sentence frames the topic + links the epic** so the recipient has context immediately.
-- **Every Jira ticket reference is a `[KEY](url)` markdown link** — every occurrence, not just the first mention. Even when the same ticket is listed twice in different sentences, both are linked. See the Links section above for the format rule.
-- **Concrete numbers in the verification line** (`value=396`, `204 returned`, `G-XXXXXXXXXX`) — proves the work was actually verified, not just "tested it, lgtm".
-- **Names the right recipient at the right paragraph** with `@jordan` for QA and `@sam` for the go/no-go decision. Don't @-mention everyone everywhere; address each person at the point where they specifically need to act.
-- **Closing blocker paragraph honest about what's NOT done** but frames it as "not blocking [the imminent thing], worth resolving soon for [longer-term reason]." Avoids both over-promising and over-alarming.
-- **No bold, no em dashes, no headers.** Just paragraphs and a numbered list. Conversational tone throughout.
-- **Uses contractions** ("we're", "doesn't") naturally.
-
-Don't slavishly copy the format — match the shape. A bug report would lead with the symptom + impact instead of "Shipped". A question would lead with the ask. The point is the qualities listed above: tight lead, every link properly formatted, concrete proof, recipient-specific call-outs, honest blocker framing.
