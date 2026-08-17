@@ -16,7 +16,7 @@ Like `ship-ticket` and `investigate`, this is a conductor. Lean on what you have
 |------|----------------------|
 | Read the ticket, its ACs, comments, links | `jira-cli` |
 | Prior context — flows, test data, known env quirks | `vault-keeper` |
-| Drive the actual UI | Chrome MCP (or the repo's Playwright setup) |
+| Exercise the system | whatever interface the AC lives behind — API/CLI with the project's own keys, a DB or analytics query, or the UI via Chrome MCP / the repo's Playwright setup |
 | Dashboards, logs, deploys | the repo's CLAUDE.md "Dashboards & Data Sources", Vercel MCP, AWS CLI |
 | Post the QA summary to Slack | `write-slack-message` |
 
@@ -25,8 +25,10 @@ Don't reimplement those. Invoke them.
 ## Read the repo's CLAUDE.md first
 
 It tells you the things QA actually needs: **which environment to test on and its real
-hostname**, test accounts and partner slugs, the quality gates, and which dashboard owns
-which signal. If the project has a vault (`vault-keeper`), read it too — test data,
+hostname**, test accounts and partner slugs, **how the project expects to be exercised**
+(API base URLs, service keys / env var names, seed or curl scripts, a test CLI), the
+quality gates, and which dashboard owns which signal. If the project has a vault
+(`vault-keeper`), read it too — test data,
 known environment limitations, and past QA traps are usually already written down, and
 rediscovering them is wasted time.
 
@@ -102,12 +104,27 @@ Capture the "before" before you touch anything:
 
 ### 4. Exercise each AC and capture evidence as you go
 
-Drive the real system. Use the real flow a user takes, not a shortcut that skips the code
-path under test.
+Drive the real system through **the interface the AC actually lives behind**, and use the
+real flow, not a shortcut that skips the code path under test. Match the project's own
+expectation — if it ships an API key, a service token, a seed script, or a test CLI, use
+that. A browser is one option among several, not the default:
+
+| The AC is about | Exercise it via |
+|---|---|
+| An endpoint's response, a webhook, a job, a migration | the API/CLI directly, with the project's keys |
+| Data landing somewhere — events, rows, files | the query or dashboard that owns it |
+| What a user sees or can do — rendering, validation, navigation | the UI (Chrome MCP or the repo's Playwright setup) |
+
+Reach for the browser when the AC is about the UI, or when the UI is the only path that
+triggers the code (a client-side guard, a signed session the API won't hand you). Driving
+a headless flow through a browser when a keyed API call proves the same thing is slower,
+flakier, and no more convincing.
 
 Capture evidence **per AC, at the moment it passes** — going back for it later means
-re-running everything. Screenshots go to `~/Desktop/<TICKET>-screenshots/` with names that
-say what they prove (`3-no-partner-event-shows-nulls.png`, not `screenshot3.png`).
+re-running everything. Take it in whatever form the interface produces: a response body,
+a log line, a query result, a screenshot. Save it under `~/Desktop/<TICKET>-screenshots/`
+with names that say what they prove (`3-no-partner-event-shows-nulls.png`, not
+`screenshot3.png`); for non-UI evidence, a `.json`/`.txt` next to them beats a paraphrase.
 
 Prefer evidence that is hard to argue with:
 - The **deployed artifact**, not the source you wrote. Compiled config, the live payload,
@@ -156,6 +173,8 @@ If the user says **"comment"**, they mean a comment, not the description. Respec
 literally; overwriting a description when a comment was asked for means a redo.
 
 **Embed the evidence inline** — a reviewer should not have to open attachments one by one.
+Non-image evidence (responses, log lines, query output) goes in a code block in the same
+comment; only screenshots need the upload dance below.
 
 **Jira** (inline images need the media-services UUID; the numeric attachment id does not
 work):
