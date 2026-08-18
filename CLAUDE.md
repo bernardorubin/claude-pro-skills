@@ -71,7 +71,7 @@ The agent becomes invocable via the Task tool as `subagent_type: claude-pro-skil
 ## Conventions
 
 - **Naming**: keep skill names short and descriptive. They're invoked as `/<name>` with no prefix.
-- **No AI co-author lines** in commit messages (the user handles git operations themselves; never run `git commit` without being asked).
+- **No AI co-author lines** in commit messages, PR titles/bodies, or any other artifact. Normal commit-and-push defaults apply here; pushing to `main` is what publishes (see Publishing flow), so that push is the step worth being deliberate about, not the commit.
 - **README is the source of truth** for what each skill does — keep it in sync when behavior changes.
 - **Single source of truth**: skill files live ONLY here. The user's `~/.claude/commands/` and `~/.claude/skills/` should not contain copies of anything bundled in `claude-pro-skills` (avoids drift).
 - **Config paths**: shared config lives under `~/.config/claude-pro-skills/` (e.g., `vaults.json` for the vault registry). Env-var overrides are prefixed `CLAUDE_PRO_SKILLS_*` (e.g., `$CLAUDE_PRO_SKILLS_VAULT_USER`).
