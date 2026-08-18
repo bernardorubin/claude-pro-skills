@@ -1,6 +1,6 @@
 ---
 name: write-slack-message
-description: Use when the user asks to draft, write, format, or compose a Slack message. Triggers on phrases like "write a slack message", "draft a slack post", "how should I phrase this for slack", "send this on slack", or any request to format text for Slack. Produces a message saved to ~/Desktop/slack-message.md ready to copy-paste, with business-casual tone and Slack-compatible formatting.
+description: Use when the user asks to draft, write, format, or compose a Slack message. Triggers on phrases like "write a slack message", "draft a slack post", "how should I phrase this for slack", "send this on slack", or any request to format text for Slack. Produces a message saved to ~/Desktop/slack-message-for-<recipient>.md ready to copy-paste, with business-casual tone and Slack-compatible formatting.
 ---
 
 # Write Slack Message
@@ -76,7 +76,7 @@ code here
 
 ### Length — hard cap
 
-**5 sentences, one paragraph. That is the ceiling, not the target.** Going over needs a stated reason, and you state it to the user after the draft, not inside the message.
+**2 to 3 sentences is the target. 5 is the hard ceiling, not the goal.** Most messages are one short paragraph. Going over 5 needs a stated reason, and you state it to the user after the draft, not inside the message.
 
 - Status update: 1-3 sentences
 - Question: 1-2 sentences + only the context needed to answer it
@@ -96,14 +96,14 @@ Cut on sight, no exceptions:
 
 **Before saving, cut it — mandatory, and it always finds something.** Count the sentences in the draft. Delete until you are at or under 5, starting with the cut-on-sight list. Then read what is left and ask: could the recipient act on this if I deleted one more sentence? If yes, delete it.
 
-After showing the draft, list what you cut in one line so the user can add anything back. Never preemptively keep something because they might want it.
+After saving, list what you cut in one line so the user can add anything back. Never preemptively keep something because they might want it.
 
 ## Output
 
-1. Use the Write tool to save the message to `~/Desktop/slack-message.md`
-2. The file should contain ONLY the Slack message content, no preamble or instructions
-3. Paste the full draft inline in the chat reply too, so the user can read and correct it without opening the file. The file is the copy-paste source, the inline draft is the delivery
-4. Below the draft, one line: sentence count, and what you cut
+1. Use the Write tool to save the message to `~/Desktop/slack-message-for-<recipient>.md`. Keep `<recipient>` simple: the person's first name, lowercase (`slack-message-for-dmytro.md`), or `everyone` for a channel or broadcast post (`slack-message-for-everyone.md`). Several people named? Use the one who has to act. No dates, no ticket keys, no full sentences in the filename.
+2. The file should contain ONLY the Slack message content, no preamble or instructions.
+3. **The file IS the delivery. Never paste the draft into the chat reply.** Say it's saved, give the path, stop. Pasting it inline makes the user read the same message twice.
+4. Below that, one line: sentence count, and what you cut.
 
 ## Reference examples
 

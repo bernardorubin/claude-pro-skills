@@ -9,7 +9,7 @@ Compact the current conversation into a self-contained handoff document saved to
 
 ## Where it saves
 
-Use the Write tool to save to `~/Desktop/handoff-<slug>.md`, where `<slug>` is a short kebab-case id for the work — the Jira ticket key if there is one, else the topic (e.g. `handoff-HPY-1234.md`, `handoff-invoice-refactor.md`). After writing, tell the user the path. **The file IS the output** — don't also dump the whole doc into the terminal.
+Use the Write tool to save to `~/Desktop/handoff-<slug>.md`. Keep `<slug>` simple: the Jira ticket key if there is one, else two or three lowercase kebab-case words for the topic (e.g. `handoff-HPY-1234.md`, `handoff-eve-refunds.md`). No dates, no timestamps, no full sentences. After writing, tell the user the path. **The file IS the output** — don't also dump the whole doc into the terminal.
 
 ## If an argument was passed
 

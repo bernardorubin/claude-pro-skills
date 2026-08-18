@@ -149,7 +149,7 @@ Generates a GitHub-ready PR description from the diff and updates the PR directl
 ```
 
 ### `/write-slack-message`
-Drafts a Slack message ready to copy-paste, with proper formatting and a business-casual tone. Enforces a hard **5-sentence ceiling** with a mandatory cut pass, a cut-on-sight list (reasoning, recaps, hedges, detail that belongs in the linked doc), and reports what it cut so you can add anything back. Shows the draft inline and saves it to `~/Desktop/slack-message.md`. Auto-triggers on phrases like "draft a slack message", "how should I phrase this for slack", "write up a slack post".
+Drafts a Slack message ready to copy-paste, with proper formatting and a business-casual tone. Targets **2 to 3 sentences** with a hard 5-sentence ceiling, a mandatory cut pass, a cut-on-sight list (reasoning, recaps, hedges, detail that belongs in the linked doc), and reports what it cut so you can add anything back. Saves to `~/Desktop/slack-message-for-<recipient>.md` (e.g. `slack-message-for-dmytro.md`, `slack-message-for-everyone.md`) and never pastes the draft into the chat. Auto-triggers on phrases like "draft a slack message", "how should I phrase this for slack", "write up a slack post".
 
 ## Jira
 
