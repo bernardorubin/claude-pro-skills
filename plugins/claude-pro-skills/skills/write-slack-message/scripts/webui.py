@@ -5,9 +5,12 @@ A static file:// page cannot poll (fetch is CORS-blocked there) and cannot
 delete, so this is a real server -- but a stdlib one, so there is nothing to
 install beyond the python3 macOS already ships.
 
-Binds 127.0.0.1 on a random free port behind a random path token, because the
-drafts are work messages and any local process can reach localhost. Exits on its
-own once the page stops polling, so closing the tab cleans it up.
+Binds 127.0.0.1 on a fixed port at a memorable path. There is deliberately no
+secret in the URL: a local process that wanted the drafts would just read
+~/Desktop/slack-drafts/*.md directly, so a path token protects nothing there.
+The real exposure is a webpage poking at localhost, and that is what the Origin
+and Host checks below stop. Exits once the page stops polling, so closing the
+tab cleans it up.
 
 Markdown rendering is imported from mdclip, not reimplemented -- one converter,
 one set of rules.
@@ -18,7 +21,6 @@ from __future__ import annotations
 import http.server
 import json
 import os
-import secrets
 import socketserver
 import sys
 import threading
@@ -37,28 +39,8 @@ IDLE_EXIT_SECONDS = 600
 # unwritable token file falls back to a per-process one. Worst case is exactly
 # the old behaviour -- a working server at an unpredictable URL.
 PREFERRED_PORT = int(os.environ.get("SLACK_DRAFTS_PORT", "8473"))
-TOKEN_FILE = Path.home() / ".config" / "claude-pro-skills" / "slackmsg-token"
+MOUNT = "slack-drafts"
 last_seen = time.time()
-
-
-def load_token() -> str:
-    try:
-        existing = TOKEN_FILE.read_text(encoding="utf-8").strip()
-        if existing:
-            return existing
-    except OSError:
-        pass
-    fresh = secrets.token_urlsafe(16)
-    try:
-        TOKEN_FILE.parent.mkdir(parents=True, exist_ok=True)
-        TOKEN_FILE.write_text(fresh, encoding="utf-8")
-        TOKEN_FILE.chmod(0o600)
-    except OSError:
-        pass  # ephemeral token: the URL just is not bookmarkable this run
-    return fresh
-
-
-TOKEN = load_token()
 
 
 def drafts_dir() -> Path:
@@ -367,10 +349,29 @@ document.getElementById('list').focus();
 
 
 class Handler(http.server.BaseHTTPRequestHandler):
+    def _allowed_hosts(self) -> set[str]:
+        port = self.server.server_address[1]
+        return {f"127.0.0.1:{port}", f"localhost:{port}", f"[::1]:{port}"}
+
     def _guard(self) -> str | None:
+        """Route, or None after sending an error.
+
+        Two header checks, both aimed at a webpage rather than a local process.
+        Host stops DNS rebinding (an attacker name resolved to 127.0.0.1 arrives
+        with its own Host). Origin stops a cross-site POST -- a no-cors form post
+        needs no preflight, so without this a page you merely visited could
+        silently overwrite your clipboard through /api/copy.
+        """
         global last_seen
+        if self.headers.get("Host", "") not in self._allowed_hosts():
+            self.send_error(403)
+            return None
+        origin = self.headers.get("Origin")
+        if origin and urllib.parse.urlparse(origin).netloc not in self._allowed_hosts():
+            self.send_error(403)
+            return None
         parts = urllib.parse.urlparse(self.path).path.strip("/").split("/", 1)
-        if not parts or parts[0] != TOKEN:
+        if not parts or parts[0] != MOUNT:
             self.send_error(404)
             return None
         last_seen = time.time()
@@ -457,7 +458,7 @@ def bind() -> Server:
 
 def main() -> None:
     server = bind()
-    url = f"http://127.0.0.1:{server.server_address[1]}/{TOKEN}/"
+    url = f"http://127.0.0.1:{server.server_address[1]}/{MOUNT}/"
     threading.Thread(target=idle_watch, args=(server,), daemon=True).start()
     print(url, flush=True)
     if "--no-open" not in sys.argv:
