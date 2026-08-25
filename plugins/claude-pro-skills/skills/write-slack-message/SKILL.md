@@ -185,10 +185,11 @@ message "here", "in the chat", or "pasted", switch delivery:
   trip and how it shows up in the browser UI when they are back at a desk.
 - **Flatten it for a plain-text paste**: run `<this skill's directory>/scripts/mdclip.py
   --plain <the file>` and use ITS output. A phone clipboard carries no HTML
-  flavor, so `[label](url)` would paste as literal markup; `--plain` collapses
-  each link to its bare URL (Slack auto-links those) and drops fence and
-  blockquote markers, while KEEPING backticks and list markers, which Slack does
-  convert from a plain paste.
+  flavor and Slack's mobile composer converts NOTHING from a plain paste
+  (verified on iOS 2026-08-24), so `--plain` strips every mark that would
+  otherwise show literally: links collapse to the bare URL, backticks and fence
+  and blockquote markers go. Bare URLs are not a downgrade here -- mobile Slack
+  unfurls a Jira link into a titled card, which beats a markdown link.
 - **Then output that flattened text in a fenced code block** -- the block is what
   gives them one-press copy in the Claude app. It holds the message and nothing
   else: no commentary inside it, no preamble around it.

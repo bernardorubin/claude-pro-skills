@@ -50,8 +50,9 @@ def to_plain(md: str) -> str:
     `[label](url)` would land as literal markup. Links collapse to the bare URL
     (Slack auto-links those), fence markers and blockquote markers go.
 
-    Backticks and list markers are KEPT: Slack converts those from a plain-text
-    paste, and backticked identifiers are a deliberate house rule.
+    Backticks go too. Verified on iOS Slack 2026-08-24: a plain-text paste does
+    NOT convert them, so `foo` arrives with the marks visible. List markers stay
+    -- a leading "- " reads fine either way.
     """
     out: list[str] = []
     in_code = False
@@ -64,9 +65,11 @@ def to_plain(md: str) -> str:
             continue
         line = re.sub(r"^(\s*)>\s?", r"\1", raw)
         # Only outside code spans, so `[x](url)` inside backticks stays literal.
+        # Odd indexes were code spans: keep the text, drop the marks, and leave
+        # the content verbatim (a link written inside one was meant to be literal).
         parts = CODE_SPAN.split(line)
         line = "".join(
-            f"`{part}`" if i % 2 else LINK.sub(lambda m: m.group(2), part)
+            part if i % 2 else LINK.sub(lambda m: m.group(2), part)
             for i, part in enumerate(parts)
         )
         out.append(line)
@@ -172,9 +175,10 @@ def selftest() -> None:
     assert "https://x.test" in flat and "[HPY-1]" not in flat, f"link not flattened: {flat!r}"
     assert "quoted" in flat and ">" not in flat, f"blockquote marker kept: {flat!r}"
     assert "x=1" in flat and "```" not in flat, f"fence marker kept: {flat!r}"
-    assert "`tok`" in flat, f"backticks dropped: {flat!r}"
+    assert "`" not in flat, f"backticks kept: {flat!r}"
+    assert "tok" in flat, f"code-span text lost: {flat!r}"
     assert "- a " in flat, f"list marker dropped: {flat!r}"
-    assert to_plain("`[x](https://y.test)`").strip() == "`[x](https://y.test)`", "rewrote inside code span"
+    assert to_plain("`[x](https://y.test)`").strip() == "[x](https://y.test)", "rewrote inside code span"
     print("ok")
 
 
