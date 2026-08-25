@@ -195,10 +195,23 @@ const TOKEN=location.pathname.split('/')[1];
 const PHOSPHORS=[['amber','#ffb000'],['green','#3bdc61'],['ice','#7fd8ff'],['white','#dfe2e0']];
 let drafts=[],sel=null,actIdx=0,modalIdx=0,modalFor=null;
 
+// A prompt caret, drawn rather than fetched so the page stays self-contained,
+// and rebuilt on a phosphor change so the tab icon matches the chosen colour.
+function setFavicon(hex){
+  const svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">'
+    +'<rect width="16" height="16" fill="#0a0b09"/>'
+    +'<path d="M3.5 4.5 L7 8 L3.5 11.5" fill="none" stroke="'+hex
+    +'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
+    +'<rect x="8.5" y="10" width="4.5" height="2" fill="'+hex+'"/></svg>';
+  let l=document.querySelector('link[rel=icon]');
+  if(!l){l=document.createElement('link');l.rel='icon';document.head.appendChild(l)}
+  l.href='data:image/svg+xml,'+encodeURIComponent(svg);
+}
 function setPhosphor(hex){
   document.documentElement.style.setProperty('--p',hex);
   try{localStorage.setItem('phosphor',hex)}catch(e){}
   [...document.querySelectorAll('.sw')].forEach(b=>b.setAttribute('aria-pressed',b.dataset.hex===hex));
+  setFavicon(hex);
 }
 function initPhosphors(){
   let saved='#ffb000';
