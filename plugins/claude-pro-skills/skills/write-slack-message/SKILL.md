@@ -174,6 +174,26 @@ Never preemptively keep something because they might want it.
    same opt-in governs both.
 6. Below that, one line naming what you cut, so they can add it back.
 
+### Phone delivery -- the one time the draft goes in the chat
+
+The file-is-the-delivery rule assumes the user can reach their Desktop and a
+localhost URL. On a phone they can reach neither. So when they say they are on
+their phone, on the road, travelling, away from their laptop, or ask for the
+message "here", "in the chat", or "pasted", switch delivery:
+
+- **Still write the file**, exactly as above. It is how the draft survives the
+  trip and how it shows up in the browser UI when they are back at a desk.
+- **Then output the message in a fenced code block** -- that is what gives them
+  one-press copy in the Claude app. The block holds the message and nothing
+  else: no commentary inside it, no surrounding preamble.
+- **Skip the browser UI URL** (a localhost address is unreachable from a phone)
+  and skip the nudge.
+
+Say once, in a clause, that a phone paste carries plain text only, so
+`[label](url)` can land in Slack as literal markup instead of a link. Do NOT
+silently rewrite links to bare URLs to dodge that -- offer it and let them
+choose, because bare URLs are a rule they set deliberately.
+
 ### Browsing past drafts (optional)
 
 `scripts/slackmsg --web` opens the browser UI: drafts on the left, the selected
