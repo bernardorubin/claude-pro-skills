@@ -43,6 +43,36 @@ def inline(text: str) -> str:
     return "".join(out)
 
 
+def to_plain(md: str) -> str:
+    """Markdown stripped to what pastes cleanly as PLAIN text into Slack.
+
+    For phone delivery, where the clipboard carries no HTML flavor and
+    `[label](url)` would land as literal markup. Links collapse to the bare URL
+    (Slack auto-links those), fence markers and blockquote markers go.
+
+    Backticks and list markers are KEPT: Slack converts those from a plain-text
+    paste, and backticked identifiers are a deliberate house rule.
+    """
+    out: list[str] = []
+    in_code = False
+    for raw in md.splitlines():
+        if raw.lstrip().startswith("```"):
+            in_code = not in_code
+            continue
+        if in_code:
+            out.append(raw)
+            continue
+        line = re.sub(r"^(\s*)>\s?", r"\1", raw)
+        # Only outside code spans, so `[x](url)` inside backticks stays literal.
+        parts = CODE_SPAN.split(line)
+        line = "".join(
+            f"`{part}`" if i % 2 else LINK.sub(lambda m: m.group(2), part)
+            for i, part in enumerate(parts)
+        )
+        out.append(line)
+    return "\n".join(out).strip() + "\n"
+
+
 def to_html(md: str) -> str:
     out: list[str] = []
     list_tag: str | None = None
@@ -137,11 +167,21 @@ def selftest() -> None:
         assert expect in got, f"missing {expect!r} in {got!r}"
     # a URL inside a code span must not become a link
     assert "<a" not in to_html("`[x](https://y.test)`"), "linked inside code span"
+
+    flat = to_plain("see [HPY-1](https://x.test) now\n\n> quoted\n\n```\nx=1\n```\n- a `tok`")
+    assert "https://x.test" in flat and "[HPY-1]" not in flat, f"link not flattened: {flat!r}"
+    assert "quoted" in flat and ">" not in flat, f"blockquote marker kept: {flat!r}"
+    assert "x=1" in flat and "```" not in flat, f"fence marker kept: {flat!r}"
+    assert "`tok`" in flat, f"backticks dropped: {flat!r}"
+    assert "- a " in flat, f"list marker dropped: {flat!r}"
+    assert to_plain("`[x](https://y.test)`").strip() == "`[x](https://y.test)`", "rewrote inside code span"
     print("ok")
 
 
 if __name__ == "__main__":
     if sys.argv[1:2] == ["--selftest"]:
         selftest()
+    elif sys.argv[1:2] == ["--plain"]:
+        sys.stdout.write(to_plain(Path(sys.argv[2]).read_text(encoding="utf-8")))
     else:
         print(copy(Path(sys.argv[1]).read_text(encoding="utf-8")))

@@ -183,16 +183,22 @@ message "here", "in the chat", or "pasted", switch delivery:
 
 - **Still write the file**, exactly as above. It is how the draft survives the
   trip and how it shows up in the browser UI when they are back at a desk.
-- **Then output the message in a fenced code block** -- that is what gives them
-  one-press copy in the Claude app. The block holds the message and nothing
-  else: no commentary inside it, no surrounding preamble.
+- **Flatten it for a plain-text paste**: run `<this skill's directory>/scripts/mdclip.py
+  --plain <the file>` and use ITS output. A phone clipboard carries no HTML
+  flavor, so `[label](url)` would paste as literal markup; `--plain` collapses
+  each link to its bare URL (Slack auto-links those) and drops fence and
+  blockquote markers, while KEEPING backticks and list markers, which Slack does
+  convert from a plain paste.
+- **Then output that flattened text in a fenced code block** -- the block is what
+  gives them one-press copy in the Claude app. It holds the message and nothing
+  else: no commentary inside it, no preamble around it.
 - **Skip the browser UI URL** (a localhost address is unreachable from a phone)
   and skip the nudge.
 
-Say once, in a clause, that a phone paste carries plain text only, so
-`[label](url)` can land in Slack as literal markup instead of a link. Do NOT
-silently rewrite links to bare URLs to dodge that -- offer it and let them
-choose, because bare URLs are a rule they set deliberately.
+The file on disk keeps its markdown links -- only the phone copy is flattened,
+so the same draft still pastes rich from the desktop later. Bare URLs are a
+deliberate downgrade for this one path, not a change to the house rule; do not
+carry them into a normal draft.
 
 ### Browsing past drafts (optional)
 
