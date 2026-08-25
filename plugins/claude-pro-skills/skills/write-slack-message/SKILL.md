@@ -74,36 +74,125 @@ When including code, format exactly like this (copy-pasteable to Slack):
 code here
 ```
 
-### Length — hard cap
+### Length — content sets it, not a counter
 
-**2 to 3 sentences is the target. 5 is the hard ceiling, not the goal.** Most messages are one short paragraph. Going over 5 needs a stated reason, and you state it to the user after the draft, not inside the message.
+No sentence limit. An incident summary is longer than a question; padding the
+question is the same mistake as truncating the summary. Test each sentence, not
+the message:
 
-- Status update: 1-3 sentences
-- Question: 1-2 sentences + only the context needed to answer it
-- Sharing work: brief intro + code block
-- Request: what you need + why, briefly
+**Would deleting this sentence change what the reader does next?** No → delete it.
 
 Cut on sight, no exceptions:
 - Any sentence explaining WHY you did it, unless someone asked
 - Any recap of what the reader already knows (the thread, the ticket, yesterday's message)
 - Any hedge or softener ("wanted to flag", "just circling back", "let me know if", "happy to")
 - Any detail that lives in a linked PR / ticket / doc. Link it instead
-- Any sentence that would not change what the reader does next
+- Any supporting evidence for a question. Ask the question; hold the evidence for the reply
 
-**When a companion doc exists** (a handoff, a PR, a ticket, an `.md` file), the message is a pointer, not a summary. Say what the doc is, plus the two or three things the recipient needs at a glance. The detail lives in the doc.
+**When a companion doc exists** (a handoff, a PR, a ticket, an `.md` file), the
+message is a pointer, not a summary. Say what the doc is, plus the two or three
+things the recipient needs at a glance. The detail lives in the doc.
 
-**One job per message.** Never hedge a decision to fill space: state what you did, or ask the question. "I did X, but it's easy to revert if you'd rather Y" is both at once and reads as wishy-washy. If there's a real open question, ask it plainly, address it to the one person who can settle it, and let the rest stay short.
+**One job per message.** Never hedge a decision to fill space: state what you did,
+or ask the question. "I did X, but it's easy to revert if you'd rather Y" is both
+at once and reads as wishy-washy. If there's a real open question, ask it plainly,
+address it to the one person who can settle it, and let the rest stay short.
 
-**Before saving, cut it — mandatory, and it always finds something.** Count the sentences in the draft. Delete until you are at or under 5, starting with the cut-on-sight list. Then read what is left and ask: could the recipient act on this if I deleted one more sentence? If yes, delete it.
+### Two registers: tiny (default) and full (on request)
 
-After saving, list what you cut in one line so the user can add anything back. Never preemptively keep something because they might want it.
+**Tiny is the default.** The ask or the answer, nothing else. No context, no
+rationale, no recommendation, no evidence — even when you have all of it and it is
+good. A question message is the question. A status message is the status. A
+question needs only enough for the reader to know which question it is; the
+evidence behind it belongs in your reply to them, not in the ask.
+
+**Full is opt-in.** Switch registers only when the user asks for it in their own
+words — "normal", "full", "longer", "detailed", "the long version", "with
+context", "explain the why" — or when the message is inherently multi-item (a
+multi-ticket ship update, an incident writeup, a release summary).
+
+Full is still concise. It is not tiny plus prose. It is: one sentence naming the
+topic, then one line per item, then one @person call-out per paragraph where that
+person has to act. No narration between items, no closing summary. Every
+cut-on-sight rule above still applies — full buys you more items, not more words
+per item.
+
+Past that, it needs a linked doc, not more sentences.
+
+**Before saving, cut it — mandatory, and it always finds something.** Read the
+draft and ask, per sentence, whether deleting it changes what the reader does
+next. Delete every sentence where the answer is no.
+
+**After saving, list in one line what you cut**, so the user can add anything back
+without a redraft. This matters more under the tiny default than it did before:
+tiny cuts real content on purpose, and that line is the only way it comes back.
+Never preemptively keep something because they might want it.
 
 ## Output
 
-1. Use the Write tool to save the message to `~/Desktop/slack-message-for-<recipient>.md`. Keep `<recipient>` simple: the person's first name, lowercase (`slack-message-for-dmytro.md`), or `everyone` for a channel or broadcast post (`slack-message-for-everyone.md`). Several people named? Use the one who has to act. No dates, no ticket keys, no full sentences in the filename.
-2. The file should contain ONLY the Slack message content, no preamble or instructions.
-3. **The file IS the delivery. Never paste the draft into the chat reply.** Say it's saved, give the path, stop. Pasting it inline makes the user read the same message twice.
-4. Below that, one line: sentence count, and what you cut.
+1. **Where to save — the folder decides.** Check once with `test -d`, then:
+   - `SLACK_DRAFTS_DIR` is set, or `~/Desktop/slack-drafts/` exists → save to
+     `<dir>/<recipient>-<MMDD-HHMM>.md`. Drafts accumulate, so rewriting a
+     message never destroys the version it replaces.
+   - Neither → save to `~/Desktop/slack-message-for-<recipient>.md`, overwriting
+     any previous draft for that person. This is the default and needs no setup.
+
+   **Never create the folder yourself.** Its existence IS the user's opt-in;
+   creating it silently changes where every future draft lands.
+
+   **In default mode, offer the browser UI once.** Run `<this skill's
+   directory>/scripts/slackmsg --nudge`. It prints one line the first time and
+   nothing ever again (and nothing at all once the folder exists) -- so pass
+   whatever it prints straight through to the user, and say nothing when it is
+   silent. Never repeat the invitation yourself, and never create the folder to
+   act on it: accepting is the user's move.
+
+   **In default mode, say so when you overwrite.** If the target file already
+   exists you are about to destroy a previous draft, so add one clause to the
+   report line: what it replaced, and that `mkdir ~/Desktop/slack-drafts` keeps
+   both from here on. This is the only place that hint appears — no prompt, no
+   onboarding, no state tracking. It fires when the overwrite actually costs
+   something, stays silent on a first draft for that person, and never fires
+   again once the folder exists.
+2. **`<recipient>`**: first name, lowercase (`dmytro`), or `everyone` for a
+   channel or broadcast post. Several people named? Use the one who has to act.
+   No dates, no ticket keys, no full sentences in the filename.
+3. The file contains ONLY the Slack message, no preamble or instructions.
+4. **The file IS the delivery. Never paste the draft into the chat reply.** Say
+   it's saved, give the path, stop. Pasting it inline makes the user read the
+   same message twice.
+5. **Start the browser UI and hand back its URL** -- folder mode only. Run
+   `<this skill's directory>/scripts/slackmsg --serve`. It is idempotent: it
+   reuses a running server and starts one only when the recorded URL stops
+   answering, printing the URL either way, and it does NOT steal focus with a
+   browser tab. Report that URL next to the file path so the user can read,
+   copy and delete the draft without opening a terminal. If it fails, say so
+   in a clause and move on -- the file is still the delivery.
+
+   Skip this entirely in default mode. Silently starting a local HTTP server
+   for someone who never opted into the drafts folder is a surprise, and the
+   same opt-in governs both.
+6. Below that, one line naming what you cut, so they can add it back.
+
+### Browsing past drafts (optional)
+
+`scripts/slackmsg --web` opens the browser UI: drafts on the left, the selected
+one rendered on the right, live-updating, with buttons to copy for Slack, copy
+raw markdown, or delete. It needs nothing installed beyond the python3 macOS
+ships. `--serve` is the same server without opening a tab, which is what step 5
+above calls.
+
+The bare `scripts/slackmsg` is the terminal equivalent: it lists saved drafts
+newest-first, previews the selected one,
+copies it to the clipboard on Enter and deletes on Ctrl-D. The copy carries an
+HTML flavor alongside the plain text, so `[label](url)` pastes into Slack as a
+real hyperlink instead of literal markup. (`pbcopy` sets plain-text flavors
+only, which is why a terminal copy used to lose its links where a copy out of
+a browser kept them.) It degrades by what
+is installed: two-pane browser with `fzf`, single-column picker with `gum`,
+plain numbered list with neither. Mention it only if the user asks how to find
+an older draft. It is a convenience for reading drafts, never part of writing
+one, and the drafting flow above must work unchanged when it is absent.
 
 ## Reference examples
 
@@ -121,7 +210,7 @@ Why it works: the ask is the first four words. The change is one sentence of con
 
 ### When a message genuinely carries more
 
-Multi-ticket ship updates, incident summaries, anything with several audiences: it still leads with one sentence naming the topic, then a numbered list of one line per item, then one `@person` call-out per paragraph where that person has to act. No narration between items, no closing summary. If it runs past 5 sentences of prose, the extra content belongs in a linked doc or ticket, not the message.
+Multi-ticket ship updates, incident summaries, anything with several audiences: it still leads with one sentence naming the topic, then a numbered list of one line per item, then one `@person` call-out per paragraph where that person has to act. No narration between items, no closing summary. Past that, the extra content belongs in a linked doc or ticket, not the message.
 
 There is deliberately no long example here. Long examples get pattern-matched into every draft, which is how messages got verbose in the first place.
 

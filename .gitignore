@@ -2,3 +2,4 @@
 
 # Never commit personal config/backups to this public marketplace repo
 personal/
+__pycache__/

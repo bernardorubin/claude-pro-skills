@@ -1,0 +1,218 @@
+#!/usr/bin/env zsh
+# Browse the Slack drafts written by the write-slack-message skill.
+#
+# Enter copies the selected draft to the clipboard, ctrl-d deletes it, ctrl-e
+# opens it in $EDITOR. Degrades by what is installed: fzf gives a two-pane
+# browser, gum a single-column picker, neither a numbered list.
+#
+# Reads whichever layout the skill is writing:
+#   $SLACK_DRAFTS_DIR or ~/Desktop/slack-drafts/  ->  <recipient>-<MMDD-HHMM>.md
+#   otherwise ~/Desktop/                          ->  slack-message-for-<recipient>.md
+#
+# ponytail: no config file, no index, no retention policy. A dozen drafts is an
+# `ls`. If this ever needs paging or search beyond fzf's, it wants a real store.
+
+emulate -L zsh
+setopt null_glob
+
+SELF=${0:A}
+
+drafts_dir() {
+  [[ -n $SLACK_DRAFTS_DIR ]] && { print -r -- $SLACK_DRAFTS_DIR; return }
+  [[ -d ~/Desktop/slack-drafts ]] && { print -r -- ~/Desktop/slack-drafts; return }
+  print -r -- ~/Desktop
+}
+
+draft_files() {
+  local dir=$1
+  if [[ $dir == ~/Desktop ]]; then
+    print -rl -- $dir/slack-message-for-*.md(.om) 2>/dev/null
+  else
+    print -rl -- $dir/*.md(.om) 2>/dev/null
+  fi
+}
+
+# "everyone-0824-1725.md" -> everyone ; "slack-message-for-dmytro.md" -> dmytro
+recipient_of() {
+  local base=${1:t:r}
+  base=${base#slack-message-for-}
+  print -r -- ${base%-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]}
+}
+
+age_of() {
+  local d=$(( EPOCHSECONDS - $1 ))
+  (( d < 0 )) && d=0
+  if   (( d < 3600  )); then printf '%dm' $(( d / 60 ))
+  elif (( d < 86400 )); then printf '%dh' $(( d / 3600 ))
+  else                      printf '%dd' $(( d / 86400 ))
+  fi
+}
+
+# One line per draft: "<path>\t<recipient>  <age>  <first line>"
+list_drafts() {
+  zmodload -F zsh/datetime +p:EPOCHSECONDS
+  zmodload -F zsh/stat +b:zstat
+  local f mtime first
+  for f in $(draft_files "$(drafts_dir)"); do
+    zstat -A mtime +mtime -- $f 2>/dev/null || continue
+    # Raw URLs eat the whole column, so the label shows [x](url) as x and drops
+    # backticks. The preview pane still shows the draft verbatim.
+    first=$(grep -m1 -v '^[[:space:]]*$' -- $f 2>/dev/null \
+            | sed -E 's/\[([^]]+)\]\([^)]+\)/\1/g; s/`//g')
+    printf '%s\t%-10s %4s  %s\n' \
+      "$f" "$(recipient_of $f)" "$(age_of $mtime[1])" "${first[1,90]}"
+  done
+}
+
+# Cheap change-detector for the auto-refresh watcher: every draft path plus its
+# mtime. Catches a new file, a deleted one, AND a rewrite in place (which leaves
+# the directory mtime untouched, so watching the directory alone would miss it).
+fingerprint() {
+  zmodload -F zsh/stat +b:zstat
+  local f m out=""
+  for f in $(draft_files "$(drafts_dir)"); do
+    zstat -A m +mtime -- $f 2>/dev/null && out+="$f:$m[1]"$'\n'
+  done
+  print -r -- $out | md5 -q
+}
+
+# fzf reloads only when told to, so poll the folder and push a reload through
+# fzf's --listen socket when something actually changed. Reloading on every tick
+# would yank the cursor back to the top while you are reading.
+watch_and_reload() {
+  local sock=$1 prev cur waited=0
+  while [[ ! -S $sock ]]; do
+    (( waited++ > 50 )) && return
+    sleep 0.1
+  done
+  prev=$(fingerprint)
+  while [[ -S $sock ]]; do
+    sleep 2
+    cur=$(fingerprint)
+    [[ $cur == $prev ]] && continue
+    prev=$cur
+    curl -s --unix-socket $sock -XPOST http://localhost/ \
+      -d "reload($SELF --list)" >/dev/null 2>&1 || return
+  done
+}
+
+# pbcopy sets plain-text flavors only, and Slack needs an HTML flavor on the
+# pasteboard to turn `[label](url)` into a real hyperlink -- which is why the
+# same text pasted out of a browser used to work and out of the terminal did
+# not. mdclip.py attaches both flavors; plain pbcopy is the fallback.
+copy_and_report() {
+  local f=$1 how=""
+  [[ -f $f ]] || { print -u2 "gone: $f"; return 1 }
+  if (( $+commands[python3] )) && [[ -x ${SELF:h}/mdclip.py ]]; then
+    how=$(${SELF:h}/mdclip.py $f 2>/dev/null)
+  fi
+  [[ -n $how ]] || { pbcopy < $f && how=plain }
+  print "copied (${how}): ${f:t}"
+}
+
+selftest() {
+  local got
+  for pair in \
+    'everyone-0824-1725.md:everyone' \
+    'slack-message-for-dmytro.md:dmytro' \
+    'jose-1201-0900.md:jose' \
+    'slack-message-for-everyone.md:everyone'
+  do
+    got=$(recipient_of ${pair%%:*})
+    [[ $got == ${pair##*:} ]] || { print -u2 "FAIL ${pair%%:*} -> $got"; return 1 }
+  done
+  print 'ok'
+}
+
+# One-time invitation out of default mode. Prints nothing once the user has the
+# drafts folder (already opted in) or once it has been shown, so the skill can
+# call it after every draft without ever nagging.
+NUDGE_MARK=${XDG_CONFIG_HOME:-$HOME/.config}/claude-pro-skills/slack-drafts-notice
+
+nudge() {
+  [[ $(drafts_dir) != $HOME/Desktop ]] && return 0
+  [[ -f $NUDGE_MARK ]] && return 0
+  mkdir -p ${NUDGE_MARK:h} 2>/dev/null && : > $NUDGE_MARK 2>/dev/null
+  print -r -- "Drafts can live in a small local UI now instead of a file you open by hand: a live list, arrow keys to move, one button that copies a draft with its Slack links intact. Turn it on with: mkdir ~/Desktop/slack-drafts"
+}
+
+# Idempotent start for the browser UI, so the skill can call it after every
+# draft without stacking up servers. Reuses a live one, starts one only if the
+# recorded URL stops answering (the server exits on its own when idle).
+WEB_STATE=${TMPDIR:-/tmp}/slackmsg-web.url
+WEB_LOG=${TMPDIR:-/tmp}/slackmsg-web.log
+
+serve() {
+  local url="" i
+  [[ -f $WEB_STATE ]] && url=$(<$WEB_STATE)
+  if [[ -n $url ]] && curl -s -o /dev/null -m 2 "$url"; then
+    print -r -- $url
+    return 0
+  fi
+  rm -f $WEB_STATE
+  : > $WEB_LOG
+  # nohup + disown so it outlives the shell that spawned it, including a
+  # short-lived agent tool call.
+  nohup ${SELF:h}/webui.py --no-open >>$WEB_LOG 2>&1 &
+  disown
+  for i in {1..60}; do
+    # grep, not head: python warnings can land in the log ahead of the URL
+    url=$(grep -m1 '^http://' $WEB_LOG 2>/dev/null)
+    [[ $url == http* ]] && break
+    sleep 0.1
+    url=""
+  done
+  [[ -n $url ]] || { print -u2 "web UI did not start; see $WEB_LOG"; return 1 }
+  print -r -- $url > $WEB_STATE
+  print -r -- $url
+}
+
+case $1 in
+  --list)     list_drafts; exit ;;
+  --selftest) selftest; exit ;;
+  --nudge)    nudge; exit ;;
+  --serve)    serve; exit ;;
+  --web)      url=$(serve) && { print -r -- $url; open $url } ; exit ;;
+esac
+
+typeset -a lines
+lines=("${(@f)$(list_drafts)}")
+(( ${#lines} )) || { print "no drafts in $(drafts_dir)"; exit 0 }
+
+# fzf and gum both drive /dev/tty directly. Without a controlling terminal they
+# do not error, they block forever — which is what running this inside an agent
+# harness or a pipe looks like. Check before reaching for either.
+if ! ( : < /dev/tty ) 2>/dev/null; then
+  print -rl -- ${lines#*$'\t'}
+  print -u2 ""
+  print -u2 "No terminal attached, so that is the list, not the picker."
+  print -u2 "Run slackmsg in a real terminal for preview, copy and delete."
+  exit 0
+fi
+
+if (( $+commands[fzf] )); then
+  sock=${TMPDIR:-/tmp}/slackmsg-$$.sock
+  watch_and_reload $sock &
+  watcher=$!
+  trap 'kill $watcher 2>/dev/null; rm -f $sock' EXIT INT TERM
+  sel=$(print -rl -- $lines | fzf \
+    --listen=$sock \
+    --delimiter=$'\t' --with-nth=2 \
+    --layout=reverse --height=70% --info=inline --border=rounded \
+    --border-label=' slack drafts ' --prompt='filter> ' --pointer='>' \
+    --preview 'cat -- {1}' \
+    --preview-window='right:52%:wrap:border-left' \
+    --header 'enter copy · ctrl-d delete · ctrl-e edit · ctrl-r refresh · esc quit' \
+    --bind "ctrl-d:execute-silent(rm -f -- {1})+reload($SELF --list)" \
+    --bind "ctrl-r:reload($SELF --list)" \
+    --bind "ctrl-e:execute(\${EDITOR:-vi} {1})+reload($SELF --list)")
+  kill $watcher 2>/dev/null
+elif (( $+commands[gum] )); then
+  sel=$(print -rl -- $lines | gum choose --height 15)
+else
+  print -rl -- ${lines/#*$'\t'/} | cat -n
+  read '?draft number: ' n
+  sel=${lines[$n]}
+fi
+
+[[ -n $sel ]] && copy_and_report ${sel%%$'\t'*}
