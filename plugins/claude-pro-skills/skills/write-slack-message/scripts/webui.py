@@ -32,8 +32,33 @@ from mdclip import copy as clipboard_copy, to_html  # noqa: E402
 
 POLL_MS = 1500
 IDLE_EXIT_SECONDS = 600
-TOKEN = secrets.token_urlsafe(16)
+# A stable port + a persisted token make the URL bookmarkable. Both degrade
+# rather than fail: a taken port falls back to an OS-assigned one, and an
+# unwritable token file falls back to a per-process one. Worst case is exactly
+# the old behaviour -- a working server at an unpredictable URL.
+PREFERRED_PORT = int(os.environ.get("SLACK_DRAFTS_PORT", "8473"))
+TOKEN_FILE = Path.home() / ".config" / "claude-pro-skills" / "slackmsg-token"
 last_seen = time.time()
+
+
+def load_token() -> str:
+    try:
+        existing = TOKEN_FILE.read_text(encoding="utf-8").strip()
+        if existing:
+            return existing
+    except OSError:
+        pass
+    fresh = secrets.token_urlsafe(16)
+    try:
+        TOKEN_FILE.parent.mkdir(parents=True, exist_ok=True)
+        TOKEN_FILE.write_text(fresh, encoding="utf-8")
+        TOKEN_FILE.chmod(0o600)
+    except OSError:
+        pass  # ephemeral token: the URL just is not bookmarkable this run
+    return fresh
+
+
+TOKEN = load_token()
 
 
 def drafts_dir() -> Path:
@@ -415,8 +440,23 @@ def idle_watch(server: socketserver.TCPServer) -> None:
     server.shutdown()
 
 
+class Server(socketserver.ThreadingTCPServer):
+    # Without this a socket in TIME_WAIT from the previous run blocks the
+    # preferred port for a minute or two, silently costing the stable URL.
+    allow_reuse_address = True
+
+
+def bind() -> Server:
+    for port in (PREFERRED_PORT, 0):
+        try:
+            return Server(("127.0.0.1", port), Handler)
+        except OSError:
+            continue  # something else holds it; take whatever the OS gives
+    raise OSError("could not bind a local port")
+
+
 def main() -> None:
-    server = socketserver.ThreadingTCPServer(("127.0.0.1", 0), Handler)
+    server = bind()
     url = f"http://127.0.0.1:{server.server_address[1]}/{TOKEN}/"
     threading.Thread(target=idle_watch, args=(server,), daemon=True).start()
     print(url, flush=True)

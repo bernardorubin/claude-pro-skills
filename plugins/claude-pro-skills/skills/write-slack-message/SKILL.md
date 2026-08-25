@@ -207,7 +207,13 @@ carry them into a normal draft.
 one rendered on the right, live-updating, with buttons to copy for Slack, copy
 raw markdown, or delete. It needs nothing installed beyond the python3 macOS
 ships. `--serve` is the same server without opening a tab, which is what step 5
-above calls.
+above calls. The URL is stable and bookmarkable -- a fixed port (`8473`,
+overridable with `SLACK_DRAFTS_PORT`) and a token persisted at
+`~/.config/claude-pro-skills/slackmsg-token`. Both degrade rather than fail: a
+taken port falls back to an OS-assigned one and an unwritable token file falls
+back to a per-process one, so the server always starts, just sometimes at an
+unpredictable URL. A bookmark only resolves while a server is running; drafting
+starts one.
 
 The bare `scripts/slackmsg` is the terminal equivalent: it lists saved drafts
 newest-first, previews the selected one,
