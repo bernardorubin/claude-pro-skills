@@ -96,26 +96,39 @@ PAGE = r"""<!doctype html><meta charset=utf-8>
 <title>Slack drafts</title>
 <link rel=stylesheet href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
-/* One phosphor hue drives every shade; the switcher only rewrites --p. */
-:root{--bg:#0a0b09;--p:#ffb000;
- --p-lit:color-mix(in oklab,var(--p) 72%,#fff);
- --p-mid:color-mix(in oklab,var(--p) 62%,var(--bg));
- --p-dim:color-mix(in oklab,var(--p) 40%,var(--bg));
+/* Two independent axes, both on <html>: data-skin (terminal | modern) and
+   data-theme (dark | light). One accent hue drives every shade, so a swatch
+   click only rewrites --p. --lift is the "away from the background" direction,
+   which is the thing a theme flip actually changes. --ink is body text: the
+   accent itself in the terminal skin, near-neutral in the modern one. */
+:root{--p:#ffb000;--bg:#0a0b09;--lift:#fff;--ink:var(--p)}
+:root[data-theme=light]{--bg:#f4f1e9;--lift:#000}
+:root[data-skin=modern]{--bg:#0e1013;--ink:color-mix(in oklab,var(--p) 10%,var(--lift))}
+/* Both single-attribute rules above have equal specificity, so modern+light
+   needs its own rule to win rather than relying on source order. */
+:root[data-skin=modern][data-theme=light]{--bg:#fbfaf9}
+:root{
+ --p-lit:color-mix(in oklab,var(--p) 72%,var(--lift));
  --p-rule:color-mix(in oklab,var(--p) 26%,var(--bg));
  --p-faint:color-mix(in oklab,var(--p) 14%,var(--bg));
- --p-wash:color-mix(in oklab,var(--p) 9%,var(--bg))}
+ --p-wash:color-mix(in oklab,var(--p) 9%,var(--bg));
+ --ink-mid:color-mix(in oklab,var(--ink) 78%,var(--bg));
+ --ink-dim:color-mix(in oklab,var(--ink) 62%,var(--bg))}
 *{box-sizing:border-box}
-body{margin:0;height:100vh;display:flex;flex-direction:column;background:var(--bg);color:var(--p);
+body{margin:0;height:100vh;display:flex;flex-direction:column;background:var(--bg);color:var(--ink);
  font:13px/1.5 'IBM Plex Mono',ui-monospace,Menlo,monospace}
 #top{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--p-rule)}
 #top b{font-weight:600;letter-spacing:.14em}
 #rule{flex-grow:1;height:1px;background:var(--p-faint)}
-#count{color:var(--p-dim)}
+#count{color:var(--ink-dim)}
 #cursor{width:7px;height:13px;background:var(--p);animation:blink 1.1s step-end infinite}
 @keyframes blink{50%{opacity:0}}
-#swatches{display:flex;gap:5px;margin-right:4px}
+#swatches{display:flex;gap:5px}
 .sw{width:11px;height:11px;border:1px solid var(--p-rule);cursor:pointer;padding:0;background:none}
 .sw[aria-pressed=true]{border-color:var(--p-lit);box-shadow:inset 0 0 0 2px var(--bg)}
+.tog{font:inherit;font-size:11px;letter-spacing:.1em;border:1px solid var(--p-rule);background:none;
+ color:var(--ink-dim);padding:2px 9px;cursor:pointer}
+.tog:hover{color:var(--ink);border-color:var(--p)}
 #main{flex-grow:1;display:flex;min-height:0}
 #list{width:380px;border-right:1px solid var(--p-rule);overflow:auto;outline:none}
 .row{display:flex;gap:10px;padding:9px 14px;cursor:pointer}
@@ -125,12 +138,12 @@ body{margin:0;height:100vh;display:flex;flex-direction:column;background:var(--b
 .row[aria-selected=true] .caret{color:var(--p)}
 .row .hd{display:flex;justify-content:space-between;gap:8px}
 .row .who{font-weight:600}
-.row .age{color:var(--p-dim)}
-.row p{margin:2px 0 0;color:var(--p-mid);overflow:hidden;display:-webkit-box;
+.row .age{color:var(--ink-dim)}
+.row p{margin:2px 0 0;color:var(--ink-mid);overflow:hidden;display:-webkit-box;
  -webkit-line-clamp:2;-webkit-box-orient:vertical}
 #pane{flex-grow:1;display:flex;flex-direction:column;min-height:0}
-#meta{padding:14px 26px;border-bottom:1px solid var(--p-faint);display:flex;gap:22px;color:var(--p-dim)}
-#meta span b{color:var(--p);margin-left:10px;font-weight:400}
+#meta{padding:14px 26px;border-bottom:1px solid var(--p-faint);display:flex;gap:22px;color:var(--ink-dim)}
+#meta span b{color:var(--ink);margin-left:10px;font-weight:400}
 #body{flex-grow:1;padding:24px 26px;overflow:auto;max-width:78ch}
 #body p{margin:0 0 14px}
 #body ol,#body ul{margin:0 0 14px;padding-left:22px}
@@ -138,17 +151,17 @@ body{margin:0;height:100vh;display:flex;flex-direction:column;background:var(--b
 #body code{background:var(--p);color:var(--bg);padding:0 4px}
 #body pre{margin:0 0 14px;padding:12px 14px;border:1px solid var(--p-rule);color:var(--p-lit);overflow:auto}
 #body pre code{background:none;color:inherit;padding:0}
-#body blockquote{margin:0 0 14px;border-left:2px solid var(--p-rule);padding-left:14px;color:var(--p-mid)}
+#body blockquote{margin:0 0 14px;border-left:2px solid var(--p-rule);padding-left:14px;color:var(--ink-mid)}
 #body a{color:var(--p-lit)}
 #rail{display:flex;gap:8px;padding:12px 26px;border-top:1px solid var(--p-rule);align-items:center}
 /* The FOCUSED action is the filled one -- that is the keyboard cursor, not a
    permanent primary, so arrowing left/right visibly moves it. */
-button.act{font:inherit;border:1px solid var(--p-rule);background:none;color:var(--p);
+button.act{font:inherit;border:1px solid var(--p-rule);background:none;color:var(--ink);
  padding:4px 13px;cursor:pointer}
 button.act:hover{border-color:var(--p)}
 button.act[aria-selected=true]{background:var(--p);color:var(--bg);border-color:var(--p);font-weight:600}
-#hint{flex-grow:1;text-align:right;color:var(--p-dim)}
-#empty{padding:32px 26px;color:var(--p-dim)}
+#hint{flex-grow:1;text-align:right;color:var(--ink-dim)}
+#empty{padding:32px 26px;color:var(--ink-dim)}
 #toast{position:fixed;left:50%;bottom:64px;transform:translateX(-50%) translateY(6px);
  background:var(--p);color:var(--bg);padding:7px 18px;font-weight:600;letter-spacing:.08em;
  opacity:0;pointer-events:none;transition:opacity .12s,transform .12s;z-index:20}
@@ -156,20 +169,59 @@ button.act[aria-selected=true]{background:var(--p);color:var(--bg);border-color:
 /* confirm window */
 #scrim{position:fixed;inset:0;background:rgba(4,5,4,.72);display:none;
  align-items:center;justify-content:center;z-index:30}
+:root[data-theme=light] #scrim{background:rgba(38,36,32,.45)}
 #scrim.on{display:flex}
 .win{width:440px;background:var(--bg);border:1px solid var(--p)}
 .titlebar{background:var(--p);color:var(--bg);padding:4px 10px;font-weight:600;letter-spacing:.12em;
  display:flex;justify-content:space-between}
 .winbody{padding:18px 16px}
 .winbody p{margin:0 0 10px}
-.winbody .dim{color:var(--p-dim);margin:0}
+.winbody .dim{color:var(--ink-dim);margin:0}
 .winbody .fname{background:var(--p);color:var(--bg);padding:0 4px}
 .winrail{display:flex;gap:8px;padding:0 16px 16px}
+/* Labels are stored in sentence case and shouted by the terminal skin, so the
+   modern skin gets normal words without a second copy of every string. */
+[data-skin=terminal] #top b,[data-skin=terminal] #count,[data-skin=terminal] .tog,
+[data-skin=terminal] #meta,[data-skin=terminal] .act,[data-skin=terminal] #toast,
+[data-skin=terminal] .titlebar{text-transform:uppercase}
+[data-skin=terminal] .act::before{content:'[ '}
+[data-skin=terminal] .act::after{content:' ]'}
+/* modern skin: same layout, soft edges, neutral text, accent kept for state */
+[data-skin=modern] body{font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+ -webkit-font-smoothing:antialiased}
+[data-skin=modern] #top{padding:12px 18px;border-color:var(--p-faint)}
+[data-skin=modern] #top b{letter-spacing:-.01em;font-size:14px}
+[data-skin=modern] #rule{background:none}
+[data-skin=modern] #cursor{display:none}
+[data-skin=modern] .sw{width:13px;height:13px;border:none;border-radius:50%;
+ box-shadow:0 0 0 1px var(--p-rule)}
+[data-skin=modern] .sw[aria-pressed=true]{box-shadow:0 0 0 2px var(--bg),0 0 0 3px var(--p)}
+[data-skin=modern] .tog{border-radius:999px;letter-spacing:0;font-size:12px;padding:3px 11px}
+[data-skin=modern] #list{border-color:var(--p-faint);padding:6px}
+[data-skin=modern] .row{border-radius:10px;padding:10px 12px;gap:0}
+[data-skin=modern] .row .caret{display:none}
+[data-skin=modern] .row[aria-selected=true]{background:var(--p-faint)}
+[data-skin=modern] #meta{border-color:var(--p-faint)}
+[data-skin=modern] #body code{background:var(--p-faint);color:var(--ink);border-radius:5px}
+[data-skin=modern] #body pre{background:var(--p-wash);border-color:transparent;border-radius:10px;
+ color:var(--ink)}
+[data-skin=modern] #body a{text-underline-offset:2px}
+[data-skin=modern] #rail{border-color:var(--p-faint)}
+[data-skin=modern] button.act{border-radius:999px;padding:6px 15px}
+[data-skin=modern] #toast{border-radius:999px;letter-spacing:0;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+[data-skin=modern] .win{border-radius:14px;border-color:var(--p-faint);overflow:hidden;
+ box-shadow:0 24px 70px rgba(0,0,0,.45)}
+[data-skin=modern] .titlebar{background:none;color:var(--ink);letter-spacing:0;font-size:14px;
+ padding:12px 16px;border-bottom:1px solid var(--p-faint)}
+[data-skin=modern] .titlebar span:last-child{color:var(--ink-dim)}
+[data-skin=modern] .winbody .fname{background:var(--p-faint);color:var(--ink);border-radius:4px;padding:1px 5px}
 </style>
 
 <div id=top>
-  <b>SLACK DRAFTS</b><span id=rule></span>
+  <b>Slack drafts</b><span id=rule></span>
   <div id=swatches></div>
+  <button class=tog id=theme title="Light / dark"></button>
+  <button class=tog id=skin title="Switch skin"></button>
   <span id=count></span><span id=cursor></span>
 </div>
 <div id=main>
@@ -182,7 +234,7 @@ button.act[aria-selected=true]{background:var(--p);color:var(--bg);border-color:
 </div>
 <div id=toast></div>
 <div id=scrim><div class=win>
-  <div class=titlebar><span>DELETE DRAFT</span><span>&#215;</span></div>
+  <div class=titlebar><span>Delete draft</span><span>&#215;</span></div>
   <div class=winbody>
     <p>Delete <span class=fname id=mname></span>?</p>
     <p class=dim>This removes the file from disk. It cannot be undone.</p>
@@ -192,14 +244,23 @@ button.act[aria-selected=true]{background:var(--p);color:var(--bg);border-color:
 
 <script>
 const TOKEN=location.pathname.split('/')[1];
-const PHOSPHORS=[['amber','#ffb000'],['green','#3bdc61'],['ice','#7fd8ff'],['white','#dfe2e0']];
-let drafts=[],sel=null,actIdx=0,modalIdx=0,modalFor=null;
+// One accent set per theme: the dark hues are phosphors, the light ones are
+// inks, because a #ffb000 that glows on black is unreadable on paper.
+const ACCENTS={
+  dark:[['amber','#ffb000'],['green','#3bdc61'],['ice','#7fd8ff'],['mono','#dfe2e0']],
+  light:[['amber','#b45309'],['green','#15803d'],['ice','#0369a1'],['mono','#3f3f46']],
+};
+let drafts=[],sel=null,actIdx=0,modalIdx=0,modalFor=null,theme='dark',skin='terminal';
+
+const store=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
+const load=(k,d)=>{try{return localStorage.getItem(k)||d}catch(e){return d}};
 
 // A prompt caret, drawn rather than fetched so the page stays self-contained,
-// and rebuilt on a phosphor change so the tab icon matches the chosen colour.
+// and rebuilt on any theme/accent change so the tab icon matches the page.
 function setFavicon(hex){
+  const bg=getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()||'#0a0b09';
   const svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">'
-    +'<rect width="16" height="16" fill="#0a0b09"/>'
+    +'<rect width="16" height="16" fill="'+bg+'"/>'
     +'<path d="M3.5 4.5 L7 8 L3.5 11.5" fill="none" stroke="'+hex
     +'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
     +'<rect x="8.5" y="10" width="4.5" height="2" fill="'+hex+'"/></svg>';
@@ -207,28 +268,41 @@ function setFavicon(hex){
   if(!l){l=document.createElement('link');l.rel='icon';document.head.appendChild(l)}
   l.href='data:image/svg+xml,'+encodeURIComponent(svg);
 }
-function setPhosphor(hex){
-  document.documentElement.style.setProperty('--p',hex);
-  try{localStorage.setItem('phosphor',hex)}catch(e){}
-  [...document.querySelectorAll('.sw')].forEach(b=>b.setAttribute('aria-pressed',b.dataset.hex===hex));
+function applyLook(){
+  const root=document.documentElement;
+  root.dataset.theme=theme;root.dataset.skin=skin;
+  const set=ACCENTS[theme];
+  let hex=load('accent-'+theme,set[0][1]);
+  if(!set.some(a=>a[1]===hex))hex=set[0][1];  // a hue saved under the other theme
+  root.style.setProperty('--p',hex);
+  document.getElementById('swatches').innerHTML=set.map(([n,h])=>
+    `<button class=sw data-hex="${h}" title="${n}" style="background:${h}" aria-pressed="${h===hex}"></button>`).join('');
+  [...document.querySelectorAll('.sw')].forEach(b=>b.onclick=()=>{
+    store('accent-'+theme,b.dataset.hex);applyLook();
+  });
+  document.getElementById('theme').textContent=theme;  // no glyph: IBM Plex Mono has no sun
+  document.getElementById('skin').textContent=skin;
   setFavicon(hex);
 }
-function initPhosphors(){
-  let saved='#ffb000';
-  try{saved=localStorage.getItem('phosphor')||saved}catch(e){}
-  document.getElementById('swatches').innerHTML=PHOSPHORS.map(([n,h])=>
-    `<button class=sw data-hex="${h}" title="${n}" style="background:${h}" aria-pressed=false></button>`).join('');
-  [...document.querySelectorAll('.sw')].forEach(b=>b.onclick=()=>setPhosphor(b.dataset.hex));
-  setPhosphor(saved);
+function initLook(){
+  theme=load('theme',matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');
+  skin=load('skin','terminal');
+  document.getElementById('theme').onclick=()=>{
+    theme=theme==='dark'?'light':'dark';store('theme',theme);applyLook();
+  };
+  document.getElementById('skin').onclick=()=>{
+    skin=skin==='terminal'?'modern':'terminal';store('skin',skin);applyLook();
+  };
+  applyLook();
 }
 
 const esc=s=>s.replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
 const excerpt=md=>esc(md.replace(/\[([^\]]+)\]\([^)]+\)/g,'$1').replace(/`/g,'').slice(0,170));
 
 const ACTIONS=[
-  {label:'[ COPY FOR SLACK ]',run:d=>copyRich(d)},
-  {label:'[ COPY RAW ]',      run:d=>copyPlain(d)},
-  {label:'[ DELETE ]',        run:d=>openConfirm(d)},
+  {label:'Copy for Slack',run:d=>copyRich(d)},
+  {label:'Copy raw',      run:d=>copyPlain(d)},
+  {label:'Delete',        run:d=>openConfirm(d)},
 ];
 
 function render(){
@@ -244,7 +318,7 @@ function render(){
 
   const d=drafts.find(x=>x.name===sel);
   document.getElementById('meta').innerHTML=d
-    ?`<span>TO<b>${esc(d.who)}</b></span><span>FILE<b>${esc(d.name)}</b></span>`:'';
+    ?`<span>To<b>${esc(d.who)}</b></span><span>File<b>${esc(d.name)}</b></span>`:'';
   document.getElementById('body').innerHTML=d?d.html:'<div id=empty>No draft selected.</div>';
   document.getElementById('rail').innerHTML=d
     ?ACTIONS.map((a,i)=>`<button class=act data-i="${i}" aria-selected="${i===actIdx}">${a.label}</button>`).join('')
@@ -270,22 +344,22 @@ async function copyRich(d){
     const r=await fetch(`/${TOKEN}/api/copy/${encodeURIComponent(d.name)}`,{method:'POST'});
     if(!r.ok)throw new Error(r.status);
     const {flavor}=await r.json();
-    toast(flavor==='html+plain'?'COPIED FOR SLACK':'COPIED AS PLAIN TEXT');
+    toast(flavor==='html+plain'?'Copied for Slack':'Copied as plain text');
     return;
   }catch(e){}
   try{
     await navigator.clipboard.write([new ClipboardItem({
       'text/html':new Blob([d.html],{type:'text/html'}),
       'text/plain':new Blob([d.md],{type:'text/plain'})})]);
-    toast('COPIED (BROWSER)');
-  }catch(e){navigator.clipboard.writeText(d.md);toast('COPIED AS TEXT')}
+    toast('Copied (browser)');
+  }catch(e){navigator.clipboard.writeText(d.md);toast('Copied as text')}
 }
-function copyPlain(d){navigator.clipboard.writeText(d.md);toast('COPIED RAW MARKDOWN')}
+function copyPlain(d){navigator.clipboard.writeText(d.md);toast('Copied raw markdown')}
 
 // -- confirm window ---------------------------------------------------------
 // Cancel is index 0 and starts focused: Enter on a destructive dialog should
 // never be the destructive answer.
-const MODAL=[{label:'[ CANCEL ]',run:closeConfirm},{label:'[ DELETE ]',run:doDelete}];
+const MODAL=[{label:'Cancel',run:closeConfirm},{label:'Delete',run:doDelete}];
 function renderModal(){
   document.getElementById('mrail').innerHTML=MODAL.map((m,i)=>
     `<button class=act data-i="${i}" aria-selected="${i===modalIdx}">${m.label}</button>`).join('');
@@ -307,7 +381,7 @@ function closeConfirm(){
 function doDelete(){
   const name=modalFor;closeConfirm();
   fetch(`/${TOKEN}/api/draft/${encodeURIComponent(name)}`,{method:'DELETE'})
-    .then(()=>{sel=null;actIdx=0;toast('DELETED');poll()});
+    .then(()=>{sel=null;actIdx=0;toast('Deleted');poll()});
 }
 document.getElementById('scrim').onclick=e=>{if(e.target.id==='scrim')closeConfirm()};
 
@@ -324,6 +398,9 @@ function moveAct(step){
 addEventListener('keydown',e=>{
   if(e.metaKey||e.ctrlKey||e.altKey)return;
   const k=e.key;
+  // A focused toggle handles its own Enter/Space; without this the global
+  // Enter below would also fire the selected draft action.
+  if(e.target.tagName==='BUTTON'&&(k==='Enter'||k===' '))return;
   if(modalFor){
     if(k==='ArrowLeft'||k==='ArrowRight'||k==='Tab'){
       e.preventDefault();modalIdx=(modalIdx+1)%MODAL.length;renderModal();
@@ -355,7 +432,7 @@ async function poll(){
     if(!same)render();
   }catch(e){}
 }
-initPhosphors();poll();setInterval(poll,__POLL__);
+initLook();poll();setInterval(poll,__POLL__);
 document.getElementById('list').focus();
 </script>
 """

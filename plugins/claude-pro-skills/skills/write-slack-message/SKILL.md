@@ -205,7 +205,9 @@ carry them into a normal draft.
 
 `scripts/slackmsg --web` opens the browser UI: drafts on the left, the selected
 one rendered on the right, live-updating, with buttons to copy for Slack, copy
-raw markdown, or delete. It needs nothing installed beyond the python3 macOS
+raw markdown, or delete. The header carries a light/dark toggle, a skin toggle
+(`terminal` or `modern`), and an accent swatch row that changes with the theme;
+all three persist per browser. It needs nothing installed beyond the python3 macOS
 ships. `--serve` is the same server without opening a tab, which is what step 5
 above calls. The URL is fixed and memorable --
 `http://127.0.0.1:8473/slack-drafts/` (port overridable with
