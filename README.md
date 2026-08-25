@@ -28,7 +28,7 @@ Everything is a **skill** — no `claude-pro-skills:` prefix needed when invokin
 | `/pr-review` | "review this PR", "review my uncommitted changes", "audit the whole repo" — three modes: PR / local / full-repo |
 | `/review-cycle` | "run the review cycle", "review and fix this PR", "do the review loop" — reviews → posts a living PR comment → fixes what's worth fixing → pushes → updates the comment, until clean (reuses `/pr-review`) |
 | `/pr-description` | "write a PR description", "draft the PR body", "update the PR" |
-| `/write-slack-message` | "draft a slack message", "how should I phrase this for slack" |
+| `/write-slack-message` | "draft a slack message", "how should I phrase this for slack" — tiny by default, saves to a drafts folder, and hands back a live browser UI whose copy button keeps Slack links working |
 | `/prd-to-jira` | "create tickets from this PRD", "break this down into jira tasks" |
 | `/jira-cli` | Jira URL or key (ACME-1234, WEB-456), "update the description on ABC-123", "add a comment to …", "what's the status of …", "move this to in progress" |
 | `/vault-keeper` | "save this to the vault", "what does the wiki say about X", "ingest this doc", "lint the wiki" (auto-fires inside any registered vault project) |

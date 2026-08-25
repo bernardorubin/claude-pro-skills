@@ -48,7 +48,11 @@ The historic command/skill split was dropped because the prefix made commands pa
    description: <description that drives auto-trigger — include explicit trigger phrases>
    ---
    ```
-2. Optionally add `evals/`, `references/`, scripts, etc. as siblings of `SKILL.md`.
+2. Optionally add `evals/`, `references/`, `scripts/`, etc. as siblings of `SKILL.md`.
+   Scripts ship with the plugin and are installed into the plugin cache, so keep them
+   dependency-free (stdlib / system tools) and commit them executable — `write-slack-message`
+   is the working example. Reference them from `SKILL.md` relative to the skill directory,
+   never by an absolute path, since the cache path carries the version number.
 3. Document in `plugins/claude-pro-skills/README.md` and the root `README.md`, and bump the skill count in the plugin README's headline (the manifests deliberately carry no count).
 
 The skill becomes invocable as `/<name>` (no prefix) and via the Skill tool as `claude-pro-skills:<name>`.

@@ -149,7 +149,15 @@ Generates a GitHub-ready PR description from the diff and updates the PR directl
 ```
 
 ### `/write-slack-message`
-Drafts a Slack message ready to copy-paste, with proper formatting and a business-casual tone. Targets **2 to 3 sentences** with a hard 5-sentence ceiling, a mandatory cut pass, a cut-on-sight list (reasoning, recaps, hedges, detail that belongs in the linked doc), and reports what it cut so you can add anything back. Saves to `~/Desktop/slack-message-for-<recipient>.md` (e.g. `slack-message-for-dmytro.md`, `slack-message-for-everyone.md`) and never pastes the draft into the chat. Auto-triggers on phrases like "draft a slack message", "how should I phrase this for slack", "write up a slack post".
+Drafts a Slack message ready to paste, business-casual, with **no sentence cap** — an incident summary is longer than a question, and padding the question is the same mistake as truncating the summary. Two registers: **tiny by default** (the ask or the answer, nothing else — no context, no rationale, no recommendation) and **full on request** ("full", "longer", "detailed", or an inherently multi-item update), which buys more items, not more words per item. Keeps the cut-on-sight list (reasoning, recaps, hedges, detail that belongs in the linked doc), the mandatory cut pass, and the line telling you what it cut so you can add anything back.
+
+**Where it saves.** `~/Desktop/slack-message-for-<recipient>.md` by default, overwriting the previous draft for that person. Create `~/Desktop/slack-drafts/` and it switches to timestamped files in there instead, so rewriting a message stops destroying the version it replaces. The folder's existence is the opt-in and the skill never creates it for you; in default mode it offers the upgrade exactly once.
+
+**Reading drafts back.** With the folder in use the skill also hands back a browser UI at `http://127.0.0.1:8473/slack-drafts/` — a live-updating list, arrow keys to move through drafts and actions, Enter to run one, and a confirm window on delete. Its **Copy for Slack** button puts an HTML flavour on the clipboard, so `[label](url)` pastes into Slack as a real hyperlink rather than literal markup (plain `pbcopy` sets text only, which is why a terminal copy used to lose its links). `scripts/slackmsg` is the terminal equivalent — fzf if installed, else gum, else a plain numbered list. Both are stdlib/system tools only: nothing to install, macOS.
+
+**On a phone**, say so and the draft comes back in the chat as a code block for one-press copy, flattened for a plain-text paste (links become bare URLs, which mobile Slack unfurls; backticks and fence markers are stripped because mobile converts nothing). The file on disk keeps its markdown either way.
+
+Auto-triggers on phrases like "draft a slack message", "how should I phrase this for slack", "write up a slack post".
 
 ## Jira
 
