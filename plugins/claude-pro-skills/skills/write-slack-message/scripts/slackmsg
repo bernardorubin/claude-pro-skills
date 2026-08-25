@@ -163,6 +163,12 @@ serve() {
     url=""
   done
   [[ -n $url ]] || { print -u2 "web UI did not start; see $WEB_LOG"; return 1 }
+  # Something else holds the usual port, so the bookmarked URL is wrong THIS run
+  # and may even show that other app's page. Say so rather than quietly handing
+  # back a different address.
+  local want=${SLACK_DRAFTS_PORT:-8473}
+  [[ $url == *":${want}/"* ]] || print -u2 \
+    "note: port ${want} is in use, so this run is at a different address and your bookmark will not reach it."
   print -r -- $url > $WEB_STATE
   print -r -- $url
 }

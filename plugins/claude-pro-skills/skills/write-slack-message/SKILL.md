@@ -210,7 +210,9 @@ ships. `--serve` is the same server without opening a tab, which is what step 5
 above calls. The URL is fixed and memorable --
 `http://127.0.0.1:8473/slack-drafts/` (port overridable with
 `SLACK_DRAFTS_PORT`) -- so it can be bookmarked. A taken port falls back to an
-OS-assigned one rather than failing, which is the only case the bookmark misses.
+OS-assigned one rather than failing; `--serve` prints a note on stderr when that
+happens, so pass it along -- the bookmark points at whatever else holds the port
+that run, which is confusing if the squatter serves a page of its own.
 There is no secret in the URL on purpose: anything running locally could read
 the draft files directly, so a path token would guard nothing, while `Host` and
 `Origin` checks do stop the case that matters (a webpage poking at localhost).
