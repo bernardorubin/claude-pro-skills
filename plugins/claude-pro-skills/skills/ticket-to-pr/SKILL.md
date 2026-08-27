@@ -1,5 +1,5 @@
 ---
-name: ship-ticket
+name: ticket-to-pr
 description: >-
   Use when taking a Jira ticket (or a described feature/bugfix) all the way from
   investigation through implementation, PR, worklog, and a Slack update — the full
@@ -14,7 +14,7 @@ description: >-
   from "assigned" to "review-ready PR + logged + communicated" in one thread.
 ---
 
-# Ship Ticket
+# Ticket to PR
 
 This is the pipeline you run on almost every ticket: understand it, implement on a
 branch, open a PR, fix review, log the work, and post an update. The point of this

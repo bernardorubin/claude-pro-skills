@@ -5,8 +5,8 @@ description: >-
   build. Triggers on "cut a release", "ship a build", "prep the release",
   "release the app", "build and submit", "cut a build for TestFlight", "new App
   Store build", "ship version 1.3", "release notes and build". This is the
-  per-RELEASE complement to ship-ticket (which is per-TICKET and stops at a
-  review-ready PR): many ship-tickets merge, then one cut-release cuts the
+  per-RELEASE complement to ticket-to-pr (which is per-TICKET and stops at a
+  review-ready PR): many ticket-to-pr runs merge, then one cut-release cuts the
   version. It pre-flights the release gates (version train / build slot / CI
   green / version bump), builds the artifact, generates release notes from the
   merged tickets, and hands back the exact submit command. Enforces the two hard
@@ -14,7 +14,7 @@ description: >-
   BEFORE building (catches closed version trains and taken build slots), and
   NEVER run the actual submit / OTA / App Store publish — build to ready, then
   hand the command back. Not for writing a feature or fixing one ticket (that's
-  ship-ticket); this is for shipping a version made of already-merged work.
+  ticket-to-pr); this is for shipping a version made of already-merged work.
 ---
 
 # Cut Release
@@ -26,12 +26,12 @@ Connect — you know them. It's to **hold the one discipline that keeps releases
 from blowing up at the upload step**: pre-flight the gates *before* you build, and
 **stop before the actual publish** so you (never Claude) run that command.
 
-`cut-release` is the per-**release** half; [[ship-ticket]] is the per-**ticket**
-half. They don't overlap: `ship-ticket` ends at a review-ready PR; `cut-release`
+`cut-release` is the per-**release** half; [[ticket-to-pr]] is the per-**ticket**
+half. They don't overlap: `ticket-to-pr` ends at a review-ready PR; `cut-release`
 begins after those PRs are merged, when you're turning a pile of merged work into
-one versioned build. A week of `ship-ticket` runs → one `cut-release`.
+one versioned build. A week of `ticket-to-pr` runs → one `cut-release`.
 
-Like `ship-ticket`, this is a conductor, not the orchestra. Lean on:
+Like `ticket-to-pr`, this is a conductor, not the orchestra. Lean on:
 
 | Step | Existing skill / tool |
 |------|----------------------|

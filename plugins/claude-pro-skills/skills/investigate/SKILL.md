@@ -8,7 +8,7 @@ description: >-
   "can you look into why Y", "figure out what's going on with Z", "dig into
   this", "someone reported X — find out why", or pasting an incident / alert /
   error with intent to find the cause (NOT to build a fix — for taking a ticket
-  all the way to a shipped PR use ship-ticket). The common shape is pasting a
+  all the way to a shipped PR use ticket-to-pr). The common shape is pasting a
   Slack thread / conversation and saying "investigate this" — read the thread,
   find the answer, hand back a reply ready to drop into that same thread. This
   skill enforces the
@@ -31,7 +31,7 @@ a log — you know that. It's to hold the one discipline that makes an investiga
 worth trusting: **look before you conclude, and conclude only what the evidence
 supports.**
 
-Like `ship-ticket`, this is a conductor, not the orchestra. Lean on your existing
+Like `ticket-to-pr`, this is a conductor, not the orchestra. Lean on your existing
 skills:
 
 | Step | Existing skill / tool |
@@ -81,7 +81,7 @@ read the actual code. Questions come last, not first.
 **4. This is read-only.**
 Investigating ≠ fixing. Don't edit code, don't deploy, don't run a publish/OTA
 command. If the investigation surfaces a fix, *report it* and let the user decide —
-hand off to `ship-ticket` if they want it built. Stop at the answer.
+hand off to `ticket-to-pr` if they want it built. Stop at the answer.
 
 ## The pipeline
 

@@ -10,7 +10,7 @@ description: >-
   domain, privacy policy, account deletion, App Privacy answers, DSA trader status,
   OTA-before-first-submit, and the "nothing was copied from dev" traps that produce
   silent blank screens. For a later release of an app that has already shipped once,
-  use cut-release instead. For a single ticket on an existing app, use ship-ticket.
+  use cut-release instead. For a single ticket on an existing app, use ticket-to-pr.
   Holds the hard line: Claude builds to ready and NEVER submits, publishes, or ships
   an OTA unless the user explicitly says to for that specific action.
 ---
@@ -39,7 +39,7 @@ build, a review cycle, or a day.
 |---|---|
 | Brand-new app, never shipped | **this skill** |
 | App has shipped before, cutting the next release | `cut-release` |
-| One ticket on an existing app | `ship-ticket` |
+| One ticket on an existing app | `ticket-to-pr` |
 | Diagnosing a production anomaly | `investigate` |
 
 Hand off to `cut-release` the moment version 1 is approved. Do not reimplement it.
