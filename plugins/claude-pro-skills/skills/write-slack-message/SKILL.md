@@ -204,8 +204,11 @@ carry them into a normal draft.
 ### Browsing past drafts (optional)
 
 `scripts/slackmsg --web` opens the browser UI: drafts on the left, the selected
-one rendered on the right, live-updating, with buttons to copy for Slack, copy
-raw markdown, or delete. The header carries a light/dark toggle, a skin toggle
+one rendered on the right, live-updating. The action row sits at the top of the
+message pane -- copy for Slack, copy raw markdown, delete -- and every draft
+card carries its own delete `x`, so nothing needs a trip to the bottom of the
+window. The header carries a `delete all` button that empties the drafts folder,
+a light/dark toggle, a skin toggle
 (`terminal` or `modern`), and an accent swatch row that changes with the theme;
 all three persist per browser. It needs nothing installed beyond the python3 macOS
 ships. `--serve` is the same server without opening a tab, which is what step 5

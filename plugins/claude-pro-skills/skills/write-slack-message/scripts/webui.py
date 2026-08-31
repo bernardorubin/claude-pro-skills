@@ -113,7 +113,9 @@ PAGE = r"""<!doctype html><meta charset=utf-8>
  --p-faint:color-mix(in oklab,var(--p) 14%,var(--bg));
  --p-wash:color-mix(in oklab,var(--p) 9%,var(--bg));
  --ink-mid:color-mix(in oklab,var(--ink) 78%,var(--bg));
- --ink-dim:color-mix(in oklab,var(--ink) 62%,var(--bg))}
+ --ink-dim:color-mix(in oklab,var(--ink) 62%,var(--bg));
+ --danger:#e5484d}
+:root[data-theme=light]{--danger:#c62828}
 *{box-sizing:border-box}
 body{margin:0;height:100vh;display:flex;flex-direction:column;background:var(--bg);color:var(--ink);
  font:13px/1.5 'IBM Plex Mono',ui-monospace,Menlo,monospace}
@@ -141,6 +143,14 @@ body{margin:0;height:100vh;display:flex;flex-direction:column;background:var(--b
 .row .age{color:var(--ink-dim)}
 .row p{margin:2px 0 0;color:var(--ink-mid);overflow:hidden;display:-webkit-box;
  -webkit-line-clamp:2;-webkit-box-orient:vertical}
+/* Per-row delete: always in the layout so nothing shifts, only revealed on the
+   row you are pointing at or the one that is selected. */
+.row .del{font:inherit;font-size:16px;line-height:1;border:none;background:none;color:var(--ink-dim);
+ cursor:pointer;padding:0 4px;margin:-4px -4px 0 0;opacity:0;transition:opacity .1s}
+.row:hover .del,.row[aria-selected=true] .del{opacity:1}
+.row .del:hover{color:var(--danger)}
+#delall{margin-left:2px}
+#delall:hover{color:var(--danger);border-color:var(--danger)}
 #pane{flex-grow:1;display:flex;flex-direction:column;min-height:0}
 #meta{padding:14px 26px;border-bottom:1px solid var(--p-faint);display:flex;gap:22px;color:var(--ink-dim)}
 #meta span b{color:var(--ink);margin-left:10px;font-weight:400}
@@ -153,7 +163,7 @@ body{margin:0;height:100vh;display:flex;flex-direction:column;background:var(--b
 #body pre code{background:none;color:inherit;padding:0}
 #body blockquote{margin:0 0 14px;border-left:2px solid var(--p-rule);padding-left:14px;color:var(--ink-mid)}
 #body a{color:var(--p-lit)}
-#rail{display:flex;gap:8px;padding:12px 26px;border-top:1px solid var(--p-rule);align-items:center}
+#rail{display:flex;gap:8px;padding:12px 26px;border-bottom:1px solid var(--p-rule);align-items:center}
 /* The FOCUSED action is the filled one -- that is the keyboard cursor, not a
    permanent primary, so arrowing left/right visibly moves it. */
 button.act{font:inherit;border:1px solid var(--p-rule);background:none;color:var(--ink);
@@ -222,22 +232,23 @@ button.act[aria-selected=true]{background:var(--p);color:var(--bg);border-color:
   <div id=swatches></div>
   <button class=tog id=theme title="Light / dark"></button>
   <button class=tog id=skin title="Switch skin"></button>
+  <button class=tog id=delall title="Delete every draft" hidden>delete all</button>
   <span id=count></span><span id=cursor></span>
 </div>
 <div id=main>
   <div id=list tabindex=0></div>
   <div id=pane>
+    <div id=rail></div>
     <div id=meta></div>
     <div id=body><div id=empty>No draft selected.</div></div>
-    <div id=rail></div>
   </div>
 </div>
 <div id=toast></div>
 <div id=scrim><div class=win>
-  <div class=titlebar><span>Delete draft</span><span>&#215;</span></div>
+  <div class=titlebar><span id=mtitle>Delete draft</span><span>&#215;</span></div>
   <div class=winbody>
-    <p>Delete <span class=fname id=mname></span>?</p>
-    <p class=dim>This removes the file from disk. It cannot be undone.</p>
+    <p id=mline>Delete <span class=fname id=mname></span>?</p>
+    <p class=dim id=mdim>This removes the file from disk. It cannot be undone.</p>
   </div>
   <div class=winrail id=mrail></div>
 </div></div>
@@ -307,11 +318,13 @@ const ACTIONS=[
 
 function render(){
   document.getElementById('count').textContent=drafts.length?drafts.length+' held':'none held';
+  document.getElementById('delall').hidden=!drafts.length;
   document.getElementById('list').innerHTML=drafts.map(d=>
     `<div class=row data-n="${d.name}" aria-selected="${d.name===sel}">
        <span class=caret>&gt;</span>
        <div style="flex-grow:1;min-width:0">
-         <div class=hd><span class=who>${esc(d.who)}</span><span class=age>${d.age}</span></div>
+         <div class=hd><span class=who>${esc(d.who)}</span><span class=age>${d.age}</span>
+           <button class=del title="Delete this draft">&#215;</button></div>
          <p>${excerpt(d.md)}</p>
        </div>
      </div>`).join('')||'<div id=empty>No drafts.</div>';
@@ -367,12 +380,26 @@ function renderModal(){
     modalIdx=+b.dataset.i;MODAL[modalIdx].run();
   });
 }
-function openConfirm(d){
-  if(!d)return;
-  modalFor=d.name;modalIdx=0;
-  document.getElementById('mname').textContent=d.name;
+// modalFor is a filename, or ALL for the whole folder.
+const ALL='\u0000all';
+function showConfirm(title,name,dim){
+  modalIdx=0;
+  document.getElementById('mtitle').textContent=title;
+  document.getElementById('mname').textContent=name;
+  document.getElementById('mdim').textContent=dim+' It cannot be undone.';
   document.getElementById('scrim').classList.add('on');
   renderModal();
+}
+function openConfirm(d){
+  if(!d)return;
+  modalFor=d.name;
+  showConfirm('Delete draft',d.name,'This removes the file from disk.');
+}
+function openConfirmAll(){
+  if(!drafts.length)return;
+  modalFor=ALL;
+  showConfirm('Delete all drafts',drafts.length+(drafts.length===1?' draft':' drafts'),
+              'This empties the drafts folder.');
 }
 function closeConfirm(){
   modalFor=null;
@@ -380,8 +407,12 @@ function closeConfirm(){
 }
 function doDelete(){
   const name=modalFor;closeConfirm();
-  fetch(`/${TOKEN}/api/draft/${encodeURIComponent(name)}`,{method:'DELETE'})
-    .then(()=>{sel=null;actIdx=0;toast('Deleted');poll()});
+  const url=name===ALL?`/${TOKEN}/api/drafts`
+                      :`/${TOKEN}/api/draft/${encodeURIComponent(name)}`;
+  // Deleting a row you were not reading should not move you off what you were.
+  if(name===ALL||name===sel){sel=null;actIdx=0}
+  fetch(url,{method:'DELETE'})
+    .then(()=>{toast(name===ALL?'Deleted all':'Deleted');poll()});
 }
 document.getElementById('scrim').onclick=e=>{if(e.target.id==='scrim')closeConfirm()};
 
@@ -418,8 +449,11 @@ addEventListener('keydown',e=>{
   }
 });
 document.getElementById('list').onclick=e=>{
-  const r=e.target.closest('.row');if(!r)return;sel=r.dataset.n;actIdx=0;render();
+  const r=e.target.closest('.row');if(!r)return;
+  if(e.target.closest('.del')){openConfirm(drafts.find(d=>d.name===r.dataset.n));return}
+  sel=r.dataset.n;actIdx=0;render();
 };
+document.getElementById('delall').onclick=()=>openConfirmAll();
 
 async function poll(){
   try{
@@ -510,6 +544,11 @@ class Handler(http.server.BaseHTTPRequestHandler):
     def do_DELETE(self) -> None:
         route = self._guard()
         if route is None:
+            return
+        if route == "api/drafts":
+            for p in draft_paths():
+                p.unlink(missing_ok=True)
+            self._send(b"{}", "application/json")
             return
         prefix = "api/draft/"
         if not route.startswith(prefix):
