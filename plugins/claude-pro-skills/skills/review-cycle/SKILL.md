@@ -10,7 +10,7 @@ description: >-
   fixes, no push): reach for review-cycle when you want the issues actually fixed
   and pushed, not just listed. It reuses /pr-review as its reviewing engine
   (including the --comment living-comment machinery) and adds the fix/push/iterate
-  loop on top. Also invoked by /ticket-to-pr as its self-review step. Uses judgment
+  loop on top. Also invoked by /shipit as its self-review step. Uses judgment
   on which findings are worth fixing.
 ---
 
@@ -24,7 +24,7 @@ owns the `--comment` living-comment machinery); `review-cycle` adds the loop on 
 Don't reimplement reviewing here; invoke `/pr-review`.
 
 Invoked directly, the user has already opted into the cycle by running it — so just
-run it (the "should we even review this?" gate lives in `/ticket-to-pr`, which asks
+run it (the "should we even review this?" gate lives in `/shipit`, which asks
 before calling this skill).
 
 ## Arguments

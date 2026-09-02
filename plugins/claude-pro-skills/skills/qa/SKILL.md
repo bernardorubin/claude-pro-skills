@@ -1,6 +1,6 @@
 ---
 name: qa
-description: Use when the user wants a ticket, PR, or change QA'd and proven — "QA this ticket", "QA HPY-1234", "verify the ACs", "test this and show me it works", "can we QA it ourselves", "check this passes before we ship", "prove it works on staging". Takes acceptance criteria from a Jira ticket (via jira-cli), a PR, or pasted text; exercises each one against the real running system; captures screenshots and payloads as evidence; then PUBLISHES a per-AC pass/fail/could-not-verify report with the evidence embedded inline — to the Jira ticket, the GitHub PR, both, or a Slack thread, asking the user where when it isn't obvious rather than silently picking. Enforces the QA discipline: every AC needs evidence or it is not a pass, a baseline before you conclude, and anything you could not prove is stated plainly rather than folded into "passed". NOT for writing the fix (that's ticket-to-pr) or for diagnosing a production anomaly (that's investigate).
+description: Use when the user wants a ticket, PR, or change QA'd and proven — "QA this ticket", "QA HPY-1234", "verify the ACs", "test this and show me it works", "can we QA it ourselves", "check this passes before we ship", "prove it works on staging". Takes acceptance criteria from a Jira ticket (via jira-cli), a PR, or pasted text; exercises each one against the real running system; captures screenshots and payloads as evidence; then PUBLISHES a per-AC pass/fail/could-not-verify report with the evidence embedded inline — to the Jira ticket, the GitHub PR, both, or a Slack thread, asking the user where when it isn't obvious rather than silently picking. Enforces the QA discipline: every AC needs evidence or it is not a pass, a baseline before you conclude, and anything you could not prove is stated plainly rather than folded into "passed". NOT for writing the fix (that's shipit) or for diagnosing a production anomaly (that's investigate).
 ---
 
 # QA
@@ -10,7 +10,7 @@ or a reviewer asking "did you test this on staging first?". Your job is to **exe
 every acceptance criterion against the real running system, capture evidence for each
 one, and post that evidence where the team will look** — the Jira ticket, the PR, or both.
 
-Like `ticket-to-pr` and `investigate`, this is a conductor. Lean on what you have:
+Like `shipit` and `investigate`, this is a conductor. Lean on what you have:
 
 | Step | Existing skill / tool |
 |------|----------------------|
@@ -198,7 +198,7 @@ some setups block it outright.
 
 QA reports; it doesn't ship. Don't merge, deploy, promote, or transition the ticket to a
 release state unless the user asks. If QA found a real failure, say so plainly and hand it
-to `ticket-to-pr` if they want it fixed.
+to `shipit` if they want it fixed.
 
 If the user wants a Slack update, draft it with `write-slack-message` — lead with the
 verdict, name what couldn't be verified, keep it short.

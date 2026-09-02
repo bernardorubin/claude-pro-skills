@@ -25,7 +25,7 @@ Write from the perspective of the picking-up agent: it has NONE of this conversa
 4. **Gotchas** — non-obvious things found this session (integration quirks, root causes, failing gates). Label each **confirmed** vs **suspected** — never state an unverified conclusion as fact.
 5. **Next steps** — the concrete to-do list to continue, most-important first. Anchor to the passed argument if there was one.
 6. **Key files & references** — paths touched and artifacts to read (PRD, plan, worklog, vault pages, PR, diff) by path or URL. Do NOT paste diffs, commit contents, or anything already captured elsewhere — reference it.
-7. **Suggested skills** — which skills the next agent should invoke to continue, one line of why each. Pull from what's actually installed (e.g. `/ticket-to-pr` to keep driving the ticket, `/pr-review` before the PR, `/save-session-to-worklog` to log at the end, `/investigate` if a cause is still unconfirmed).
+7. **Suggested skills** — which skills the next agent should invoke to continue, one line of why each. Pull from what's actually installed (e.g. `/shipit` to keep driving the ticket, `/pr-review` before the PR, `/save-session-to-worklog` to log at the end, `/investigate` if a cause is still unconfirmed).
 
 ## Rules
 

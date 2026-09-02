@@ -1,10 +1,10 @@
 ---
-name: ticket-to-pr
+name: shipit
 description: >-
   Use when taking a Jira ticket (or a described feature/bugfix) all the way from
   investigation through implementation, PR, worklog, and a Slack update — the full
   ship pipeline. Triggers on "ship ABC-123", "take this ticket end to end",
-  "implement ABC-456 and open a PR", "work this ticket", or pasting a Jira URL/key
+  "implement ABC-456 and open a PR", "work this ticket", "shipit", or pasting a Jira URL/key
   with intent to BUILD and ship (not just read or comment — for plain read/update/
   transition use the jira-cli skill instead). This skill orchestrates your existing
   skills and enforces your hard rules: verify the root cause against real prod data
@@ -14,7 +14,7 @@ description: >-
   from "assigned" to "review-ready PR + logged + communicated" in one thread.
 ---
 
-# Ticket to PR
+# Shipit
 
 This is the pipeline you run on almost every ticket: understand it, implement on a
 branch, open a PR, fix review, log the work, and post an update. The point of this
