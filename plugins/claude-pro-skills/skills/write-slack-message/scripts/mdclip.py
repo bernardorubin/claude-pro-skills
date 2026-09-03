@@ -104,7 +104,11 @@ def to_html(md: str) -> str:
             continue
 
         if not line.strip():
-            close_list()
+            # Deliberately does NOT close an open list. A blank line between
+            # items is a "loose" list and is still one list; closing here split
+            # it into consecutive <ol>s that each restarted numbering at 1.
+            # Whatever actually ends a list (paragraph, blockquote, fence, end
+            # of input) closes it in the branches below.
             continue
 
         if line.startswith(">"):
@@ -170,6 +174,14 @@ def selftest() -> None:
         assert expect in got, f"missing {expect!r} in {got!r}"
     # a URL inside a code span must not become a link
     assert "<a" not in to_html("`[x](https://y.test)`"), "linked inside code span"
+
+    # A loose list (blank line between items) is ONE list. Splitting it made
+    # every item render as "1." in Slack and in the drafts viewer.
+    loose = to_html("1. first\n\n2. second")
+    assert loose == "<ol><li>first</li><li>second</li></ol>", f"loose list split: {loose!r}"
+    assert to_html("- a\n\n- b") == "<ul><li>a</li><li>b</li></ul>", "loose bullets split"
+    # ...but a paragraph after a list still ends it
+    assert to_html("1. a\n\nafter") == "<ol><li>a</li></ol><p>after</p>", "list not closed by text"
 
     flat = to_plain("see [HPY-1](https://x.test) now\n\n> quoted\n\n```\nx=1\n```\n- a `tok`")
     assert "https://x.test" in flat and "[HPY-1]" not in flat, f"link not flattened: {flat!r}"
