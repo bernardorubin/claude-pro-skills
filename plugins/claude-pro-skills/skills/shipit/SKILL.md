@@ -11,7 +11,8 @@ description: >-
   before writing any code, run gh/jira/git commands yourself instead of handing them
   back, never run deploy/OTA/publish commands, branch with --no-track, and put Jira
   info in the description (not a comment). Reach for it whenever a ticket needs to go
-  from "assigned" to "review-ready PR + logged + communicated" in one thread.
+  from "assigned" to "review-ready PR + logged + communicated" in one thread. When no ticket
+  key is given, it asks whether to create one first or ship without it.
 ---
 
 # Shipit
@@ -88,6 +89,20 @@ confirm; a tiny fix may need no Slack update). Skip what doesn't apply, but when
 applies, hold its rule. Two phases are non-negotiable regardless of ticket size: **Phase 2
 (clarify) is a hard stop — no code gets written until every open question is answered**, and
 **Phase 6 (logging) always runs at the end, no matter how small the ticket.**
+
+### 0. No ticket key? Ask before you build
+
+If the user described the work instead of giving a ticket key or URL, **ask in one line
+whether to create the Jira ticket first, or ship without one** — don't silently pick either.
+Something like: *"Create a Jira ticket for this first, or ship without one?"*
+
+- **Create it**: use `jira-cli` (`POST /rest/api/3/issue`) — summary and description from what
+  they described, ask for project/issue type only if the repo's CLAUDE.md or the instance
+  config doesn't make it obvious. Then continue at Phase 1 with the new key.
+- **Ship without one**: skip Phase 1's claim step, and drop the `ABC-1234:` prefix from the
+  branch name, commits, and PR title — never invent a key.
+
+Skip this question entirely when a key or URL was given.
 
 ### 1. Understand the ticket
 
