@@ -435,10 +435,11 @@ The file is formatted to live as a PR comment. Posting maintains **one living re
 - **`--comment` passed outside PR mode**: note that it only applies to PRs and continue.
 
 ```bash
-# 1. Find the existing marker-tracked comment (empty string if none — the `// empty`
+# 1. Find YOUR existing marker-tracked comment (empty string if none — the `// empty`
 #    ensures no literal "null" is returned when there's no match)
+ME=$(gh api user --jq .login)
 COMMENT_ID=$(gh api "repos/{owner}/{repo}/issues/{pr}/comments" --paginate \
-  --jq 'first(.[] | select(.body | startswith("<!-- pr-review -->")) | .id) // empty')
+  --jq "first(.[] | select(.user.login == \"$ME\" and (.body | startswith(\"<!-- pr-review -->\"))) | .id) // empty")
 
 if [ -n "$COMMENT_ID" ]; then
   # 2a. Update it in place…
@@ -450,6 +451,8 @@ fi
 ```
 
 Never use `gh pr comment --edit-last` — it edits the user's most recent comment on the PR, which may not be the review.
+
+**Match on author as well as the marker.** Anyone else who runs this skill leaves the same `<!-- pr-review -->` marker, most often the PR author's own self-review. A marker-only lookup finds their comment first, and when your token can edit it (repo admin) the PATCH silently overwrites their review with yours. It happened on a teammate's PR; recovering meant pulling the original body out of GitHub's edit history. If the only marker comment belongs to someone else, create your own.
 
 ### Step 10: Show Terminal Summary
 
