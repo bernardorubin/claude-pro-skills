@@ -8,8 +8,9 @@ description: >-
   Runs the full ladder — PR into staging, wait for checks to go green, merge,
   verify the change on staging, PR into main, wait for checks, merge, confirm
   production is healthy AND that the fix is actually live on prod (via Chrome MCP
-  / playwright-cli / curl), then capture evidence of the fix working in
-  production. Enforces the promotion discipline: never merge on red or pending
+  / playwright-cli / curl), capture evidence of the fix working in production,
+  then comment on each Jira ticket and move it to Done or Ready for QA (asking
+  when it isn't obvious; skipped when there is no ticket). Enforces the promotion discipline: never merge on red or pending
   checks, never open the main PR until staging proved the change didn't break
   anything, verify the deployed commit before verifying behavior, and if prod
   comes back broken, revert immediately. NOT for cutting a versioned build or
@@ -21,7 +22,8 @@ description: >-
 
 The user has a change they want **in production, proven**. Your job is the whole
 ladder: staging PR → green → merge → verify on staging → main PR → green → merge →
-verify production is healthy and the fix is actually live → keep evidence.
+verify production is healthy and the fix is actually live → keep evidence → update the
+Jira ticket.
 
 This is the step **after** [[shipit]] leaves a review-ready PR and **beside**
 [[cut-release]] (which turns merged code into a versioned build/store submission).
@@ -32,7 +34,7 @@ Conductor, not the orchestra. Lean on what exists:
 
 | Step | Existing skill / tool |
 |------|----------------------|
-| Ticket, ACs, links | `jira-cli` |
+| Ticket, ACs, links; the post-prod comment + move to Done / Ready for QA | `jira-cli` |
 | PR body for either PR | `pr-description` |
 | Review the change before promoting it | `pr-review` / `review-cycle` |
 | Prove the change against its ACs | `qa` |
@@ -201,7 +203,37 @@ artifact. Jira inline images need the media-services UUID, not the numeric attac
 id; GitHub takes `gh image <files> --repo owner/name`. `qa` step 6 has the full upload
 dance if you need it.
 
-### 9. Report the real state
+### 9. Update the Jira ticket
+
+**Only when the promotion has a ticket**: a key the user gave, or one in the PR title,
+branch name, or body. No ticket → skip this step entirely, and don't ask. **Never run it
+when prod verification failed or you reverted** — a ticket moved forward on a broken
+deploy is worse than one left behind.
+
+For each ticket in the promotion (a staging → main PR that swept in other merged work
+carries their tickets too — handle every one the same way), with `jira-cli`:
+
+1. **Comment what shipped.** Short: the feature PR and the staging → main PR as links,
+   the commit production is running, and how you verified it on prod. ADF, tickets as
+   `inlineCard` links, evidence uploaded into the comment if the user chose Jira in step 8.
+   **No local paths.**
+2. **Move it to Done or Ready for QA — whichever the ticket calls for.**
+   - **Ready for QA**: the ticket has QA Instructions, a QA owner, or acceptance criteria
+     that someone else still needs to test.
+   - **Done**: you proved every AC on production during this promotion and nothing is
+     left for QA.
+   - **Not obvious** → ask the user, offering both, before transitioning. Don't guess.
+3. **GET the transitions first** — ids differ per issue type, so never reuse one from
+   another ticket. POST the transition, then **re-read the status to confirm it landed**:
+   a wrong id returns the same empty 204 as a correct one.
+
+```bash
+jira-curl <instance> GET /rest/api/3/issue/<KEY>/transitions | jq '.transitions[] | {id, name}'
+jira-curl <instance> POST /rest/api/3/issue/<KEY>/transitions -d '{"transition":{"id":"<id>"}}'
+jira-curl <instance> GET "/rest/api/3/issue/<KEY>?fields=status" | jq -r '.fields.status.name'
+```
+
+### 10. Report the real state
 
 Plainly: what merged where, what you verified on staging, what you verified on prod and
 how, what rode along in the promotion, and anything you could **not** verify. Log it
@@ -231,6 +263,8 @@ Slack update is wanted, draft it with `write-slack-message` — verdict first.
 Both PRs merged on green checks, the change verified working on staging before the main
 PR ever opened, production confirmed to be running the merged commit, healthy, and
 carrying the fix — with evidence in `~/Desktop/<TICKET-OR-SLUG>-prod-evidence/` and the
-user asked where (if anywhere) it should be posted. Nothing submitted to a store, no OTA
+user asked where (if anywhere) it should be posted. Every Jira ticket in the promotion
+carries a what-shipped comment and sits in Done or Ready for QA, confirmed by re-reading
+its status (skipped when there is no ticket). Nothing submitted to a store, no OTA
 pushed, no migration run. If prod failed verification: reverted immediately, the revert
-confirmed live, and the user told first.
+confirmed live, the user told first, and no ticket moved.
