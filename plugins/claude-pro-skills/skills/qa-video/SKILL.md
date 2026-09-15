@@ -24,8 +24,21 @@ qavid compress <in> [out.mp4]   # shrink under --target MB (default 9)
 qavid gif <in> [out.gif]        # short clip as a gif instead
 ```
 
-Call it by its path relative to this skill's directory, never absolutely — the
-plugin cache path carries a version number.
+**Claude runs this script, not the user.** Call it by its path relative to this
+skill's directory, never absolutely — the plugin cache path carries a version
+number, so an absolute path breaks on the next plugin update. The user's whole
+interface is `/qa-video` (or just asking for a recording); they never type `qavid`.
+
+If someone does want it by hand, it is
+`~/.claude/plugins/cache/claude-pro-skills/claude-pro-skills/<version>/skills/qa-video/scripts/qavid`,
+and this puts the current one on `PATH`:
+
+```bash
+ln -sf "$(ls -d ~/.claude/plugins/cache/claude-pro-skills/claude-pro-skills/*/skills/qa-video/scripts/qavid | sort -V | tail -1)" ~/.local/bin/qavid
+```
+
+That symlink needs redoing after each plugin update, which is the cost of not
+letting Claude drive it.
 
 ## Step 0 — setup, on the first run
 
