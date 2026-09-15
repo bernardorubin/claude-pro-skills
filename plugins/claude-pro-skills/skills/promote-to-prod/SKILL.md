@@ -154,11 +154,21 @@ exercisable on staging → say that plainly and ask before continuing.
 
 ### 5. PR into main
 
-Staging → main, checks, merge — same discipline as steps 2 and 3. The main PR body
+Staging → main, checks, merge — same discipline as steps 2 and 3, including
+`gh pr checks <n> --watch` until every check settles and merging only on all green. The
+main PR body
 says what's in it (the tickets/PRs since the last promotion) rather than restating the
 one ticket, when the promotion sweeps in other merged work. Watch for exactly that:
 **a staging → main PR carries everything else sitting on staging.** Read the diff and
 tell the user what else is riding along before you merge it.
+
+**A red check on the main PR is not fixed on that PR.** Its head is the staging branch, so
+"fix it on the branch and push" would mean pushing straight to staging. Stop instead. Read
+the failing run's logs (`gh run view <run-id> --log-failed`) and work out whether the failure
+comes from your change or from other work riding along from staging. If it's yours, fix it on
+a new `--no-track` branch, open a new PR into staging, and restart the ladder from step 2. If
+it's someone else's, report it with the evidence and ask the user how to proceed. Either way,
+the main PR stays unmerged.
 
 ### 6. Verify production
 
