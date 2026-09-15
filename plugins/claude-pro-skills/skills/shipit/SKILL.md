@@ -239,6 +239,21 @@ it. Ask something like: *"Run the self-review cycle on this PR, or is it small e
   CLAUDE.md) if one is defined. **Don't reimplement the loop here — `review-cycle` owns it.**
 - **If they skip**: mark it ready without the loop.
 
+**Then wait for CI to go green.** Local gates passing is not CI passing. Once the last push has
+landed (after the review cycle, or right after opening the PR if it was skipped), run
+`gh pr checks <n> --watch` until every check settles, then read the result. Pending is not
+green: never mark the PR ready, announce it, or move on while checks are still running.
+
+- **A check fails**: read the failing run's logs (`gh run view <run-id> --log-failed`), fix the
+  cause, run the gates, push, and watch again. Repeat until green.
+- **It looks flaky** (passes locally, failure unrelated to the diff, e.g. a timeout or network
+  error): re-run it once with `gh run rerun <run-id> --failed`. If it fails again, treat it as
+  real.
+- **It's already red on the base branch**: say so with the evidence (the same check failing on
+  the base branch's latest run) instead of fixing unrelated code, and ask the user how to
+  proceed.
+- **No checks configured**: say that plainly. "No checks ran" is not "checks passed."
+
 If the ticket asked for specific info to live on the PR or the Jira ticket, put it in the
 **description / ticket body by default**, not a comment — the user has had to ask for this
 redo before. Use a comment only when they specifically say "comment."
@@ -246,7 +261,8 @@ redo before. Use a comment only when they specifically say "comment."
 ### 5. Address review
 
 When review comes back, make the fixes and post the response with `gh pr comment` yourself.
-Push the follow-up commits. Update the PR description if the change set materially shifted. If
+Push the follow-up commits and watch CI to green again, same as Phase 4. Update the PR
+description if the change set materially shifted. If
 you re-review after these fixes, run the [[review-cycle]] skill again so the living review
 comment and the review doc stay current (it edits the same comment in place).
 
@@ -284,7 +300,8 @@ release) — hand it back, never run it.
 
 ## What "done" looks like
 
-A review-ready PR with a complete description, review addressed, the session logged to the
+A review-ready PR with a complete description, CI checks green (or explicitly reported as
+absent), review addressed, the session logged to the
 worklog and vault, a drafted Slack update ready to paste, and the deploy command handed back
 for the user to run.
 
