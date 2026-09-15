@@ -18,11 +18,18 @@ acceptance criterion is behavioral.
 `scripts/qavid` (bash; ffmpeg is its only dependency):
 
 ```bash
-qavid setup                     # check + install what's missing
-qavid record [out.mov] [-s N]   # screen recording, ctrl-c to stop
-qavid compress <in> [out.mp4]   # shrink under --target MB (default 9)
-qavid gif <in> [out.gif]        # short clip as a gif instead
+qavid page <url> [--steps f.mjs] # record the PAGE headlessly — the default
+qavid setup                      # check + install what's missing
+qavid record [out.mov] [-s N]    # whole-screen capture — the fallback
+qavid compress <in> [out.mp4]    # shrink under --target MB (default 9)
+qavid gif <in> [out.gif]         # short clip as a gif instead
 ```
+
+**Reach for `page` first.** It drives the project's own Playwright headlessly and
+records the browser page and nothing else: no terminal, no notifications, no
+Screen Recording permission, and the user's screen stays free while it runs. A
+whole-screen capture puts whatever else is open into the evidence — that is the
+first thing this skill got wrong in practice.
 
 **Claude runs this script, not the user.** Call it by its path relative to this
 skill's directory, never absolutely — the plugin cache path carries a version
@@ -62,12 +69,35 @@ prints one line per dependency and fixes what it can:
 
 | The flow is | Capture with |
 |---|---|
-| Already scripted in Playwright | **Playwright's own video** — set `video: "on"` in the project's config (or `--video=on` on the CLI). It writes a `.webm` per test into the output dir, needs no permission, and matches exactly what the test asserted. Skip `qavid record` and go straight to `compress`. Its trace (`--trace=on`) is worth keeping too. |
-| Driven through a real browser by an agent | **Chrome MCP `gif_creator`**, which records frames from the tab it is already driving. Capture extra frames before and after each action so the playback isn't abrupt. |
-| Anything manual, or spanning two apps (a studio driving a site, a terminal plus a browser) | **`qavid record`** |
+| Anything a browser can drive — a page, a redirect chain, a form, a click path | **`qavid page <url>`**, with a `--steps` file for the interaction |
+| Already covered by a Playwright test | **Playwright's own video** — `video: "on"` in the config or `--video=on` on the CLI writes a `.webm` per test; go straight to `compress`. Keep the trace (`--trace=on`) too |
+| Being driven through a real browser by an agent already | **Chrome MCP `gif_creator`**, recording the tab it is driving. Capture extra frames around each action so playback isn't abrupt |
+| Genuinely outside one browser page — a native app, two apps side by side, a studio previewing a site in an iframe | **`qavid record`**, narrowed with `--region x,y,w,h` or `--display N` |
 
-Prefer the scripted paths when the flow is already automated: they are
-reproducible, and the video is a by-product rather than a performance.
+The steps file is a module whose default export takes the page. Waits are the
+point: they are what makes the result readable at normal speed.
+
+```js
+// steps.mjs
+export default async function (page) {
+  const decline = page.getByRole("button", { name: /decline/i });
+  if (await decline.count()) { await decline.first().click(); await page.waitForTimeout(800); }
+  await page.locator('input[type=radio][value=insurance]').focus();
+  await page.waitForTimeout(600);
+  await page.keyboard.press("ArrowRight");   // switch to self-pay
+  await page.waitForTimeout(1500);
+}
+```
+
+```bash
+qavid page "https://staging.example.com/select-billing-method?a=partner" \
+  --steps steps.mjs --out ~/Desktop/HPY-1234-screenshots --name buybox-selfpay
+```
+
+`page` keeps the video even when the flow throws, because a recording of the
+failure is the useful artifact. Add `--headed` only when you need to watch it;
+that puts a browser window on screen and defeats the point. If the project has no
+Playwright, `page` says so and names the fallback instead of guessing.
 
 ## Step 2 — record the flow, not the app
 

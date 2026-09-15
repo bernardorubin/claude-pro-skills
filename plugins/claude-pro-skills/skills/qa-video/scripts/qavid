@@ -1,13 +1,18 @@
 #!/usr/bin/env bash
 # Record, compress and size-check a QA video on macOS.
 #
+#   qavid page <url> [--steps f.mjs] record the PAGE headlessly (preferred)
 #   qavid setup                      check (and offer to install) what's needed
 #   qavid record [out.mov] [-s N]    screen recording; ctrl-c stops, -s N caps seconds
 #   qavid compress <in> [out.mp4]    shrink under --target MB (default 9)
 #   qavid gif <in> [out.gif]         short clip as a gif instead
 #
-# Only dependency is ffmpeg. Screen recording uses macOS's own `screencapture`,
-# Playwright writes its own .webm and only needs `compress`.
+# Prefer `page`: Playwright records the browser page only, headless, so the
+# terminal and everything else on screen stay out of the video. `record` grabs
+# the whole screen and is the fallback for flows a browser can't drive; narrow
+# it with --region or --display.
+#
+# Dependencies: ffmpeg, plus the project's own Playwright for `page`.
 #
 # ponytail: no config, no state file. The checks are cheap enough to run every
 # time, so there is nothing to invalidate.
@@ -17,6 +22,8 @@ set -euo pipefail
 TARGET_MB=9      # GitHub rejects over 10MB; leave headroom
 WIDTH=1280
 FPS=15
+
+SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 die() { printf '%s\n' "$*" >&2; exit 1; }
 have() { command -v "$1" >/dev/null 2>&1; }
@@ -74,28 +81,70 @@ need_ffmpeg() { have ffmpeg || { echo "ffmpeg missing, running setup first." >&2
 # ---------------------------------------------------------------- record
 
 cmd_record() {
-  local out="" secs=""
+  local out="" secs="" region="" display=""
   while (($#)); do
     case "$1" in
       -s|--seconds) secs="$2"; shift 2;;
+      -R|--region) region="$2"; shift 2;;   # x,y,width,height
+      -D|--display) display="$2"; shift 2;;
       *) out="$1"; shift;;
     esac
   done
   out="${out:-$HOME/Desktop/qa-recording-$(date +%m%d-%H%M%S).mov}"
   need_ffmpeg
 
+  # Whole-screen capture puts the terminal, notifications and every other window
+  # in the evidence. --region/--display keep them out; `qavid page` avoids the
+  # screen entirely and is the better answer when a browser can drive the flow.
+  local scope=(); [[ -n "$region" ]] && scope+=(-R "$region"); [[ -n "$display" ]] && scope+=(-D "$display")
+  [[ ${#scope[@]} -eq 0 ]] && echo "Capturing the WHOLE screen. Narrow it with --region x,y,w,h or --display N, or use: qavid page <url>" >&2
+
   if [[ -n "$secs" ]]; then
-    echo "Recording the screen for ${secs}s -> $out"
-    screencapture -x -V "$secs" "$out"
+    echo "Recording for ${secs}s -> $out"
+    screencapture -x "${scope[@]}" -V "$secs" "$out"
   else
-    echo "Recording the screen -> $out"
+    echo "Recording -> $out"
     echo "Press ctrl-c here when the flow is done."
-    screencapture -x -v "$out" || true   # ctrl-c is the normal exit
+    screencapture -x "${scope[@]}" -v "$out" || true   # ctrl-c is the normal exit
   fi
 
   [[ -s "$out" ]] || die "Nothing was recorded. Run: qavid setup (screen recording permission is the usual cause)."
   echo "Recorded $(mb "$out")MB: $out"
   echo "Next: qavid compress \"$out\""
+}
+
+# ---------------------------------------------------------------- page
+
+# Walk up from the working directory for a resolvable playwright. Projects keep
+# it in devDependencies, and pnpm hides it behind .pnpm, so check both the plain
+# path and the store.
+find_playwright_root() {
+  local dir="$PWD"
+  while [[ "$dir" != "/" ]]; do
+    [[ -d "$dir/node_modules/playwright" ]] && { echo "$dir/node_modules"; return 0; }
+    local pnpm_pw; pnpm_pw="$(ls -d "$dir"/node_modules/.pnpm/playwright@*/node_modules 2>/dev/null | head -1 || true)"
+    [[ -n "$pnpm_pw" ]] && { echo "$pnpm_pw"; return 0; }
+    dir="$(dirname "$dir")"
+  done
+  return 1
+}
+
+cmd_page() {
+  local url="${1:-}"; shift || true
+  [[ -n "$url" ]] || die "usage: qavid page <url> [--steps steps.mjs] [--seconds N] [--name flow] [--headed]"
+
+  local node_path
+  node_path="$(find_playwright_root)" || die "No Playwright in this project.
+Add it (pnpm add -D playwright && npx playwright install chromium), or fall back to:
+  qavid record --region x,y,w,h"
+
+  local script="${SELF_DIR}/pw-record.mjs"
+  echo "Recording the page headlessly (nothing on your screen is captured)..."
+  local webm
+  webm="$(PW_MODULE="$node_path" node "$script" --url "$url" "$@" | tail -1)" || true
+  [[ -n "$webm" && -f "$webm" ]] || die "No video produced. Run with --headed to watch the flow, or check the steps file."
+  echo "Recorded $(mb "$webm")MB: $webm"
+  echo "Next: qavid compress \"$webm\""
 }
 
 # ---------------------------------------------------------------- compress
@@ -154,11 +203,12 @@ cmd_gif() {
 # ---------------------------------------------------------------- main
 
 case "${1:-}" in
+  page) shift; cmd_page "$@";;
   setup) shift; cmd_setup;;
   record) shift; cmd_record "$@";;
   compress) shift; cmd_compress "$@";;
   gif) shift; cmd_gif "$@";;
   ""|-h|--help)
-    sed -n '2,10p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//';;
+    sed -n '2,16p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//';;
   *) die "unknown command: $1 (try: setup, record, compress, gif)";;
 esac
