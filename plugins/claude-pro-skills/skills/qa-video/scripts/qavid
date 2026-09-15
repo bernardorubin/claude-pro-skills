@@ -1,0 +1,164 @@
+#!/usr/bin/env bash
+# Record, compress and size-check a QA video on macOS.
+#
+#   qavid setup                      check (and offer to install) what's needed
+#   qavid record [out.mov] [-s N]    screen recording; ctrl-c stops, -s N caps seconds
+#   qavid compress <in> [out.mp4]    shrink under --target MB (default 9)
+#   qavid gif <in> [out.gif]         short clip as a gif instead
+#
+# Only dependency is ffmpeg. Screen recording uses macOS's own `screencapture`,
+# Playwright writes its own .webm and only needs `compress`.
+#
+# ponytail: no config, no state file. The checks are cheap enough to run every
+# time, so there is nothing to invalidate.
+
+set -euo pipefail
+
+TARGET_MB=9      # GitHub rejects over 10MB; leave headroom
+WIDTH=1280
+FPS=15
+
+die() { printf '%s\n' "$*" >&2; exit 1; }
+have() { command -v "$1" >/dev/null 2>&1; }
+mb() { echo "scale=1; $(wc -c <"$1") / 1048576" | bc; }
+
+[[ "$(uname -s)" == "Darwin" ]] || die "qavid is macOS only (uses screencapture). On Linux, record with Playwright and use: qavid compress <file>"
+
+# ---------------------------------------------------------------- setup
+
+install_ffmpeg() {
+  if have brew; then
+    echo "Installing ffmpeg with Homebrew (a few minutes on first run)..."
+    brew install ffmpeg
+  else
+    die "ffmpeg is missing and Homebrew isn't installed.
+Install Homebrew first:
+  /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\"
+then re-run: qavid setup"
+  fi
+}
+
+cmd_setup() {
+  local ok=0
+  if have ffmpeg; then
+    echo "ok   ffmpeg $(ffmpeg -version | head -1 | cut -d' ' -f3)"
+  else
+    echo "MISS ffmpeg"
+    install_ffmpeg
+    have ffmpeg && echo "ok   ffmpeg installed" || ok=1
+  fi
+
+  have screencapture && echo "ok   screencapture (built in)" || { echo "MISS screencapture"; ok=1; }
+  have bc && echo "ok   bc (built in)" || { echo "MISS bc"; ok=1; }
+
+  # Screen Recording permission is per-app and silent when missing: the capture
+  # writes a file with no frames. A 1-second probe is the only honest check.
+  local probe; probe="$(mktemp -t qavid).mov"
+  screencapture -x -V 1 "$probe" >/dev/null 2>&1 || true
+  if [[ -s "$probe" ]] && ffprobe -v error -select_streams v -count_frames \
+      -show_entries stream=nb_read_frames -of csv=p=0 "$probe" 2>/dev/null | grep -qvx "0"; then
+    echo "ok   screen recording permission"
+  else
+    echo "MISS screen recording permission for this terminal app"
+    echo "     Grant it: System Settings > Privacy & Security > Screen & System Audio Recording,"
+    echo "     enable your terminal (Warp, Terminal, iTerm), then restart the terminal."
+    ok=1
+  fi
+  rm -f "$probe"
+
+  return $ok
+}
+
+need_ffmpeg() { have ffmpeg || { echo "ffmpeg missing, running setup first." >&2; cmd_setup >&2; }; }
+
+# ---------------------------------------------------------------- record
+
+cmd_record() {
+  local out="" secs=""
+  while (($#)); do
+    case "$1" in
+      -s|--seconds) secs="$2"; shift 2;;
+      *) out="$1"; shift;;
+    esac
+  done
+  out="${out:-$HOME/Desktop/qa-recording-$(date +%m%d-%H%M%S).mov}"
+  need_ffmpeg
+
+  if [[ -n "$secs" ]]; then
+    echo "Recording the screen for ${secs}s -> $out"
+    screencapture -x -V "$secs" "$out"
+  else
+    echo "Recording the screen -> $out"
+    echo "Press ctrl-c here when the flow is done."
+    screencapture -x -v "$out" || true   # ctrl-c is the normal exit
+  fi
+
+  [[ -s "$out" ]] || die "Nothing was recorded. Run: qavid setup (screen recording permission is the usual cause)."
+  echo "Recorded $(mb "$out")MB: $out"
+  echo "Next: qavid compress \"$out\""
+}
+
+# ---------------------------------------------------------------- compress
+
+cmd_compress() {
+  local in="" out="" target="$TARGET_MB" width="$WIDTH" fps="$FPS"
+  while (($#)); do
+    case "$1" in
+      --target) target="$2"; shift 2;;
+      --width) width="$2"; shift 2;;
+      --fps) fps="$2"; shift 2;;
+      *) [[ -z "$in" ]] && in="$1" || out="$1"; shift;;
+    esac
+  done
+  [[ -n "$in" && -f "$in" ]] || die "usage: qavid compress <in> [out.mp4] [--target MB] [--width PX] [--fps N]"
+  out="${out:-${in%.*}-qa.mp4}"
+  need_ffmpeg
+
+  # Walk the quality ladder until it fits. crf 40 at 960px is already rough, so
+  # stop there and say so rather than pretending a smaller file is usable.
+  local crf
+  for crf in 28 32 36 40; do
+    ffmpeg -y -loglevel error -i "$in" \
+      -vf "scale=${width}:-2:flags=lanczos,fps=${fps}" \
+      -c:v libx264 -preset veryfast -crf "$crf" -pix_fmt yuv420p -movflags +faststart -an \
+      "$out"
+    local size; size="$(mb "$out")"
+    if (( $(echo "$size <= $target" | bc -l) )); then
+      echo "Wrote ${size}MB at crf ${crf}, ${width}px, ${fps}fps: $out"
+      return 0
+    fi
+    echo "crf ${crf} gave ${size}MB, over the ${target}MB target; trying harder..." >&2
+    [[ "$crf" == 36 ]] && width=960
+  done
+  echo "Still $(mb "$out")MB after crf 40 at ${width}px: $out" >&2
+  echo "Record a shorter clip, or attach it to Jira instead of GitHub." >&2
+  return 1
+}
+
+# ---------------------------------------------------------------- gif
+
+cmd_gif() {
+  local in="${1:-}" out="${2:-}" width=720 fps=12
+  [[ -n "$in" && -f "$in" ]] || die "usage: qavid gif <in> [out.gif]"
+  out="${out:-${in%.*}.gif}"
+  need_ffmpeg
+  local pal; pal="$(mktemp -t qavid-pal).png"
+  ffmpeg -y -loglevel error -i "$in" -vf "fps=${fps},scale=${width}:-1:flags=lanczos,palettegen" "$pal"
+  ffmpeg -y -loglevel error -i "$in" -i "$pal" \
+    -lavfi "fps=${fps},scale=${width}:-1:flags=lanczos[x];[x][1:v]paletteuse" "$out"
+  rm -f "$pal"
+  echo "Wrote $(mb "$out")MB: $out"
+  echo "A gif is 5-10x the bytes of the same mp4 — keep it under ~10s."
+}
+
+# ---------------------------------------------------------------- main
+
+case "${1:-}" in
+  setup) shift; cmd_setup;;
+  record) shift; cmd_record "$@";;
+  compress) shift; cmd_compress "$@";;
+  gif) shift; cmd_gif "$@";;
+  ""|-h|--help)
+    sed -n '2,10p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//';;
+  *) die "unknown command: $1 (try: setup, record, compress, gif)";;
+esac

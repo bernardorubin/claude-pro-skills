@@ -1,6 +1,6 @@
 # claude-pro-skills
 
-A Claude Code toolkit — **26 skills, no prefix to type**. Shipping pipelines (new app / ticket / release), code reviews (PR / local / full-repo audit), git workflow, Claude meta tasks, external integrations, and per-project knowledge vaults.
+A Claude Code toolkit — **27 skills, no prefix to type**. Shipping pipelines (new app / ticket / release), code reviews (PR / local / full-repo audit), git workflow, Claude meta tasks, external integrations, and per-project knowledge vaults.
 
 > **Heads up**: examples throughout use placeholder names — `acme`/`beacon` projects, `acme`/`work` Jira instances, `ACME-####` ticket prefixes. They're illustrative; the plugin works for any project. Two spots hold config you replace with your own: the **Project Map** in `/save-session-to-worklog` and the vault registry under `~/.config/claude-pro-skills/vaults.json`.
 
@@ -35,6 +35,9 @@ Diagnose a production anomaly, bug report, or "why is X happening" — grounded 
 
 ### `/qa`
 QA a ticket or PR and **prove** it — exercise every acceptance criterion against the real running system **through the interface that AC lives behind** (API/CLI with the project's own keys, a data query, or the UI — a browser only when the AC is actually about the UI), capture evidence per AC, then **publish** a pass / fail / **could not verify** report with the evidence embedded inline — to the Jira ticket, the GitHub PR, both, or a Slack thread, **asking you where when it isn't obvious** rather than silently picking. Enforces three lines: evidence per AC or it isn't a pass, a **baseline before you conclude** (so a pre-existing failure never gets called a regression), and never claiming more than you proved. Opens the source spec when the ticket cites one, because a ticket's paraphrase of a PRD is not the PRD. Reports only — never merges or deploys. Auto-triggers on "QA this ticket", "verify the ACs", "test this and show me it works", "can we QA it ourselves before shipping".
+
+### `/qa-video`
+Record a QA **video** when a screenshot can't prove the thing — a redirect chain, a state machine, an editor interaction, an async path. Bundles `scripts/qavid`: `setup` installs ffmpeg via Homebrew and probes the macOS **Screen Recording permission** (which fails silently, writing a file with zero frames, so it counts frames rather than trusting the exit code), `record` drives macOS's own `screencapture`, `compress` walks the crf ladder until the file is under 9MB — headroom under GitHub's 10MB cap — and `gif` handles clips under ten seconds. Prefers Playwright's built-in video when the flow is already scripted, and Chrome MCP's `gif_creator` when an agent is driving the browser. Knows the routing asymmetry that decides where evidence lands: **Jira takes video through its attachments API (so a skill can finish the job), GitHub has no video upload API at all** (so the PR step is handed back with a paste-ready line rather than claimed as done). Refuses to record real patient data, credentials or a full screen when a window will do. Auto-triggers on "record a video of this", "a screenshot won't show this", "video QA", "attach a video to the ticket".
 
 ## Git
 
