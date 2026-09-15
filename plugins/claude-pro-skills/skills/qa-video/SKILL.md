@@ -22,6 +22,8 @@ qavid page <url> [--steps f.mjs] # record the PAGE headlessly — the default
 qavid setup                      # check + install what's missing
 qavid record [out.mov] [-s N]    # whole-screen capture — the fallback
 qavid compress <in> [out.mp4]    # shrink under --target MB (default 9)
+qavid preview <file>             # play it so someone can judge the pacing
+qavid speed <in> <factor>        # 1.5 = 50% faster, 0.75 = slower
 qavid gif <in> [out.gif]         # short clip as a gif instead
 ```
 
@@ -130,10 +132,37 @@ shorter clip or attach it to Jira, which is far more generous.
 `qavid gif` exists for clips under about ten seconds, where a gif autoplays inline
 and needs no player. Beyond that a gif is 5-10x the bytes of the same mp4.
 
-## Step 4 — publish it where the reader is
+## Step 4 — show it before you publish it, and ask about pacing
+
+**Never post a video the user hasn't seen.** You cannot judge pacing from a frame
+count, and a recording that drags or races is the one piece of evidence a reviewer
+silently skips.
+
+```bash
+qavid preview ~/Desktop/HPY-1234-screenshots/buybox-selfpay.mp4
+```
+
+That opens it in QuickTime, where it plays and loops. Then ask, in one question
+with the options spelled out — duration included, because that is what they are
+judging:
+
+> The recording is 12s. Keep this speed, 1.5x (8s), or 2x (6s)?
+
+- **Faster**: `qavid speed <file> 1.5` or `2`. Both re-encode, so the output is
+  still under the size target.
+- **Slower**: the same command with `0.75`, for a flow where a state flashes past.
+- **Only part of it is worth keeping**: re-record with a tighter steps file rather
+  than trimming, so the video still matches a reproducible run.
+
+Loop preview → adjust → preview until they're happy. Only then ask where it goes.
+
+## Step 5 — publish it where the reader is
 
 **GitHub has no API for video uploads.** `gh image` covers images only, so an agent
 cannot post a video to a PR. That asymmetry decides the routing:
+
+**Ask where it goes, with the options spelled out** — Jira ticket, the PR, both, or
+nowhere — the same way [[qa]] does. Don't pick silently.
 
 - **Jira** takes video through the attachments API, and previews mp4 inline. This is
   the destination an agent can complete on its own:
@@ -169,6 +198,6 @@ the state transitions) and put the identifiers in text alongside it.
 ## What "done" looks like
 
 A named, compressed video that shows the behavior end to end, under the destination's
-size limit, attached to the ticket by this skill and handed back for the PR with the
-paste-ready line. The report says which environment it was recorded on, and it never
+size limit, **watched by the user at a pace they chose**, attached to the ticket by
+this skill and handed back for the PR with the paste-ready line. The report says which environment it was recorded on, and it never
 claims the PR upload happened when that step is the user's.

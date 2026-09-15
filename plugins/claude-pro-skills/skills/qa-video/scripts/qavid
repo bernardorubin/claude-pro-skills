@@ -5,6 +5,8 @@
 #   qavid setup                      check (and offer to install) what's needed
 #   qavid record [out.mov] [-s N]    screen recording; ctrl-c stops, -s N caps seconds
 #   qavid compress <in> [out.mp4]    shrink under --target MB (default 9)
+#   qavid preview <file>             play it so someone can judge the pacing
+#   qavid speed <in> <factor>        1.5 = 50% faster, 0.75 = slower
 #   qavid gif <in> [out.gif]         short clip as a gif instead
 #
 # Prefer `page`: Playwright records the browser page only, headless, so the
@@ -184,6 +186,27 @@ cmd_compress() {
   return 1
 }
 
+# ---------------------------------------------------------------- preview / speed
+
+cmd_preview() {
+  local in="${1:-}"
+  [[ -n "$in" && -f "$in" ]] || die "usage: qavid preview <file>"
+  # QuickTime via `open` rather than a Quick Look panel: it plays, scrubs and
+  # loops, which is what someone judging pacing needs.
+  open "$in"
+  echo "Opened $(mb "$in")MB, $(ffprobe -v error -show_entries format=duration -of csv=p=0 "$in" | cut -d. -f1)s: $in"
+}
+
+cmd_speed() {
+  local in="${1:-}" factor="${2:-1.5}" out="${3:-}"
+  [[ -n "$in" && -f "$in" ]] || die "usage: qavid speed <in> <factor> [out]   (1.5 = 50% faster, 0.75 = slower)"
+  out="${out:-${in%.*}-${factor}x.mp4}"
+  need_ffmpeg
+  # setpts only; there is no audio to keep in sync.
+  ffmpeg -y -loglevel error -i "$in" -filter:v "setpts=PTS/${factor}" -c:v libx264 -preset veryfast -crf 28 -pix_fmt yuv420p -movflags +faststart -an "$out"
+  echo "Wrote ${factor}x ($(ffprobe -v error -show_entries format=duration -of csv=p=0 "$out" | cut -d. -f1)s, $(mb "$out")MB): $out"
+}
+
 # ---------------------------------------------------------------- gif
 
 cmd_gif() {
@@ -207,8 +230,10 @@ case "${1:-}" in
   setup) shift; cmd_setup;;
   record) shift; cmd_record "$@";;
   compress) shift; cmd_compress "$@";;
+  preview) shift; cmd_preview "$@";;
+  speed) shift; cmd_speed "$@";;
   gif) shift; cmd_gif "$@";;
   ""|-h|--help)
-    sed -n '2,16p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//';;
+    sed -n '2,18p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//';;
   *) die "unknown command: $1 (try: setup, record, compress, gif)";;
 esac
