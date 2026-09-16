@@ -33,12 +33,15 @@ def inline(text: str) -> str:
     parts, out = CODE_SPAN.split(text), []
     for i, part in enumerate(parts):
         if i % 2:  # odd indexes are the code-span contents
-            out.append(f"<code>{html.escape(part)}</code>")
+            out.append(f"<code>{html.escape(part, quote=False)}</code>")
         else:
             out.append(LINK.sub(
-                lambda m: f'<a href="{html.escape(m.group(2), quote=True)}">'
-                          f"{html.escape(m.group(1))}</a>",
-                html.escape(part),
+                # The whole part is already escaped above, so the href must NOT
+                # be escaped again: html.escape would turn its `&amp;` into
+                # `&amp;amp;` and break every URL carrying a query string.
+                lambda m: f'<a href="{m.group(2).replace(chr(34), "&quot;")}">'
+                          f"{m.group(1)}</a>",
+                html.escape(part, quote=False),
             ))
     return "".join(out)
 
@@ -93,7 +96,7 @@ def to_html(md: str) -> str:
 
         if line.startswith("```"):
             if in_code:
-                out.append("<pre><code>" + html.escape("\n".join(code)) + "</code></pre>")
+                out.append("<pre><code>" + html.escape("\n".join(code), quote=False) + "</code></pre>")
                 code, in_code = [], False
             else:
                 close_list()
@@ -131,7 +134,7 @@ def to_html(md: str) -> str:
         out.append(f"<p>{inline(line)}</p>")
 
     if in_code:  # unterminated fence: keep the content rather than dropping it
-        out.append("<pre><code>" + html.escape("\n".join(code)) + "</code></pre>")
+        out.append("<pre><code>" + html.escape("\n".join(code), quote=False) + "</code></pre>")
     close_list()
     return "".join(out)
 
