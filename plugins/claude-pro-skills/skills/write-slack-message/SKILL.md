@@ -62,6 +62,22 @@ Based on the user's request, write a Slack message following these guidelines:
 
 Worth being persnickety about this — bare URLs in Slack look careless, and unlinked ticket keys force the reader to manually search Jira to follow up. The markdown link format is two extra characters of typing for a much better recipient experience.
 
+### Include a link whenever the reader would want to check the claim
+
+The rule above is about *formatting* links you already decided to include. This one is about **including them in the first place**, and it is the half that gets forgotten.
+
+Any claim about a live system carries a link to the thing itself, so the reader can confirm it in one click instead of taking your word for it or hunting for it:
+
+- "X is broken on production" → link the page where it is broken.
+- "I fixed X" → link the page where it is now fixed.
+- "the value is wrong in Sanity / Vercel / Customer.io / GTM" → link the document, project or dashboard.
+- Naming a ticket, a PR, a build or a partner → link it, every occurrence.
+- Quoting a number from a dashboard → link the view that shows the number.
+
+This is the difference between a message someone has to trust and a message someone can verify. A reply saying a fix is live is materially weaker without the URL, and asking a teammate to fix a record without linking that record makes them do the lookup you already did.
+
+The test: for each factual claim, ask whether the reader could reasonably want to see it. If yes and a URL exists, it goes in. If no URL exists (a code path, a log line already quoted), say so rather than leaving a claim that looks checkable but isn't.
+
 ### Message Structure
 - Lead with the key point or ask
 - Keep paragraphs to 1-3 sentences max
