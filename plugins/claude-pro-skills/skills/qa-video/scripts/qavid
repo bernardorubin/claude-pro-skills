@@ -131,19 +131,37 @@ find_playwright_root() {
   return 1
 }
 
+# Plenty of projects have no Playwright and shouldn't grow one for a recording —
+# a Shopify theme, a Rails app, a static site. Any playwright-core already on the
+# machine (playwright-cli installs one) drives system Chrome just as well.
+find_global_playwright() {
+  local hit
+  hit="$(ls -d "$HOME"/Library/pnpm/store/*/links/*/playwright-core/*/*/node_modules/playwright-core 2>/dev/null | sort -V | tail -1 || true)"
+  [[ -z "$hit" ]] && hit="$(ls -d "$(npm root -g 2>/dev/null)"/playwright-core 2>/dev/null | head -1 || true)"
+  [[ -n "$hit" ]] && { echo "$hit"; return 0; }
+  return 1
+}
+
 cmd_page() {
   local url="${1:-}"; shift || true
-  [[ -n "$url" ]] || die "usage: qavid page <url> [--steps steps.mjs] [--seconds N] [--name flow] [--headed]"
+  [[ -n "$url" ]] || die "usage: qavid page <url> [--steps steps.mjs] [--seconds N] [--name flow] [--headed] [--no-cursor]"
 
-  local node_path
-  node_path="$(find_playwright_root)" || die "No Playwright in this project.
+  local node_path="" pw_path="" pw_channel=""
+  if node_path="$(find_playwright_root)"; then
+    :
+  elif pw_path="$(find_global_playwright)"; then
+    pw_channel="chrome"   # playwright-core ships no browsers; drive installed Chrome
+    echo "No Playwright in this project — using the global playwright-core with system Chrome."
+  else
+    die "No Playwright here and none installed globally.
 Add it (pnpm add -D playwright && npx playwright install chromium), or fall back to:
   qavid record --region x,y,w,h"
+  fi
 
   local script="${SELF_DIR}/pw-record.mjs"
   echo "Recording the page headlessly (nothing on your screen is captured)..."
   local webm
-  webm="$(PW_MODULE="$node_path" node "$script" --url "$url" "$@" | tail -1)" || true
+  webm="$(PW_MODULE="$node_path" PW_PATH="$pw_path" PW_CHANNEL="$pw_channel" node "$script" --url "$url" "$@" | tail -1)" || true
   [[ -n "$webm" && -f "$webm" ]] || die "No video produced. Run with --headed to watch the flow, or check the steps file."
   echo "Recorded $(mb "$webm")MB: $webm"
   echo "Next: qavid compress \"$webm\""

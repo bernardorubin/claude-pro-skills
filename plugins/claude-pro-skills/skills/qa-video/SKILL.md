@@ -79,17 +79,30 @@ prints one line per dependency and fixes what it can:
 The steps file is a module whose default export takes the page. Waits are the
 point: they are what makes the result readable at normal speed.
 
+**Click with `page.qaClick(...)`, not `locator.click()`.** A headless recording has
+no pointer of its own, so `page` draws one: a cursor that follows pointer events and
+a red ring at each click. `qaClick` walks the real mouse to the element first, so the
+cursor visibly travels there and the ring lands on what was clicked. A plain
+`locator.click()` teleports — the ring appears with no approach — and
+`click({ force: true })` fires no pointer events at all, so nothing is drawn and the
+video shows the page changing for no visible reason. `--no-cursor` turns the overlay
+off.
+
 ```js
 // steps.mjs
 export default async function (page) {
   const decline = page.getByRole("button", { name: /decline/i });
-  if (await decline.count()) { await decline.first().click(); await page.waitForTimeout(800); }
-  await page.locator('input[type=radio][value=insurance]').focus();
-  await page.waitForTimeout(600);
+  if (await decline.count()) await page.qaClick(decline.first());
+  await page.qaClick('label:has(input[type=radio][value=insurance])');  // selector or locator
   await page.keyboard.press("ArrowRight");   // switch to self-pay
   await page.waitForTimeout(1500);
 }
 ```
+
+`qaClick` takes `{ settle }` for how long to hold after the click (default 900ms) —
+give a gallery swap or a fetch longer, so the result is readable. **Click the label,
+not a visually hidden input**: swatches and radios are often `opacity: 0` with the
+label carrying the paint, and a hidden element has no box to move the mouse to.
 
 ```bash
 qavid page "https://staging.example.com/select-billing-method?a=partner" \
@@ -98,8 +111,13 @@ qavid page "https://staging.example.com/select-billing-method?a=partner" \
 
 `page` keeps the video even when the flow throws, because a recording of the
 failure is the useful artifact. Add `--headed` only when you need to watch it;
-that puts a browser window on screen and defeats the point. If the project has no
-Playwright, `page` says so and names the fallback instead of guessing.
+that puts a browser window on screen and defeats the point.
+
+**A project without Playwright still records.** `page` prefers the project's own
+install, and falls back to any global `playwright-core` on the machine (the one
+`playwright-cli` brings), driving installed Chrome. So a Shopify theme or a Rails
+app gets a recording without growing a devDependency for it. Only when there is
+neither does `page` stop and name the fallback.
 
 ## Step 2 — record the flow, not the app
 
