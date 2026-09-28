@@ -1,6 +1,11 @@
 ---
 name: qa-video
-description: Record a QA video of a flow, compress it to a postable size, and attach it to the Jira ticket or PR. Use when a change is behavioral rather than visual and a screenshot cannot show it working — a redirect chain, a state machine, an editor interaction, a timing or async path. Triggers on phrases like "record a video of this", "screen record the QA", "a screenshot won't show this", "attach a video to the ticket", "video QA", "show the flow working".
+description: >-
+  Use when a change is behavioral and a screenshot can't show it working (a redirect
+  chain, state machine, editor interaction, async path): records a video of the flow,
+  compresses it, and attaches it to the Jira ticket or PR. Triggers on "record a video
+  of this", "screen record the QA", "a screenshot won't show this", "attach a video to
+  the ticket", "video QA", "show the flow working".
 ---
 
 # QA Video

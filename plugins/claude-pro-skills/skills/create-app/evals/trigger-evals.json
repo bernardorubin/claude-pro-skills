@@ -1,0 +1,8 @@
+[
+  {"query": "I have a new app idea, let's build it and get it on the App Store", "should_trigger": true},
+  {"query": "take this app to its first App Store release, nothing has ever shipped", "should_trigger": true},
+  {"query": "start a new project for a habit tracker app", "should_trigger": true},
+  {"query": "cut a build for TestFlight for version 1.3", "should_trigger": false},
+  {"query": "promote this change to prod", "should_trigger": false},
+  {"query": "implement ACME-12 in the existing app", "should_trigger": false}
+]

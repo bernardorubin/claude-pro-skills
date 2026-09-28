@@ -1,6 +1,12 @@
 ---
 name: vault-keeper
-description: Use when working in a project that has a registered second-brain knowledge vault (Karpathy-style LLM Wiki). Auto-fires when the user documents findings (architecture decisions, integration quirks, debugging discoveries, team facts, ticket epics), looks up domain context (team/integrations/flows/past decisions), ingests raw sources into the wiki, or asks for a vault lint/audit. Resolves the current working directory against `~/.config/claude-pro-skills/vaults.json`; if the project has no registered vault, the skill self-terminates without action. To set up a new vault, use `/vault-init`. Triggers on phrases like "save this to the vault", "what does the wiki say about X", "let's document this finding", "ingest this doc", "lint the wiki", "what's our second brain say about Y".
+description: >-
+  Use in a project with a registered knowledge vault (listed in ~/.config/claude-pro-
+  skills/vaults.json) when the user documents a finding, looks up domain context,
+  ingests a source into the wiki, or asks for a vault lint. Triggers on "add this to
+  the vault", "what does the wiki say about X", "let's document this finding", "ingest
+  this doc", "lint the wiki". Does nothing when no vault is registered; set one up
+  with vault-init.
 allowed-tools: Read, Write, Edit, Bash(jq:*), Bash(cat:*), Bash(test:*), Bash(ls:*), Bash(date:*), Bash(grep:*), Bash(find:*), Bash(git:*)
 ---
 

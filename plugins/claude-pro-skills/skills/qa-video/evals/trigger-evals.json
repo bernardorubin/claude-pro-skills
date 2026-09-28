@@ -1,0 +1,8 @@
+[
+  {"query": "record a video of the login redirect chain and attach it to the PR", "should_trigger": true},
+  {"query": "a screenshot won't show this timing bug, screen record the QA", "should_trigger": true},
+  {"query": "attach a video of the editor drag-and-drop working to ACME-88", "should_trigger": true},
+  {"query": "QA this ticket and post a pass/fail report", "should_trigger": false},
+  {"query": "take a screenshot of the new header on staging", "should_trigger": false},
+  {"query": "verify all the acceptance criteria on ACME-1234", "should_trigger": false}
+]

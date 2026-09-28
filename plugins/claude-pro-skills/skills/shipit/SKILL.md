@@ -1,18 +1,11 @@
 ---
 name: shipit
 description: >-
-  Use when taking a Jira ticket (or a described feature/bugfix) all the way from
-  investigation through implementation, PR, worklog, and a Slack update — the full
-  ship pipeline. Triggers on "ship ABC-123", "take this ticket end to end",
-  "implement ABC-456 and open a PR", "work this ticket", "shipit", or pasting a Jira URL/key
-  with intent to BUILD and ship (not just read or comment — for plain read/update/
-  transition use the jira-cli skill instead). This skill orchestrates your existing
-  skills and enforces your hard rules: verify the root cause against real prod data
-  before writing any code, run gh/jira/git commands yourself instead of handing them
-  back, never run deploy/OTA/publish commands, branch with --no-track, and put Jira
-  info in the description (not a comment). Reach for it whenever a ticket needs to go
-  from "assigned" to "review-ready PR + logged + communicated" in one thread. When no ticket
-  key is given, it asks whether to create one first or ship without it.
+  Use when taking a Jira ticket or described feature/bugfix from investigation to a
+  review-ready PR, worklog entry and Slack update. Triggers on "ship ABC-123", "take
+  this ticket end to end", "implement ABC-456 and open a PR", "work this ticket",
+  "shipit", or a pasted Jira URL/key with intent to build. Stops before anything that
+  deploys. Only reading or updating a ticket: jira-cli.
 ---
 
 # Shipit

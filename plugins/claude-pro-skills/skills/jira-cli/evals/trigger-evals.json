@@ -1,0 +1,10 @@
+[
+  {"query": "what's the status of ACME-1234?", "should_trigger": true},
+  {"query": "add a comment to WEB-456 saying the fix is on staging", "should_trigger": true},
+  {"query": "move ACME-88 to in progress", "should_trigger": true},
+  {"query": "find tickets assigned to me", "should_trigger": true},
+  {"query": "ship ACME-1234 end to end", "should_trigger": false},
+  {"query": "implement WEB-456 and open a PR", "should_trigger": false},
+  {"query": "QA ACME-1234 and post the report", "should_trigger": false},
+  {"query": "break this PRD into Jira tickets", "should_trigger": false}
+]

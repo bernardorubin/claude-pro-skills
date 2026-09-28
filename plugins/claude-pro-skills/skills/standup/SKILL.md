@@ -1,16 +1,11 @@
 ---
 name: standup
 description: >-
-  Use when the user wants a daily-standup update drafted from their worklog —
-  "write my standup", "standup update", "what did I do yesterday for standup",
-  "daily standup", "generate my standup from the worklog", "standup notes".
-  Reads the actual worklog (vault-aware, same source /save-session-to-worklog
-  writes) for the last working day's entries, optionally cross-references Jira
-  ticket status, and writes a short standup-notes PDF to the Desktop.
-  The whole point is that it sources from the WORKLOG (ground truth), never from
-  memory or thin notes — so the update reflects what actually got done. For
-  logging today's work INTO the worklog use /save-session-to-worklog; this skill
-  reads it back OUT as a standup.
+  Use when the user wants their daily standup drafted. Triggers on "write my standup",
+  "standup update", "what did I do yesterday for standup", "daily standup", "standup
+  notes". Reads the last working day from the worklog (never memory) and writes a
+  short standup PDF to the Desktop. To log work into the worklog, use save-session-to-
+  worklog.
 ---
 
 # Standup

@@ -1,21 +1,12 @@
 ---
 name: promote-to-prod
 description: >-
-  Use when the user wants a change taken from a branch all the way to verified
-  production through the staging ladder. Triggers on "promote to prod", "promote
-  this to production", "push it to prod", "get this to prod", "ship it to
-  production", "promote HPY-1234", "staging then prod", "roll this out to prod".
-  Runs the full ladder — PR into staging, wait for checks to go green, merge,
-  verify the change on staging, PR into main, wait for checks, merge, confirm
-  production is healthy AND that the fix is actually live on prod (via Chrome MCP
-  / playwright-cli / curl), capture evidence of the fix working in production,
-  then comment on each Jira ticket and move it to Done or Ready for QA (asking
-  when it isn't obvious; skipped when there is no ticket). Enforces the promotion discipline: never merge on red or pending
-  checks, never open the main PR until staging proved the change didn't break
-  anything, verify the deployed commit before verifying behavior, and if prod
-  comes back broken, revert immediately. NOT for cutting a versioned build or
-  store submission (that's cut-release), and NOT for writing the change itself
-  (that's shipit).
+  Use when a change should go from a branch to verified production through staging.
+  Triggers on "promote to prod", "push it to prod", "get this to prod", "ship it to
+  production", "promote ACME-1234", "staging then prod", "roll this out to prod". PRs
+  and merges into staging then main only on green checks, verifies each environment in
+  the browser, captures evidence, and reverts if prod breaks. Not for store builds
+  (cut-release) or writing the change (shipit).
 ---
 
 # Promote to Prod

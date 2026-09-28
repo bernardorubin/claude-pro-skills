@@ -1,0 +1,8 @@
+[
+  {"query": "save to vault", "should_trigger": true},
+  {"query": "file everything worth keeping from this session into the wiki", "should_trigger": true},
+  {"query": "dump this whole session to the vault before I close it", "should_trigger": true},
+  {"query": "what does the wiki say about the billing flow?", "should_trigger": false},
+  {"query": "save this session to the worklog and the vault", "should_trigger": false},
+  {"query": "log today's work to my worklog", "should_trigger": false}
+]

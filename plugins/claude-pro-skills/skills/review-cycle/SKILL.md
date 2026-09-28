@@ -1,17 +1,11 @@
 ---
 name: review-cycle
 description: >-
-  Use when the user wants the full review-AND-FIX cycle on a PR — not just a
-  review, but review → post it to the PR as one living comment → fix the findings
-  worth fixing → run the gates → push → update that same comment, looping until
-  clean. Triggers on "run the review cycle", "review and fix this PR", "do the
-  review loop", "review cycle on PR 512", "review my PR and fix the issues",
-  "review-cycle". Distinct from /pr-review, which only reviews and reports (no
-  fixes, no push): reach for review-cycle when you want the issues actually fixed
-  and pushed, not just listed. It reuses /pr-review as its reviewing engine
-  (including the --comment living-comment machinery) and adds the fix/push/iterate
-  loop on top. Also invoked by /shipit as its self-review step. Uses judgment
-  on which findings are worth fixing.
+  Use when a PR should be reviewed AND fixed: review, post one living PR comment, fix
+  the findings worth fixing, run the gates, push, update the comment, repeat until
+  clean. Triggers on "run the review cycle", "review and fix this PR", "do the review
+  loop", "review cycle on PR 512", "review my PR and fix the issues". Also shipit's
+  self-review step. For a review with no fixes, use pr-review.
 ---
 
 # Review Cycle

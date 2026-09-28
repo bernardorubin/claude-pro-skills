@@ -1,6 +1,11 @@
 ---
 name: write-slack-message
-description: Use when the user asks to draft, write, format, or compose a Slack message. Triggers on phrases like "write a slack message", "draft a slack post", "how should I phrase this for slack", "send this on slack", or any request to format text for Slack. Produces a message saved to ~/Desktop/slack-message-for-<recipient>.md ready to copy-paste, with business-casual tone and Slack-compatible formatting.
+description: >-
+  Use when the user asks to draft, write, format, or compose a Slack message. Triggers
+  on "write a slack message", "draft a slack post", "how should I phrase this for
+  slack", "send this on slack", or any request to format text for Slack. Saves a copy-
+  paste-ready draft to ~/Desktop/slack-drafts/ (served by a local copy UI), falling
+  back to ~/Desktop/slack-message-for-<recipient>.md.
 ---
 
 # Write Slack Message

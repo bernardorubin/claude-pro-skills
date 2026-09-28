@@ -1,0 +1,9 @@
+[
+  {"query": "add this to the vault: the payments webhook retries 3 times with no backoff", "should_trigger": true},
+  {"query": "what does the wiki say about how auth tokens are refreshed?", "should_trigger": true},
+  {"query": "ingest this design doc into the wiki", "should_trigger": true},
+  {"query": "lint the wiki for broken links", "should_trigger": true},
+  {"query": "save everything valuable from this session to the vault", "should_trigger": false},
+  {"query": "wrap up the session", "should_trigger": false},
+  {"query": "set up a knowledge vault for this project", "should_trigger": false}
+]

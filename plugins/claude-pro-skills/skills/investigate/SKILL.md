@@ -1,22 +1,12 @@
 ---
 name: investigate
 description: >-
-  Use when someone asks you to investigate, diagnose, or get to the bottom of
-  something — a production anomaly, a bug report, a "why is X happening", a
-  traffic / payment / email / deploy oddity, a pasted error or alert, or a
-  teammate's question that needs a real answer. Triggers on "investigate X",
-  "can you look into why Y", "figure out what's going on with Z", "dig into
-  this", "someone reported X — find out why", or pasting an incident / alert /
-  error with intent to find the cause (NOT to build a fix — for taking a ticket
-  all the way to a shipped PR use shipit). The common shape is pasting a
-  Slack thread / conversation and saying "investigate this" — read the thread,
-  find the answer, hand back a reply ready to drop into that same thread. This
-  skill enforces the
-  investigation discipline: pull real evidence from the dashboards, logs, and
-  code yourself before drawing any conclusion, make zero assumptions, ask for
-  access or help only when genuinely blocked, and end with a short,
-  evidence-backed Slack update drafted via write-slack-message. Reach for it
-  whenever a question needs an answer grounded in real data rather than a guess.
+  Use when asked to investigate or diagnose something: a prod anomaly, bug report,
+  alert, pasted error, or a teammate's "why is X happening". Triggers on "investigate
+  X", "look into why Y", "figure out what's going on with Z", "dig into this", or a
+  pasted Slack thread plus "investigate this". Read-only: pulls dashboards, logs and
+  code before concluding, then drafts a reply for that thread. To build the fix, use
+  shipit.
 ---
 
 # Investigate

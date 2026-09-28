@@ -1,6 +1,12 @@
 ---
 name: pr-review
-description: Use when the user wants code reviewed — a GitHub PR, their local/uncommitted changes, or a whole-repo audit. Stack-aware (frontend, backend, or both decide which reviewers run), confidence-scored review with parallel agents, incremental tracking, and GitHub-comment-ready file output (optionally posted to the PR with --comment). Three modes — (1) PR mode reviews a GitHub PR by number or auto-detected from the current branch. (2) Local mode reviews uncommitted changes plus commits ahead of main when no PR exists. (3) Full-repo mode reviews the entire codebase when the user explicitly asks for a full audit ("audit the whole repo", "review the entire codebase", "full repo audit"). Auto-triggers on phrases like "review this PR", "review my changes", "audit my code", "review my uncommitted work", "audit the whole repo".
+description: >-
+  Use when the user wants code reviewed: a GitHub PR, their local/uncommitted changes,
+  or a whole-repo audit. Stack-aware (frontend, backend or both pick the reviewers),
+  confidence-scored, parallel agents; --comment posts it to the PR. Triggers on
+  "review this PR", "review PR 512", "review my changes", "review my uncommitted
+  work", "audit my code", "audit the whole repo". Reports only; to also fix the
+  findings, use review-cycle.
 ---
 
 # PR Review
@@ -300,32 +306,7 @@ Instruct both agents to:
 
 #### Specialist Agents (both modes, only when triggered in Step 6)
 
-**Agent 5 — Silent Failure Hunter** *(only if triggered)*:
-Think like an oncall engineer paged at 3am. Focus on errors that would be invisible until production.
-- `catch` blocks that swallow errors (empty catch, catch with only `console.log`)
-- Fallback values that mask failures (defaults that hide broken state)
-- Missing error propagation (async functions that don't await or handle rejections)
-- Logging gaps — errors caught but not logged, or logged at wrong severity
-- Retry logic without backoff or max attempts
-- Status checks that return success even on partial failure
-
-**Agent 6 — Comment Accuracy** *(only if triggered)*:
-Think like a developer reading this code 6 months from now. Focus on whether comments help or mislead.
-- Comments that contradict the code they describe
-- Stale comments referencing removed/renamed variables, functions, or logic
-- TODO/FIXME/HACK comments without context or tracking
-- Over-commenting (restating what the code clearly does)
-- Under-commenting (complex logic with no explanation)
-- JSDoc/docstring parameter mismatches (wrong types, missing params, extra params)
-
-**Agent 7 — Type Design** *(only if triggered)*:
-Think like a library author. Focus on whether new types express their invariants correctly.
-- Types that allow invalid states (e.g., `status: string` instead of a union type)
-- Missing `readonly` modifiers on immutable data
-- Overly broad types (`any`, `object`, `Record<string, unknown>`) where narrower types are possible
-- Discriminated unions that should be used but aren't
-- Types that don't enforce their business rules (e.g., email as `string` vs branded type)
-- Exported types that leak implementation details
+When Step 6 triggered Agent 5 (Silent Failure Hunter), 6 (Comment Accuracy) or 7 (Type Design), read `references/specialist-agents.md` and pass the triggered agent's brief to it.
 
 ### Step 8: Consolidate & Filter
 
@@ -458,25 +439,7 @@ The file is formatted to live as a PR comment. Posting maintains **one living re
 - **`--comment` not passed** (PR mode): skip, but end Step 10's summary with the offer to post.
 - **`--comment` passed outside PR mode**: note that it only applies to PRs and continue.
 
-```bash
-# 1. Find YOUR existing marker-tracked comment (empty string if none — the `// empty`
-#    ensures no literal "null" is returned when there's no match)
-ME=$(gh api user --jq .login)
-COMMENT_ID=$(gh api "repos/{owner}/{repo}/issues/{pr}/comments" --paginate \
-  --jq "first(.[] | select(.user.login == \"$ME\" and (.body | startswith(\"<!-- pr-review -->\"))) | .id) // empty")
-
-if [ -n "$COMMENT_ID" ]; then
-  # 2a. Update it in place…
-  gh api -X PATCH "repos/{owner}/{repo}/issues/comments/$COMMENT_ID" -F body=@"{review-file}"
-else
-  # 2b. …or create it if none exists
-  gh pr comment {pr} --body-file "{review-file}"
-fi
-```
-
-Never use `gh pr comment --edit-last` — it edits the user's most recent comment on the PR, which may not be the review.
-
-**Match on author as well as the marker.** Anyone else who runs this skill leaves the same `<!-- pr-review -->` marker, most often the PR author's own self-review. A marker-only lookup finds their comment first, and when your token can edit it (repo admin) the PATCH silently overwrites their review with yours. It happened on a teammate's PR; recovering meant pulling the original body out of GitHub's edit history. If the only marker comment belongs to someone else, create your own.
+When posting, read `references/post-pr-comment.md` and follow it exactly: it finds your own marker comment by author and marker, PATCHes it in place, or creates one. Never use `gh pr comment --edit-last`.
 
 ### Step 10: Show Terminal Summary
 

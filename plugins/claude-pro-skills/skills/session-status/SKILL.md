@@ -1,6 +1,11 @@
 ---
 name: session-status
-description: Use when the user wants a status board of everything worked on in the current session — every feature request, bug fix, question and follow-up they raised, with where each one actually stands and what's blocking or still missing. Triggers on "session status", "where are we", "what's the status of everything", "summarize the work we've done this session", "what did we do and what's left", "what's still open", "what's blocked", "did we ship everything", "loose ends", "recap this session". Built for long multi-ticket sessions where work gets started and quietly never finished. Verifies each item against real state (git, PRs, Jira, gates) instead of trusting the conversation. Read-only — it reports, it never ships, pushes, or fixes anything.
+description: >-
+  Use when the user wants a status board of everything asked for in this session
+  (features, fixes, questions, follow-ups), each verified against git, PRs and Jira
+  rather than the conversation. Triggers on "session status", "where are we", "what's
+  the status of everything", "what's still open", "what's blocked", "did we ship
+  everything", "loose ends", "recap this session". Read-only.
 ---
 
 # Session Status

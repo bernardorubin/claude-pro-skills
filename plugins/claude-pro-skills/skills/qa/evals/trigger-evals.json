@@ -1,0 +1,10 @@
+[
+  {"query": "QA ACME-1234 against staging and post the results on the ticket", "should_trigger": true},
+  {"query": "verify the ACs on PR 218 and show me it works", "should_trigger": true},
+  {"query": "can we QA the checkout fix ourselves before it ships", "should_trigger": true},
+  {"query": "prove the new signup validation works on staging", "should_trigger": true},
+  {"query": "record a video of the redirect flow and attach it to ACME-1234", "should_trigger": false},
+  {"query": "the password reset email isn't sending in prod, find out why", "should_trigger": false},
+  {"query": "fix the bug in ACME-1234 and open a PR", "should_trigger": false},
+  {"query": "review PR 218", "should_trigger": false}
+]

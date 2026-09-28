@@ -1,0 +1,8 @@
+[
+  {"query": "cut a release for version 2.4", "should_trigger": true},
+  {"query": "prep the release notes and build for TestFlight", "should_trigger": true},
+  {"query": "new App Store build with everything merged since 1.3", "should_trigger": true},
+  {"query": "this app has never shipped, get it ready for its first App Store submission", "should_trigger": false},
+  {"query": "promote PR 218 to production through staging", "should_trigger": false},
+  {"query": "ship ACME-1234 end to end", "should_trigger": false}
+]

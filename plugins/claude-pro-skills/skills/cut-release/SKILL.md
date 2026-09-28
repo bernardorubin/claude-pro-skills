@@ -1,20 +1,12 @@
 ---
 name: cut-release
 description: >-
-  Use when cutting a RELEASE — turning already-merged code into a submittable
-  build. Triggers on "cut a release", "ship a build", "prep the release",
-  "release the app", "build and submit", "cut a build for TestFlight", "new App
-  Store build", "ship version 1.3", "release notes and build". This is the
-  per-RELEASE complement to shipit (which is per-TICKET and stops at a
-  review-ready PR): many shipit runs merge, then one cut-release cuts the
-  version. It pre-flights the release gates (version train / build slot / CI
-  green / version bump), builds the artifact, generates release notes from the
-  merged tickets, and hands back the exact submit command. Enforces the two hard
-  rules that keep releases from failing at upload: verify release preconditions
-  BEFORE building (catches closed version trains and taken build slots), and
-  NEVER run the actual submit / OTA / App Store publish — build to ready, then
-  hand the command back. Not for writing a feature or fixing one ticket (that's
-  shipit); this is for shipping a version made of already-merged work.
+  Use when cutting a release: turning already-merged code into a submittable build.
+  Triggers on "cut a release", "ship a build", "prep the release", "cut a build for
+  TestFlight", "new App Store build", "ship version 1.3", "build and submit", "release notes and build".
+  Pre-flights the version train, build slot, CI and version bump, builds, writes
+  release notes, and hands back the submit command; never submits. Per-ticket work:
+  shipit. First-ever release: create-app.
 ---
 
 # Cut Release

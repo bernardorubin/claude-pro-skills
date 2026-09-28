@@ -1,6 +1,11 @@
 ---
 name: handoff
-description: Use when the user wants to hand off the current conversation to a fresh Claude session or another agent — a self-contained handoff document written to the Desktop that a new session reads to pick up exactly where this one left off. Triggers on "handoff", "/handoff", "write a handoff doc", "hand this off to a new session", "pass this to another agent", "context is getting long, write a handoff", "compact this for a new chat to continue". Optional argument describes what the next session will focus on.
+description: >-
+  Use when the user wants to hand the current conversation to a fresh session or
+  another agent through a self-contained handoff doc on the Desktop. Triggers on
+  "handoff", "write a handoff doc", "hand this off to a new session", "pass this to
+  another agent", "context is getting long, write a handoff". An optional argument
+  names what the next session will focus on.
 ---
 
 # Handoff

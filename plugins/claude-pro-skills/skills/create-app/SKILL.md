@@ -1,18 +1,12 @@
 ---
 name: create-app
 description: >-
-  Use when taking a brand-new app from an idea all the way to its first App Store /
-  Play Store / production release — the zero-to-launch pipeline. Triggers on "let's
-  build an app", "new app idea", "start a new project", "take this app to the App
-  Store", "I want to ship this app", "get this app ready for release", or a first-time
-  submission where no version has ever shipped. This is the FIRST-release skill: it
-  owns the one-time gauntlet nobody remembers — production auth instances, custom
-  domain, privacy policy, account deletion, App Privacy answers, DSA trader status,
-  OTA-before-first-submit, and the "nothing was copied from dev" traps that produce
-  silent blank screens. For a later release of an app that has already shipped once,
-  use cut-release instead. For a single ticket on an existing app, use shipit.
-  Holds the hard line: Claude builds to ready and NEVER submits, publishes, or ships
-  an OTA unless the user explicitly says to for that specific action.
+  Use when taking a brand-new app from idea to its first App Store / Play Store /
+  production release. Triggers on "let's build an app", "new app idea", "start a new
+  project", "take this app to the App Store", "get this app ready for release", or a
+  first-ever submission. Owns the one-time launch gauntlet (prod auth, custom domain,
+  privacy policy, account deletion, store privacy answers). Builds to ready, never
+  submits. Later releases: cut-release. Single tickets: shipit.
 ---
 
 # Create App

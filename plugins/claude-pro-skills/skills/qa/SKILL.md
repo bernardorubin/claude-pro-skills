@@ -1,6 +1,12 @@
 ---
 name: qa
-description: Use when the user wants a ticket, PR, or change QA'd and proven — "QA this ticket", "QA HPY-1234", "verify the ACs", "test this and show me it works", "can we QA it ourselves", "check this passes before we ship", "prove it works on staging". Takes acceptance criteria from a Jira ticket (via jira-cli), a PR, or pasted text; exercises each one against the real running system; captures screenshots and payloads as evidence; then PUBLISHES a per-AC pass/fail/could-not-verify report with the evidence embedded inline — to the Jira ticket, the GitHub PR, both, or a Slack thread, asking the user where when it isn't obvious rather than silently picking. Enforces the QA discipline: every AC needs evidence or it is not a pass, a baseline before you conclude, and anything you could not prove is stated plainly rather than folded into "passed". NOT for writing the fix (that's shipit) or for diagnosing a production anomaly (that's investigate).
+description: >-
+  Use when a ticket, PR, or change needs to be QA'd and proven. Triggers on "QA this
+  ticket", "QA ACME-1234", "verify the ACs", "test this and show me it works", "prove
+  it works on staging", "check this passes before we ship". Tests each acceptance
+  criterion against the running system and publishes a pass / fail / could-not-verify
+  report with evidence to Jira, the PR, or Slack. For a video of a flow, use qa-video.
+  For the fix, use shipit.
 ---
 
 # QA

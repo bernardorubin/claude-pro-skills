@@ -1,6 +1,11 @@
 ---
 name: save-to-vault
-description: Use when the user wants a deliberate end-of-session sweep that files everything valuable from the WHOLE conversation into the project's knowledge vault (Karpathy-style LLM Wiki) in one pass — not the ambient single-fact writes that [[vault-keeper]] does during normal work. Reviews the entire session, dedupes against what's already filed, and writes each worth-keeping finding into the right wiki page. Resolves the cwd against `~/.config/claude-pro-skills/vaults.json`; if no vault is registered it says so and points to `/vault-init`. Triggers on phrases like "save to vault", "save this session to the vault", "save whatever's valuable from this session", "dump this session to the wiki", "file everything worth keeping", "/save-to-vault".
+description: >-
+  Use for a deliberate end-of-session sweep that files everything worth keeping from
+  the whole conversation into the project's registered knowledge vault, deduped
+  against what's already there. Triggers on "save to vault", "save this session to the
+  vault", "dump this session to the wiki", "file everything worth keeping". Single
+  facts during work: vault-keeper. Worklog plus vault: wrap-session.
 allowed-tools: Read, Write, Edit, Bash(jq:*), Bash(cat:*), Bash(test:*), Bash(ls:*), Bash(date:*), Bash(grep:*), Bash(find:*), Bash(git:*)
 ---
 

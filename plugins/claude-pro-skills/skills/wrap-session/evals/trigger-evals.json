@@ -1,0 +1,8 @@
+[
+  {"query": "wrap up the session", "should_trigger": true},
+  {"query": "save to worklog and vault", "should_trigger": true},
+  {"query": "end of day, log and save the session everywhere", "should_trigger": true},
+  {"query": "save this session to the vault", "should_trigger": false},
+  {"query": "update my worklog", "should_trigger": false},
+  {"query": "write a handoff doc for the next session", "should_trigger": false}
+]

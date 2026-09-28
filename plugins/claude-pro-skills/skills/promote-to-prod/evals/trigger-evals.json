@@ -1,0 +1,10 @@
+[
+  {"query": "promote ACME-1234 to prod", "should_trigger": true},
+  {"query": "get this fix to production through staging", "should_trigger": true},
+  {"query": "staging then prod for PR 218", "should_trigger": true},
+  {"query": "roll this out to prod and confirm it's live", "should_trigger": true},
+  {"query": "cut a release for the iOS app", "should_trigger": false},
+  {"query": "push my branch", "should_trigger": false},
+  {"query": "merge PR 218 into staging", "should_trigger": false},
+  {"query": "why did prod return 500s last night?", "should_trigger": false}
+]
