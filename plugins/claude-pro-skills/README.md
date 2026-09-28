@@ -189,7 +189,7 @@ Credentials are stored at `~/.config/jira/credentials` with mode 600. Add as man
 
 Runs multiple focused review agents in parallel, each examining the code from a different angle (security, correctness, code quality, performance). Findings are scored on a 0-100 confidence scale, and only issues scoring 80+ are surfaced — cutting noise while catching real problems. Results are saved to a markdown file you can share, reference later, or track progress against as you fix issues.
 
-**Scope:** General-purpose, optimized for TypeScript/JavaScript projects. Works with any language but includes specialized checks for React, Next.js, and TypeScript codebases. Frontend-specific checks (re-renders, bundle size, accessibility) only fire when relevant to the changed files.
+**Stack-aware:** the changed files decide which reviewers run. Security, correctness and quality run on every PR. A frontend diff adds the performance/UX/accessibility reviewer; a backend diff adds the runtime/data/contracts reviewer (blocking I/O in async handlers, transactions and races, idempotency, migrations, paid external calls, route-level tests); a full-stack diff gets both. When a backend change removes or renames a route, field, or event, the reviewers grep the sibling repos for callers and check whether those callers are live in production before rating it.
 
 #### The three modes
 
@@ -222,13 +222,13 @@ Or invoke explicitly via slash with flags:
 /pr-review 463 --comment
 ```
 
-**GitHub-comment ready.** The review file renders cleanly as a PR comment: compact header, findings linked to the PR's head commit, minor sections collapsed in `<details>`. Pass `--comment` (PR mode) to post it directly — the skill maintains one living review comment per PR, updated in place on every re-run.
+**GitHub-comment ready.** The review file renders cleanly as a PR comment: a one-line title with the risk, a short verdict, a counts table, then numbered findings with plain-English titles, linked locations, and the suggested fix collapsed as a diff. Minor findings, fixed items, and history collapse in `<details>`. Pass `--comment` (PR mode) to post it directly — the skill maintains one living review comment per PR, updated in place on every re-run.
 
 #### Modes
 
 | | Full (default) | Lite |
 |---|---|---|
-| **Core agents** | 4 specialized (security, correctness, quality, performance) | 2 combined (security+correctness, quality+performance) |
+| **Core agents** | Security, correctness, quality, plus frontend and/or backend reviewer by stack | 2 combined (security+correctness, quality+stack lens) |
 | **Specialist agents** | Up to 3 additional (silent failures, comments, types) when triggered | Same triggers apply |
 | **File reading** | Every changed file read in full | Diff only, selective file reads |
 | **Code snippets** | Before/after fix suggestions included | Descriptions only |
