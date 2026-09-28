@@ -244,7 +244,7 @@ Think like a senior reviewer on the team. Focus on maintainability and standards
   - Stale codegen outputs — a source-of-truth schema changed (CMS schema, GraphQL/OpenAPI spec, DB schema, protobuf) but the generated artifacts (types, clients) weren't regenerated alongside it. The project's CLAUDE.md (from Step 4) names the codegen commands and output files.
   - New environment variables added but not documented
   - New API routes without proper error handling patterns
-  - Server component converted to client component without loading/error states
+  - (Frontend) Server component converted to client component without loading/error states
   - Changed shared types/utils without updating all consumers
 
 **Agent 4F — Frontend Performance & UX** *(frontend/fullstack only)*:
@@ -526,7 +526,7 @@ Each run appends to the Review history so you can track the review history. Both
 - No unnecessary duplication
 - Edge cases handled
 - No race conditions or memory leaks
-- Accessibility requirements met
+- Frontend: accessibility requirements met
 - Test coverage adequate
 - No breaking changes with unupdated consumers
 - No missing companion changes (typegen, env docs, loading states)

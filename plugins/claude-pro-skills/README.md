@@ -259,12 +259,13 @@ When the skill detects a prior review file (same PR, same day):
 
 #### Review Agents
 
-**Core agents (always run in full mode)**
+**Core agents (full mode; Agent 4F/4B chosen by the diff's stack)**
 
 - **Agent 1 — Security** (*think like an attacker*): input validation, injection (SQL/XSS/command), authn/authz bypass, sensitive data exposure, CSRF/CORS/headers, insecure deserialization, breaking changes (consumers of modified types/exports/APIs)
-- **Agent 2 — Correctness** (*think like a QA engineer*): race conditions, null/undefined handling, logic errors, memory leaks, state management bugs (stale closures, missing React deps), error propagation, edge cases
-- **Agent 3 — Code Quality** (*think like a senior reviewer*): TypeScript strictness, SOLID, DRY, naming, project pattern adherence (reads CLAUDE.md), test coverage, missing companion changes (typegen, env vars, etc.)
-- **Agent 4 — Performance & UX** (*think like a user on a slow connection*): re-renders/memoization, query/fetching efficiency, bundle size (client vs server), accessibility, loading/error states, cleanup, dependency audit when `package.json` changed
+- **Agent 2 — Correctness** (*think like a QA engineer*): race conditions, null/undefined handling, logic errors, memory leaks, state management bugs (stale closures, missing hook deps), error propagation, edge cases
+- **Agent 3 — Code Quality** (*think like a senior reviewer*): typing for the languages in the diff (TypeScript strictness, Python type hints/pydantic), SOLID, DRY, naming, project pattern adherence (reads CLAUDE.md), test coverage, missing companion changes (typegen, env vars, etc.)
+- **Agent 4F — Frontend Performance & UX** (*frontend/fullstack diffs; think like a user on a slow connection*): re-renders/memoization, query/fetching efficiency, bundle size (client vs server), accessibility, loading/error states, cleanup, dependency audit when `package.json` changed
+- **Agent 4B — Backend Runtime, Data & Contracts** (*backend/fullstack diffs; think like the on-call engineer*): blocking I/O in async handlers, transactions and read-then-write races, idempotency, API/event contract changes (sibling repos grepped for callers), migrations, paid/rate-limited external calls, error-to-status mapping, route-level tests, dependency audit when `pyproject.toml`/`requirements*.txt`/`go.mod`/`Gemfile` changed
 
 **Specialist agents (triggered automatically when relevant)**
 
@@ -272,7 +273,7 @@ When the skill detects a prior review file (same PR, same day):
 - **Comment Accuracy** — fires when diff adds/modifies 5+ comment lines. Catches comments that contradict code, stale references, undocumented TODOs, JSDoc mismatches.
 - **Type Design** — fires when diff introduces new types/interfaces. Flags types allowing invalid states, missing `readonly`, overly broad types (`any`), missed discriminated unions.
 
-**Lite mode** consolidates the 4 core agents into 2 (Security+Correctness, Quality+Performance) and reads diff only. Specialist agents still trigger when relevant.
+**Lite mode** consolidates the core agents into 2 (Security+Correctness, Quality+the frontend and/or backend lens) and reads diff only. Specialist agents still trigger when relevant.
 
 #### Confidence Scoring
 
