@@ -1,0 +1,144 @@
+<title>__TITLE__</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: brief panel, then a 7-day strip, then filterable Releases / Shipped / Open ledgers. Dark-first. */
+:root {
+  --bg: #0e100f; --panel: #151917; --line: #2a302d; --fg: #e6e9e7; --muted: #8f9893;
+  --accent: #9cc4a4; --weekend: #34473b; --chip-on-bg: #eef1ef; --chip-on-fg: #0e100f;
+  --display: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) {
+  --bg: #f6f7f6; --panel: #eceeec; --line: #d3d8d5; --fg: #161a18; --muted: #5d6661;
+  --accent: #3f7a4f; --weekend: #d6e4da; --chip-on-bg: #161a18; --chip-on-fg: #f6f7f6; color-scheme: light } }
+:root[data-theme="light"] {
+  --bg: #f6f7f6; --panel: #eceeec; --line: #d3d8d5; --fg: #161a18; --muted: #5d6661;
+  --accent: #3f7a4f; --weekend: #d6e4da; --chip-on-bg: #161a18; --chip-on-fg: #f6f7f6; color-scheme: light }
+body { background: var(--bg); color: var(--fg); font: 16px/1.55 var(--display); }
+main { max-width: 1180px; margin: 0 auto; padding-inline: clamp(16px, 4vw, 48px); padding-block: 40px 80px; display: grid; gap: 56px; }
+.eyebrow { font: 600 12px/1 var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.eyebrow.accent { color: var(--accent); }
+h1, h2 { font-weight: 300; letter-spacing: -.02em; line-height: 1.05; margin: 12px 0 0; text-wrap: balance; }
+h1 { font-size: clamp(36px, 6vw, 60px); }
+h2 { font-size: clamp(30px, 4.5vw, 46px); padding-bottom: 20px; border-bottom: 2px solid var(--fg); }
+a { color: inherit; text-decoration-color: var(--muted); text-underline-offset: 4px; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.brief { background: var(--panel); border: 1px solid var(--line); padding: clamp(20px, 3vw, 36px); display: grid; gap: 20px; }
+.brief-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px 56px; }
+.brief-cols > div { min-width: 0; }
+.brief ul { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 10px; }
+.brief li { position: relative; padding-left: 26px; }
+.brief li::before { content: "–"; position: absolute; left: 0; color: var(--muted); }
+.days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border: 1px solid var(--line); margin-top: 32px; }
+.day { padding: 16px; min-height: 150px; display: flex; flex-direction: column; gap: 4px; border-left: 1px solid var(--line); min-width: 0; }
+.day:first-child { border-left: 0; }
+.day.weekend { background: var(--weekend); }
+.day .num { font-size: 34px; font-weight: 300; font-variant-numeric: tabular-nums; }
+.day .counts { margin-top: auto; font-size: 14px; color: var(--muted); }
+.day .counts b { color: var(--fg); font-variant-numeric: tabular-nums; }
+@media (max-width: 720px) { .days { grid-template-columns: repeat(4, minmax(0, 1fr)); } .day { border-top: 1px solid var(--line); min-height: 120px; } }
+.note { color: var(--muted); margin: 14px 0 0; }
+.note b { color: var(--fg); font-weight: 600; }
+.chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+.chip { font: 600 13px/1 var(--display); letter-spacing: .12em; text-transform: uppercase; background: none; color: var(--fg);
+  border: 1px solid var(--line); padding: 12px 16px; cursor: pointer; }
+.chip span { color: var(--muted); margin-left: 8px; letter-spacing: 0; font-variant-numeric: tabular-nums; }
+.chip[aria-pressed="true"] { background: var(--chip-on-bg); color: var(--chip-on-fg); border-color: var(--chip-on-bg); }
+.chip[aria-pressed="true"] span { color: inherit; }
+.group { margin-top: 40px; }
+.group-head { display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap; }
+.table-wrap { overflow-x: auto; margin-top: 16px; }
+table { width: 100%; border-collapse: collapse; min-width: 640px; }
+th { text-align: left; font: 600 12px/1 var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); padding: 0 16px 14px 0; border-bottom: 1px solid var(--line); }
+td { padding: 16px 16px 16px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+td.v { font-weight: 600; white-space: nowrap; }
+td.d, td.k { white-space: nowrap; font-variant-numeric: tabular-nums; }
+td.w { font: 500 12px/1.9 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--accent); white-space: nowrap; }
+td.s { font-size: 13px; color: var(--muted); white-space: nowrap; }
+tr.cont td.v, tr.cont td.d { color: transparent; }
+.empty { color: var(--muted); margin-top: 16px; }
+</style>
+
+<main id="app"></main>
+
+<script>
+const DATA = /*__DATA__*/null;
+
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const DOW = ["SUN","MON","TUE","WED","THU","FRI","SAT"];
+const d = s => new Date(s + "T00:00:00Z");
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const short = s => { const x = d(s); return `${x.getUTCDate()} ${MONTHS[x.getUTCMonth()].slice(0, 3)}`; };
+const long = s => { const x = d(s); return `${x.getUTCDate()} ${MONTHS[x.getUTCMonth()]}`; };
+function range(a, b) {
+  const x = d(a), y = d(b);
+  if (x.getUTCMonth() === y.getUTCMonth()) return `${x.getUTCDate()}–${y.getUTCDate()} ${MONTHS[y.getUTCMonth()]} ${y.getUTCFullYear()}`;
+  return `${long(a)} – ${long(b)} ${y.getUTCFullYear()}`;
+}
+const link = (key, url) => url ? `<a href="${esc(url)}" target="_blank" rel="noopener">${esc(key)}</a>` : esc(key);
+
+let who = "Everyone", section = null;
+try { who = localStorage.getItem("ws-who") || who; section = localStorage.getItem("ws-section"); } catch (e) {}
+
+function render() {
+  const D = DATA, match = w => who === "Everyone" || w === who;
+  const people = {};
+  D.items.forEach(i => { if (i.who) people[i.who] = (people[i.who] || 0) + 1; });
+  if (!people[who]) who = "Everyone"; // a remembered name from an earlier week may not be in this one
+  const releases = D.releases.map(r => ({ ...r, items: r.items.filter(i => match(i.who)) })).filter(r => r.items.length);
+  const shipped = D.items.filter(i => i.status === "shipped" && match(i.who));
+  const open = D.items.filter(i => i.status === "open" && match(i.who));
+  const chip = (label, n, on, attr) => `<button class="chip" ${attr} aria-pressed="${on}">${esc(label)}<span>${n}</span></button>`;
+  const show = s => !section || section === s;
+
+  const releaseGroups = [...new Set(releases.map(r => r.repo))].map(repo => {
+    const rows = releases.filter(r => r.repo === repo).flatMap(r => r.items.map((i, n) => `
+      <tr class="${n ? "cont" : ""}"><td class="v">${esc(r.version)}</td><td class="d">${short(r.date)}</td>
+      <td class="k">${link(i.key, i.url)}</td><td class="w">${esc(i.who || "–")}</td><td>${esc(i.what)}</td></tr>`)).join("");
+    const src = releases.find(r => r.repo === repo).source;
+    return `<div class="group"><div class="group-head"><span class="eyebrow accent">${esc(repo)}</span><span class="note" style="margin:0">tracked in ${esc(src)}</span></div>
+      <div class="table-wrap"><table><thead><tr><th>Version</th><th>Date</th><th>Ticket</th><th>Who</th><th>What shipped</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+  }).join("");
+
+  const ledger = rows => rows.length ? `<div class="table-wrap"><table><thead><tr><th>Date</th><th>Item</th><th>Who</th><th>What</th><th>Status</th></tr></thead><tbody>${
+    rows.sort((a, b) => a.date < b.date ? -1 : 1).map(i => `<tr><td class="d">${short(i.date)}</td><td class="k">${link(i.key, i.url)}</td>
+      <td class="w">${esc(i.who || "–")}</td><td>${esc(i.title)}${i.repo ? ` <span class="s">· ${esc(i.repo)}</span>` : ""}</td><td class="s">${esc(i.state || "")}</td></tr>`).join("")
+  }</tbody></table></div>` : `<p class="empty">Nothing here for this filter.</p>`;
+
+  const cutCount = releases.length;
+  document.getElementById("app").innerHTML = `
+    <section class="brief" aria-label="Meeting brief">
+      <div class="eyebrow">Meeting brief</div>
+      <div class="brief-cols">
+        <div><div class="eyebrow accent">Shipped</div><ul>${D.brief.shipped.map(b => `<li>${esc(b)}</li>`).join("")}</ul></div>
+        <div><div class="eyebrow accent">In progress / upcoming</div><ul>${D.brief.upcoming.map(b => `<li>${esc(b)}</li>`).join("")}</ul></div>
+      </div>
+    </section>
+    <section>
+      <div class="eyebrow">Weekly summary</div>
+      <h1>${range(D.start, D.end)}</h1>
+      <div class="days">${D.days.map(day => { const x = d(day.date), wk = x.getUTCDay() % 6 === 0; return `
+        <div class="day${wk ? " weekend" : ""}"><span class="eyebrow">${DOW[x.getUTCDay()]}</span><span class="num">${x.getUTCDate()}</span>
+        <div class="counts">${day.counts.map(([n, l]) => `<div><b>${n}</b> ${esc(l)}</div>`).join("")}</div></div>`; }).join("")}</div>
+      <p class="note">${D.days.length} days.${D.previousEnd ? ` The previous summary closed <b>${long(D.previousEnd)}</b>.` : ""}</p>
+      <div class="chips">${chip("Everyone", D.items.length, who === "Everyone", 'data-who="Everyone"')}${
+        Object.entries(people).sort((a, b) => b[1] - a[1]).map(([p, n]) => chip(p, n, who === p, `data-who="${esc(p)}"`)).join("")}</div>
+      <div class="chips">${chip("Releases", cutCount, section === "releases", 'data-section="releases"')}${
+        chip("Shipped", shipped.length, section === "shipped", 'data-section="shipped"')}${chip("Open", open.length, section === "open", 'data-section="open"')}</div>
+      <p class="note">${shipped.length + open.length} items. Select a name to filter.</p>
+    </section>
+    ${show("releases") ? `<section><div class="eyebrow">Releases</div><h2>${cutCount} cut this period</h2>${releaseGroups}</section>` : ""}
+    ${show("shipped") ? `<section><div class="eyebrow">Shipped</div><h2>${shipped.length} merged or done</h2>${ledger(shipped)}</section>` : ""}
+    ${show("open") ? `<section><div class="eyebrow">Open</div><h2>${open.length} still moving</h2>${ledger(open)}</section>` : ""}`;
+}
+
+document.addEventListener("click", e => {
+  const b = e.target.closest(".chip"); if (!b) return;
+  if (b.dataset.who) who = b.dataset.who;
+  if (b.dataset.section) section = section === b.dataset.section ? null : b.dataset.section;
+  try { localStorage.setItem("ws-who", who); section ? localStorage.setItem("ws-section", section) : localStorage.removeItem("ws-section"); } catch (e) {}
+  render();
+});
+render();
+</script>

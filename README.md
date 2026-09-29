@@ -42,6 +42,7 @@ Everything is a **skill** — no `claude-pro-skills:` prefix needed when invokin
 | `/git-pull-reapply` | "pull and reapply", "safe pull", "rebase from remote" |
 | `/save-session-to-worklog` | "save this session", "log to worklog", "update my standup notes" |
 | `/standup` | "write my standup", "standup update", "what did I do yesterday for standup" — writes a short standup-notes PDF from the worklog (ground truth, not memory) |
+| `/weekly-summary` | "weekly summary", "what shipped this week", "summary for the weekly meeting" — builds a shareable weekly page (meeting brief, day strip, releases, shipped, open) from GitHub, Jira, the vault and the worklog |
 | `/wrap-session` | "wrap up the session", "save to worklog and vault", "do both" — runs `/save-session-to-worklog` then `/save-to-vault` in one pass |
 | `/session-status` | "where are we", "what's the status of everything", "what's still open", "loose ends" — status board of every request in the session (feature, bugfix, ticket, unanswered question), verified against git/PRs/Jira, plus what's blocking and what's missing |
 | `/handoff` | "write a handoff doc", "hand this off to a new session", "context is getting long" — compacts the conversation into `~/Desktop/handoff-<slug>.md` for a fresh session to pick up |

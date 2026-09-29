@@ -1,6 +1,6 @@
 # claude-pro-skills
 
-A Claude Code toolkit — **28 skills, no prefix to type**. Shipping pipelines (new app / ticket / release), code reviews (PR / local / full-repo audit), git workflow, Claude meta tasks, external integrations, and per-project knowledge vaults.
+A Claude Code toolkit — **29 skills, no prefix to type**. Shipping pipelines (new app / ticket / release), code reviews (PR / local / full-repo audit), git workflow, Claude meta tasks, external integrations, and per-project knowledge vaults.
 
 > **Heads up**: examples throughout use placeholder names — `acme`/`beacon` projects, `acme`/`work` Jira instances, `ACME-####` ticket prefixes. They're illustrative; the plugin works for any project. Two spots hold config you replace with your own: the **Project Map** in `/save-session-to-worklog` and the vault registry under `~/.config/claude-pro-skills/vaults.json`.
 
@@ -98,6 +98,9 @@ Logs the current session's work into a monthly worklog file. **Vault-aware**: if
 
 ### `/standup`
 The read-back companion to `/save-session-to-worklog`: it writes daily-standup notes **from the worklog** (the ground truth the worklog skill wrote) to `~/Desktop/standup-YYYY-MM-DD.pdf`, so the update reflects what actually got done rather than what you half-remember. Reads the last working day's entries (vault-aware, same source), optionally confirms ticket status with `jira-cli`, pulls "today" from your in-progress tickets or a quick ask, and keeps it to 3-6 one-line bullets (Yesterday / Today / Blockers). PDF conversion uses macOS's built-in `cupsfilter` — no extra tooling. If the worklog has nothing logged for the last working day, it says so instead of inventing a standup. Auto-triggers on "write my standup", "standup update", "what did I do yesterday for standup".
+
+### `/weekly-summary`
+One page per project per week, published as a private Artifact: a meeting brief (Shipped / In progress and upcoming), a 7-day activity strip, person and status filters, then Releases, Shipped and Open ledgers. Facts come from GitHub PRs, Jira (tickets and released fix versions, falling back to GitHub releases), the worklog and the vault; every line must trace to one of them. The period runs from the day after the previous summary (read from `~/Desktop/weekly-summaries/`) to today. The page is a fixed template in `assets/template.html` filled with a JSON blob, so it looks the same every week. Auto-triggers on "weekly summary", "what shipped this week", "summary for the weekly meeting".
 
 ## Knowledge vaults
 
