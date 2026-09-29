@@ -13,7 +13,7 @@ needs real diagnosis is flagged for `investigate`, not diagnosed here.
 
 ## Arguments
 
-- **Hours** (first number, default `24`). Vercel keeps error clusters for 7 days, so cap at `168`.
+- **Hours** (first number, default `24`). Raw runtime logs (every warning) only go back as far as the plan keeps them: 1 day on Pro, 3 on Enterprise. `get_runtime_errors` clusters go back 7 days. Past the raw-log retention, say plainly that warnings are only covered for the retained window.
 - `--dry` : report the grouped findings and the dedupe verdicts, file nothing.
 - `--prod` / `--staging` : limit to one environment (default: both).
 
@@ -99,11 +99,29 @@ from Step 1. Body shape, short:
    what would confirm it.
 4. `## Acceptance Criteria`.
 
+Add the label `vercel-triage` to every ticket filed, so `labels = vercel-triage` lists everything this skill has found.
+
 Title: `[FE]`/`[BE]`/`[FE/BE]` + the symptom in plain words. Never put local paths,
 customer emails, or full user identifiers beyond what the log already masks.
 Verify with a GET that every ticket landed with its parent, component and sprint.
 
-## Step 6: Report
+## Step 6: Clean up open tickets
+
+Pull every open ticket with `labels = vercel-triage AND statusCategory != Done`. For each one not
+already matched in Step 4, search the retained window for its log signature (the exact message,
+route and level from its description):
+
+- **Still happening** → comment the recurrence, leave it open.
+- **Gone, and the route still got traffic** (the page or endpoint was hit with no matching line)
+  → comment the evidence, including the window size, and move it to Done. A route with no
+  traffic proves nothing: leave it open and say so.
+- **In Ready for QA or assigned to someone else** → comment the evidence, don't transition it.
+  QA or the owner closes it.
+
+Silence over the retained window is weaker than a fix. Say how many hours the window covered in
+every comment.
+
+## Step 7: Report
 
 A short list: each new ticket as a link with one line, each commented ticket as a
 link with what recurred, and the skipped noise in one line. Numbers with their window
