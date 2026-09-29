@@ -13,7 +13,7 @@ needs real diagnosis is flagged for `investigate`, not diagnosed here.
 
 ## Arguments
 
-- **Hours** (first number, default `24`). Raw runtime logs (every warning) only go back as far as the plan keeps them: 1 day on Pro, 3 on Enterprise. `get_runtime_errors` clusters go back 7 days. Past the raw-log retention, say plainly that warnings are only covered for the retained window.
+- **Hours** (first number, default `24`). Error clusters (`get_runtime_errors`) go back 7 days; runtime logs go back as far as the team's retention (30 days with Observability Plus, 1 day on plain Pro). Check the retention in the repo's CLAUDE.md or vault before assuming it.
 - `--dry` : report the grouped findings and the dedupe verdicts, file nothing.
 - `--prod` / `--staging` : limit to one environment (default: both).
 
@@ -118,8 +118,10 @@ route and level from its description):
 - **In Ready for QA or assigned to someone else** → comment the evidence, don't transition it.
   QA or the owner closes it.
 
-Silence over the retained window is weaker than a fix. Say how many hours the window covered in
-every comment.
+Prove the error used to happen with the same query over an earlier window before calling its
+absence a fix, and say both windows in the comment. **A bare full-text `query` over more than
+24h returns "No logs found" with a message blaming retention, even when the logs exist.** Always
+add `group_by` for multi-day windows, and keep each window to about 4 days or it times out.
 
 ## Step 7: Report
 
