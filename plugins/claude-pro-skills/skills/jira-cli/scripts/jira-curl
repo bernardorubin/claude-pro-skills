@@ -179,8 +179,15 @@ if [[ -z "${!email_var:-}" || -z "${!token_var:-}" || -z "${!url_var:-}" ]]; the
   exit 1
 fi
 
+# A file upload (-F/--form) needs curl's own multipart header, so the JSON
+# Content-Type is only added when no form part is passed.
+content_type=(-H "Content-Type: application/json")
+for arg in "$@"; do
+  [[ "$arg" == "-F" || "$arg" == "--form" ]] && content_type=() && break
+done
+
 curl -s -X "$METHOD" \
   -u "${!email_var}:${!token_var}" \
-  -H "Content-Type: application/json" \
+  ${content_type[@]+"${content_type[@]}"} \
   "${!url_var}${API_PATH}" \
   "$@"
