@@ -56,7 +56,6 @@ td.v { font-weight: 600; white-space: nowrap; }
 td.d, td.k { white-space: nowrap; font-variant-numeric: tabular-nums; }
 td.w { font: 500 12px/1.9 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--accent); white-space: nowrap; }
 td.s { font-size: 13px; color: var(--muted); white-space: nowrap; }
-tr.cont td.v, tr.cont td.d { color: transparent; }
 .empty { color: var(--muted); margin-top: 16px; }
 </style>
 
@@ -93,8 +92,8 @@ function render() {
   const show = s => !section || section === s;
 
   const releaseGroups = [...new Set(releases.map(r => r.repo))].map(repo => {
-    const rows = releases.filter(r => r.repo === repo).flatMap(r => r.items.map((i, n) => `
-      <tr class="${n ? "cont" : ""}"><td class="v">${esc(r.version)}</td><td class="d">${short(r.date)}</td>
+    const rows = releases.filter(r => r.repo === repo).flatMap(r => r.items.map(i => `
+      <tr><td class="v">${r.url ? link(r.version, r.url) : esc(r.version)}</td><td class="d">${short(r.date)}</td>
       <td class="k">${link(i.key, i.url)}</td><td class="w">${esc(i.who || "–")}</td><td>${esc(i.what)}</td></tr>`)).join("");
     const src = releases.find(r => r.repo === repo).source;
     return `<div class="group"><div class="group-head"><span class="eyebrow accent">${esc(repo)}</span><span class="note" style="margin:0">tracked in ${esc(src)}</span></div>

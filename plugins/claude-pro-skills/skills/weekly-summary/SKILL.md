@@ -65,6 +65,12 @@ Always pass `-R <owner>/<repo>` to `gh`.
    - A ticket with no Jira access: stop and ask per the access rule, don't skip Jira.
 3. **Releases without Jira versions**: `gh release list -R X` in the period (source
    "GitHub"), its body for the items. Only when the project has no Jira versions.
+   **No Jira versions and no GitHub releases** (typical for a web app): each production
+   deploy is a release. Take the PRs merged into the production branch in the period
+   (the promotion PRs, e.g. `staging` → `main`; the repo's CLAUDE.md names the branch):
+   source "Production deploy", `version` = `#<number>`, `url` = the PR, `date` = its
+   merge date, `items` = the tickets it carried. Put the deploy count in the brief's
+   first Shipped bullet and in the day strip ("prod deploys").
 4. **Worklog**: the period's day entries from every
    `{vault}/raw/work-logs/*/<month>-<year>-<project>-worklog.md` (or the Desktop copy
    when no vault), both months when the period spans two.
@@ -72,6 +78,11 @@ Always pass `-R <owner>/<repo>` to `gh`.
    `wiki/tickets/` and `wiki/integrations/` pages those lines touch, for status,
    deadlines, stalls and who owes what. The vault is a map; any claim that a PR or
    ticket can confirm gets confirmed there first.
+
+**People scope**: if the user or a memory limits the summary to certain people (e.g.
+"only me and Jose"), filter PRs by author and tickets by assignee before anything else,
+and apply it to the brief, the day counts and the releases too. Someone else's work can
+still be named as a dependency ("waits on the eligibility endpoint") but not credited.
 
 **Who**: first name only, uppercase is done by the page. Map GitHub logins and Jira
 assignees to names via `{vault}/wiki/people/`, `gh api users/<login> --jq .name`, or
@@ -102,7 +113,7 @@ Plain words, no em dashes, no hype. If a bullet can't name its source, cut it.
   "start": "2026-09-22", "end": "2026-09-28", "previousEnd": "2026-09-21",
   "brief": { "shipped": ["..."], "upcoming": ["..."] },
   "days": [{ "date": "2026-09-22", "counts": [[2, "PRs opened"], [1, "Jira ticket"]] }],
-  "releases": [{ "repo": "acme-web", "source": "Jira", "version": "1.69.0", "date": "2026-09-24",
+  "releases": [{ "repo": "acme-web", "source": "Jira", "version": "1.69.0", "date": "2026-09-24", "url": "https://...",
                  "items": [{ "key": "ACME-418", "url": "https://...", "who": "Dana", "what": "One sentence on what shipped." }] }],
   "items": [{ "status": "shipped", "key": "ACME-387", "url": "https://...", "who": "Dana",
               "title": "Plain-language summary", "date": "2026-09-23", "repo": "acme-web", "state": "Done" }]
@@ -110,7 +121,10 @@ Plain words, no em dashes, no hype. If a bullet can't name its source, cut it.
 ```
 
 - `days`: one entry per date in the period, counts only for kinds that are non-zero
-  (PRs opened, Jira tickets created, releases), singular when 1.
+  (PRs opened, Jira tickets created, releases or prod deploys), singular when 1.
+- `releases[].url`: optional; when set, the version links to it (the Jira version page,
+  the GitHub release, or the promotion PR). Every item row repeats its release's
+  version and date.
 - `what`/`title`: rewrite ticket summaries into one plain sentence of behavior, not the
   raw Jira title.
 
