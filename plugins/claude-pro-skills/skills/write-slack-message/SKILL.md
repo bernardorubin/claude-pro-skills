@@ -4,8 +4,9 @@ description: >-
   Use when the user asks to draft, write, format, or compose a Slack message. Triggers
   on "write a slack message", "draft a slack post", "how should I phrase this for
   slack", "send this on slack", or any request to format text for Slack. Saves a copy-
-  paste-ready draft to ~/Desktop/slack-drafts/ (served by a local copy UI), falling
-  back to ~/Desktop/slack-message-for-<recipient>.md.
+  paste-ready draft to ~/Desktop/slack-drafts/ (shown by the slack-drafts mod's
+  /slack-drafts pane and phone page), falling back to
+  ~/Desktop/slack-message-for-<recipient>.md.
 ---
 
 # Write Slack Message
@@ -161,13 +162,6 @@ Never preemptively keep something because they might want it.
    **Never create the folder yourself.** Its existence IS the user's opt-in;
    creating it silently changes where every future draft lands.
 
-   **In default mode, offer the browser UI once.** Run `<this skill's
-   directory>/scripts/slackmsg --nudge`. It prints one line the first time and
-   nothing ever again (and nothing at all once the folder exists) -- so pass
-   whatever it prints straight through to the user, and say nothing when it is
-   silent. Never repeat the invitation yourself, and never create the folder to
-   act on it: accepting is the user's move.
-
    **In default mode, say so when you overwrite.** If the target file already
    exists you are about to destroy a previous draft, so add one clause to the
    report line: what it replaced, and that `mkdir ~/Desktop/slack-drafts` keeps
@@ -182,28 +176,22 @@ Never preemptively keep something because they might want it.
 4. **The file IS the delivery. Never paste the draft into the chat reply.** Say
    it's saved, give the path, stop. Pasting it inline makes the user read the
    same message twice.
-5. **Start the browser UI and hand back its URL** -- folder mode only. Run
-   `<this skill's directory>/scripts/slackmsg --serve`. It is idempotent: it
-   reuses a running server and starts one only when the recorded URL stops
-   answering, printing the URL either way, and it does NOT steal focus with a
-   browser tab. Report that URL next to the file path so the user can read,
-   copy and delete the draft without opening a terminal. If it fails, say so
-   in a clause and move on -- the file is still the delivery.
-
-   Skip this entirely in default mode. Silently starting a local HTTP server
-   for someone who never opted into the drafts folder is a surprise, and the
-   same opt-in governs both.
+5. **Start nothing.** In folder mode the `slack-drafts` mod, when installed,
+   sees the save, opens its pane and sends the draft to the phone page on its
+   own. Mention `/slack-drafts` once in the report line only if the user seems
+   not to know where drafts show up.
 6. Below that, one line naming what you cut, so they can add it back.
 
 ### Phone delivery -- the one time the draft goes in the chat
 
-The file-is-the-delivery rule assumes the user can reach their Desktop and a
-localhost URL. On a phone they can reach neither. So when they say they are on
+The file-is-the-delivery rule assumes the user can reach their Desktop. On a
+phone they cannot. So when they say they are on
 their phone, on the road, travelling, away from their laptop, or ask for the
 message "here", "in the chat", or "pasted", switch delivery:
 
 - **Still write the file**, exactly as above. It is how the draft survives the
-  trip and how it shows up in the browser UI when they are back at a desk.
+  trip, and with the `slack-drafts` mod's phone page set up it is also how the
+  draft reaches the phone with formatting intact.
 - **Flatten it for a plain-text paste**: run `<this skill's directory>/scripts/mdclip.py
   --plain <the file>` and use ITS output. A phone clipboard carries no HTML
   flavor and Slack's mobile composer converts NOTHING from a plain paste
@@ -214,8 +202,9 @@ message "here", "in the chat", or "pasted", switch delivery:
 - **Then output that flattened text in a fenced code block** -- the block is what
   gives them one-press copy in the Claude app. It holds the message and nothing
   else: no commentary inside it, no preamble around it.
-- **Skip the browser UI URL** (a localhost address is unreachable from a phone)
-  and skip the nudge.
+- **When the `slack-drafts` mod has a phone page**, add one line after the block:
+  the formatted version is on the Slack Drafts page (pinned in claude.ai), whose
+  Copy for Slack keeps links and code.
 
 The file on disk keeps its markdown links -- only the phone copy is flattened,
 so the same draft still pastes rich from the desktop later. Bare URLs are a
@@ -224,37 +213,12 @@ carry them into a normal draft.
 
 ### Browsing past drafts (optional)
 
-`scripts/slackmsg --web` opens the browser UI: drafts on the left, the selected
-one rendered on the right, live-updating. The action row sits at the top of the
-message pane -- copy for Slack, copy raw markdown, delete -- and every draft
-card carries its own delete `x`, so nothing needs a trip to the bottom of the
-window. The header carries a `delete all` button that empties the drafts folder,
-a light/dark toggle, a skin toggle
-(`terminal` or `modern`), and an accent swatch row that changes with the theme;
-all three persist per browser. It needs nothing installed beyond the python3 macOS
-ships. `--serve` is the same server without opening a tab, which is what step 5
-above calls. The URL is fixed and memorable --
-`http://127.0.0.1:8473/slack-drafts/` (port overridable with
-`SLACK_DRAFTS_PORT`) -- so it can be bookmarked. A taken port falls back to an
-OS-assigned one rather than failing; `--serve` prints a note on stderr when that
-happens, so pass it along -- the bookmark points at whatever else holds the port
-that run, which is confusing if the squatter serves a page of its own.
-There is no secret in the URL on purpose: anything running locally could read
-the draft files directly, so a path token would guard nothing, while `Host` and
-`Origin` checks do stop the case that matters (a webpage poking at localhost).
-A bookmark only resolves while a server is running; drafting starts one.
-
-The bare `scripts/slackmsg` is the terminal equivalent: it lists saved drafts
-newest-first, previews the selected one,
-copies it to the clipboard on Enter and deletes on Ctrl-D. The copy carries an
-HTML flavor alongside the plain text, so `[label](url)` pastes into Slack as a
-real hyperlink instead of literal markup. (`pbcopy` sets plain-text flavors
-only, which is why a terminal copy used to lose its links where a copy out of
-a browser kept them.) It degrades by what
-is installed: two-pane browser with `fzf`, single-column picker with `gum`,
-plain numbered list with neither. Mention it only if the user asks how to find
-an older draft. It is a convenience for reading drafts, never part of writing
-one, and the drafting flow above must work unchanged when it is absent.
+The `slack-drafts` mod (`slack-drafts@claude-pro-skills`) shows them: `/slack-drafts`
+opens a pane listing every draft newest first, with Copy for Slack (an HTML
+clipboard copy, so `[label](url)` pastes as a real link), copy raw markdown, and
+delete. On the phone, its pinned Slack Drafts page does the same. Mention it only if
+the user asks how to find an older draft; the drafting flow above must work
+unchanged without it.
 
 ## Reference examples
 
