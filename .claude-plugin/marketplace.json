@@ -49,6 +49,20 @@
       "author": {
         "name": "Bernardo Rubin"
       }
+    },
+    {
+      "name": "quick-replies",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/bernardorubin/claude-pro-skills.git",
+        "path": "plugins/quick-replies",
+        "ref": "main"
+      },
+      "description": "Turns Claude's \"Next steps\" and \"I need from you\" lists into Go ahead, Yes / No buttons and reply boxes above the prompt, sent back as one message.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Bernardo Rubin"
+      }
     }
   ]
 }

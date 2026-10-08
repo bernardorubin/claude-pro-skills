@@ -4,7 +4,7 @@
 
 <h1 align="center">claude-pro-skills</h1>
 
-A Claude Code plugin marketplace by Bernardo Rubin. The main plugin (`claude-pro-skills`) bundles everything, no command/skill prefixes to type; `usage-bars` and `slack-drafts` are separate mods.
+A Claude Code plugin marketplace by Bernardo Rubin. The main plugin (`claude-pro-skills`) bundles everything, no command/skill prefixes to type; `usage-bars`, `slack-drafts` and `quick-replies` are separate mods.
 
 ## Installation
 
@@ -75,6 +75,17 @@ A `/slack-drafts` pane for the drafts `/write-slack-message` saves, with a copy 
 ```
 
 See [`plugins/slack-drafts/README.md`](plugins/slack-drafts/README.md) for the one-time phone setup.
+
+## `quick-replies`
+
+Turns Claude's **Next steps** and **I need from you** lists into buttons above the prompt: **Go ahead**, **Yes** / **No** and a reply box per question, sent back as one message. Installed separately:
+
+```
+/plugin install quick-replies@claude-pro-skills
+/reload-plugins
+```
+
+See [`plugins/quick-replies/README.md`](plugins/quick-replies/README.md).
 
 ## License
 
