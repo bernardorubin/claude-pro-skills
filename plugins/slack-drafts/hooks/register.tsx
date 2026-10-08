@@ -51,7 +51,10 @@ const trash = async ($: EngineInterface, d: Draft, url: string) => {
 
 // The phone page (an artifact with a db) gets an append-only copy: a new row per
 // save and a tombstone per delete; the page shows the newest row per draft and
-// tidies the rest. Appending means no row versions to track here.
+// tidies the rest. Every row id carries the push time, so a re-push (a fresh
+// install starts with an empty `synced` record) adds a duplicate the page folds
+// away instead of colliding with an existing row, which the store refuses
+// without its version.
 const docId = (name: string, at: number) =>
   `${name.replace(/\.md$/, '').replace(/[^A-Za-z0-9_.~:@+-]/g, '_')}-${Math.round(at)}`
 
@@ -63,7 +66,7 @@ const syncPhone = async ($: EngineInterface, url: string, list: Draft[]) => {
   const gone = Object.keys(synced).filter(name => !list.some(d => d.name === name))
   if (changed.length === 0 && gone.length === 0) return
   const writes = [
-    ...changed.map(d => ({ op: 'set' as const, collection: 'drafts', doc_id: docId(d.name, d.mtimeMs), data: { name: d.name, md: d.text, savedAt: d.mtimeMs } })),
+    ...changed.map(d => ({ op: 'set' as const, collection: 'drafts', doc_id: docId(d.name, now), data: { name: d.name, md: d.text, savedAt: d.mtimeMs } })),
     ...gone.map(name => ({ op: 'set' as const, collection: 'drafts', doc_id: docId(name, now), data: { name, deleted: true, savedAt: now } })),
   ]
   const r = await $.tool.call({ tool: 'ArtifactData', action: 'batch', url, writes })

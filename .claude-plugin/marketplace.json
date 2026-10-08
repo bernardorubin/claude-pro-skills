@@ -45,7 +45,7 @@
         "ref": "main"
       },
       "description": "A /drafts pane for the Slack drafts /write-slack-message saves: Slack-safe copy on the Mac, and an optional phone page to paste them from your iPhone with links intact.",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "author": {
         "name": "Bernardo Rubin"
       }
