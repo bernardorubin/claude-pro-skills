@@ -4,7 +4,7 @@
 
 <h1 align="center">claude-pro-skills</h1>
 
-A Claude Code plugin marketplace by Bernardo Rubin. One plugin (`claude-pro-skills`), everything bundled, no command/skill prefixes to type.
+A Claude Code plugin marketplace by Bernardo Rubin. The main plugin (`claude-pro-skills`) bundles everything, no command/skill prefixes to type; `usage-bars` is a separate mod for the prompt.
 
 ## Installation
 
@@ -53,6 +53,17 @@ Everything is a **skill** — no `claude-pro-skills:` prefix needed when invokin
 The plugin also bundles one subagent: `code-reviewer`, the parallel review agent `/pr-review` launches for its focus-area passes.
 
 See [`plugins/claude-pro-skills/README.md`](plugins/claude-pro-skills/README.md) for full details on every skill, the PR review modes (PR / local / full-repo), and the iterative review loop.
+
+## `usage-bars`
+
+A band above the prompt (terminal and desktop Code tab) with two bars: context window used, and what's left of the 5-hour rate-limit window. Orange then red as each nears its limit. Installed separately:
+
+```
+/plugin install usage-bars@claude-pro-skills
+/reload-plugins
+```
+
+See [`plugins/usage-bars/README.md`](plugins/usage-bars/README.md).
 
 ## License
 

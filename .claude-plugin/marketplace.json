@@ -21,6 +21,20 @@
       "author": {
         "name": "Bernardo Rubin"
       }
+    },
+    {
+      "name": "usage-bars",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/bernardorubin/claude-pro-skills.git",
+        "path": "plugins/usage-bars",
+        "ref": "main"
+      },
+      "description": "Two bars above the prompt: context window used and what's left of the 5-hour rate-limit window. Terminal and desktop.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Bernardo Rubin"
+      }
     }
   ]
 }

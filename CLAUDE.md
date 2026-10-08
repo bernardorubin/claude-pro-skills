@@ -9,7 +9,8 @@ claude-pro-skills/
 ├── .claude-plugin/
 │   └── marketplace.json              # marketplace manifest — lists every plugin
 ├── plugins/
-│   └── claude-pro-skills/             # the single bundled plugin (see below)
+│   ├── usage-bars/                    # separate function-hooks mod (hooks/register.tsx); `claude plugin validate` + `claude plugin test` it
+│   └── claude-pro-skills/             # the main bundled plugin (see below)
 │       ├── .claude-plugin/
 │       │   └── plugin.json           # plugin manifest
 │       ├── skills/                   # skill folders, each with SKILL.md
