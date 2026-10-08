@@ -67,7 +67,7 @@ See [`plugins/usage-bars/README.md`](plugins/usage-bars/README.md).
 
 ## `slack-drafts`
 
-A `/drafts` pane for the drafts `/write-slack-message` saves, with a copy button that keeps Slack links and code, and an optional private phone page to paste them from your iPhone. Installed separately:
+A `/slack-drafts` pane for the drafts `/write-slack-message` saves, with a copy button that keeps Slack links and code, and an optional private phone page to paste them from your iPhone. Installed separately:
 
 ```
 /plugin install slack-drafts@claude-pro-skills

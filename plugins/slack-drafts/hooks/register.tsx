@@ -58,7 +58,7 @@ const trash = async ($: EngineInterface, d: Draft, url: string) => {
 const docId = (name: string, at: number) =>
   `${name.replace(/\.md$/, '').replace(/[^A-Za-z0-9_.~:@+-]/g, '_')}-${Math.round(at)}`
 
-// Returns what happened, for /drafts to say; failures also toast.
+// Returns what happened, for /slack-drafts to say; failures also toast.
 const syncPhone = async ($: EngineInterface, url: string, list: Draft[]): Promise<string> => {
   if (!url) return 'phone page off (set its URL in /config)'
   const synced = ((await $.store.get('synced')) ?? {}) as Record<string, number>
@@ -89,12 +89,12 @@ export const register: Register = (on, options) => {
 
   on('session.start', async ($, e, next) => {
     const ran = await next(e)
-    await $.command.register({ name: 'drafts', description: 'Show the Slack drafts in a pane' })
+    await $.command.register({ name: 'slack-drafts', description: 'Show your Slack drafts in a pane and send new ones to the phone page' })
     await refresh($)
     return ran
   })
 
-  on('command.run', { command: 'drafts' }, async $ => {
+  on('command.run', { command: 'slack-drafts' }, async $ => {
     const list = await refresh($)
     await open($, true)
     const phone = await syncPhone($, phoneUrl, list)

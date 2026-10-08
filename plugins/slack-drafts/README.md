@@ -1,10 +1,10 @@
 # slack-drafts
 
-A `/drafts` pane in Claude Code (terminal and desktop Code tab) for the drafts `/write-slack-message` saves to `~/Desktop/slack-drafts/`, plus an optional phone page so you can paste them from your iPhone with Slack formatting intact.
+A `/slack-drafts` pane in Claude Code (terminal and desktop Code tab) for the drafts `/write-slack-message` saves to `~/Desktop/slack-drafts/`, plus an optional phone page so you can paste them from your iPhone with Slack formatting intact.
 
 ## In Claude Code
 
-- `/drafts` opens the pane: one card per draft, newest first, rendered as Markdown.
+- `/slack-drafts` opens the pane: one card per draft, newest first, rendered as Markdown.
 - Saving a draft opens the pane on its own.
 - **Copy for Slack** puts an HTML version on the Mac clipboard (via `osascript`), so `[label](url)` pastes as a link and backticks as code. **Markdown** copies the raw text. **Delete** moves the file to the Trash.
 - `SLACK_DRAFTS_DIR` overrides the folder.
@@ -13,7 +13,7 @@ A `/drafts` pane in Claude Code (terminal and desktop Code tab) for the drafts `
 
 Slack on iOS only keeps formatting when the clipboard carries HTML, which the Claude app cannot put there for a mod. So drafts are mirrored to a private claude.ai artifact (`phone/index.html`) whose **Copy for Slack** button does that copy in the browser.
 
-Each save, delete or `/drafts` appends rows to that artifact's database through the `ArtifactData` tool (approve it once). The page shows the newest row per draft and tidies the rest.
+Each save, delete or `/slack-drafts` appends rows to that artifact's database through the `ArtifactData` tool (approve it once). The page shows the newest row per draft and tidies the rest.
 
 Set it up once per account:
 
