@@ -1,6 +1,6 @@
 import { expect, test } from 'claude-code/testing'
 
-import { GO_AHEAD, composeReply, parseAsks, parseSteps } from './asks'
+import { GO_AHEAD, commandOf, composeReply, kindOf, parseAsks, parseSteps } from './asks'
 
 const REPLY = `Done.
 
@@ -32,4 +32,14 @@ test('reads the next steps and puts the go-ahead first', async () => {
   expect(parseSteps(REPLY)).toEqual([{ n: 1, text: 'Build the thing.' }])
   expect(composeReply(parseAsks(REPLY), { 2: { choice: 'yes' } }, true)).toBe(`${GO_AHEAD}\n2. yes`)
   expect(composeReply([], {}, true)).toBe(GO_AHEAD)
+})
+
+test('tells decisions, open questions and actions apart', async () => {
+  expect(kindOf('Should I commit? Yes or no.')).toBe('yesno')
+  expect(kindOf('Want me to publish it?')).toBe('yesno')
+  expect(kindOf('Which name do you prefer, slack-drafts or drafts?')).toBe('open')
+  expect(kindOf('Run `/reload-plugins`. The buttons come back from my next reply.')).toBe('action')
+  expect(commandOf('Run `/reload-plugins`. The buttons come back.')).toEqual({ command: 'reload-plugins', args: '' })
+  expect(commandOf('Run `/skin band on`.')).toEqual({ command: 'skin', args: 'band on' })
+  expect(commandOf('Open the page on your iPhone.')).toBeUndefined()
 })

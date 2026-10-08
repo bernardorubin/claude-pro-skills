@@ -8,6 +8,11 @@ const BAND = {
 
 test('draws the asks on terminal and desktop, and sends the picked answers', async ($, on) => {
   const sent: string[] = []
+  const ran: string[] = []
+  on('command.run', ($, e) => {
+    ran.push(e.command)
+    return { text: '' }
+  })
   on('turn.complete', () => ({ text: '' }))
   // stands in for the engine's own band beneath the mod
   on('ui.render', ($, e) => {
@@ -23,7 +28,9 @@ test('draws the asks on terminal and desktop, and sends the picked answers', asy
 
   for (const surface of ['terminal', 'desktop'] as const) {
     const ui = await $.ui.mount({ plugin: 'quick-replies', surface, ...BAND })
-    expect(await ui.find({ key: 'yes-2' })).toBeDefined()
+    expect(await ui.find({ key: 'run-2' })).toBeDefined()
+    expect(await ui.find({ key: 'done-2' })).toBeDefined()
+    expect(await ui.find({ key: 'yes-2' })).toBeUndefined()
     expect(await ui.find({ key: 'no-3' })).toBeDefined()
     expect(await ui.find({ key: 'text-3' })).toBeDefined()
     await ui.unmount()
@@ -31,10 +38,12 @@ test('draws the asks on terminal and desktop, and sends the picked answers', asy
 
   const ui = await $.ui.mount({ plugin: 'quick-replies', surface: 'desktop', ...BAND })
   await ui.press({ key: 'go' })
-  await ui.press({ key: 'yes-2' })
+  await ui.press({ key: 'run-2' })
+  await ui.press({ key: 'yes-3' })
   await ui.input({ key: 'text-3', text: 'not yet', kind: 'change' })
   await ui.press({ key: 'send' })
-  expect(sent).toEqual(['Go ahead with the next steps.\n2. yes\n3. not yet'])
-  expect(await ui.find({ key: 'yes-2' })).toBeUndefined()
+  expect(ran).toEqual(['reload-plugins'])
+  expect(sent).toEqual(['Go ahead with the next steps.\n2. done\n3. yes: not yet'])
+  expect(await ui.find({ key: 'yes-3' })).toBeUndefined()
   await ui.unmount()
 })

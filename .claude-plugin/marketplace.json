@@ -59,7 +59,7 @@
         "ref": "main"
       },
       "description": "Turns Claude's \"Next steps\" and \"I need from you\" lists into Go ahead, Yes / No buttons and reply boxes above the prompt, sent back as one message.",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "author": {
         "name": "Bernardo Rubin"
       }

@@ -2,7 +2,7 @@ import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
 import type { Answer } from '../types'
-import { GO_AHEAD, composeReply, parseAsks, parseSteps } from './asks'
+import { GO_AHEAD, commandOf, composeReply, kindOf, parseAsks, parseSteps } from './asks'
 
 const asksAtom = atom({ plugin: 'quick-replies', key: 'asks' } as const, [])
 const stepsAtom = atom({ plugin: 'quick-replies', key: 'steps' } as const, [])
@@ -51,7 +51,7 @@ export const register: Register = on => {
     const send = async () => {
       const text = composeReply(asks, answers, goAhead)
       if (!text) {
-        $.ui.toast('Pick Yes or No, type a reply, or press Go ahead first')
+        $.ui.toast('Answer at least one item, or press Go ahead, first')
         return
       }
       await submit(text)
@@ -83,21 +83,37 @@ export const register: Register = on => {
           {asks.length > 0 && <Text bold>Claude needs from you</Text>}
           {asks.map(({ n, text }) => {
             const a = answers[n] ?? {}
-            const pick = (choice: 'yes' | 'no') => () =>
+            const kind = kindOf(text)
+            const cmd = kind === 'action' ? commandOf(text) : undefined
+            const pick = (choice: 'yes' | 'no' | 'done') => () =>
               setAnswer($, n, prev => ({ ...prev, choice: prev.choice === choice ? undefined : choice }))
+            const choiceButton = (choice: 'yes' | 'no' | 'done', label: string) => (
+              <Button key={`${choice}-${n}`} label={label} variant={a.choice === choice ? 'primary' : 'secondary'} onPress={pick(choice)} />
+            )
+            const run = async () => {
+              if (!cmd) return
+              await setAnswer($, n, prev => ({ ...prev, choice: 'done' }))
+              await $.command
+                .run({ command: cmd.command, ...(cmd.args ? { args: cmd.args } : {}) })
+                .catch((error: unknown) => $.ui.toast(`Could not run /${cmd.command}: ${error instanceof Error ? error.message : String(error)}`))
+            }
             return (
               <Box key={`ask-${n}`} flexDirection="column">
                 <Markdown text={`${n}. ${text}`} />
-                <Box gap={1}>
-                  <Button key={`yes-${n}`} label="Yes" variant={a.choice === 'yes' ? 'primary' : 'secondary'} onPress={pick('yes')} />
-                  <Button key={`no-${n}`} label="No" variant={a.choice === 'no' ? 'primary' : 'secondary'} onPress={pick('no')} />
-                </Box>
+                {kind !== 'open' && (
+                  <Box gap={1}>
+                    {kind === 'yesno' && choiceButton('yes', 'Yes')}
+                    {kind === 'yesno' && choiceButton('no', 'No')}
+                    {cmd && <Button key={`run-${n}`} label={`Run /${cmd.command}`} variant="primary" onPress={run} />}
+                    {kind === 'action' && choiceButton('done', 'Done')}
+                  </Box>
+                )}
                 {'Input' in ui && (
                   // ponytail: its own full-width row, so long replies wrap instead of shoving the buttons
                   <Box width="100%">
                     <ui.Input
                       key={`text-${n}`}
-                      placeholder="or reply in words"
+                      placeholder={kind === 'action' ? 'or tell Claude what happened' : kind === 'open' ? 'your answer' : 'or reply in words'}
                       value={a.text ?? ''}
                       onInput={value => void setAnswer($, n, prev => ({ ...prev, text: value }))}
                       onSubmit={value => void setAnswer($, n, prev => ({ ...prev, text: value }))}

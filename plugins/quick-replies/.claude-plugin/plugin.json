@@ -1,6 +1,6 @@
 {
   "name": "quick-replies",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Turns Claude's \"I need from you\" list into Yes / No buttons and reply boxes above the prompt, sent back as one message",
   "author": { "name": "Bernardo Rubin" },
   "types": "./types/index.d.ts"

@@ -24,6 +24,24 @@ export const parseSteps = (answer: string) => section(answer, 'Next steps')
 
 export const GO_AHEAD = 'Go ahead with the next steps.'
 
+// What an ask wants back: a decision (Yes / No), an open answer (words only),
+// or something for the person to do (Done, plus Run when it is a slash command).
+export type AskKind = 'yesno' | 'open' | 'action'
+const YES_NO = /\byes(\s+or\s+|\s*\/\s*)no\b/i
+const DECISION = /^(should|shall|can|could|do|does|is|are|will|would|want|may|ok|okay)\b/i
+export const kindOf = (text: string): AskKind =>
+  YES_NO.test(text) || (text.includes('?') && DECISION.test(text))
+    ? 'yesno'
+    : text.includes('?')
+      ? 'open'
+      : 'action'
+
+// "Run `/reload-plugins`." -> { command: 'reload-plugins', args: '' }
+export const commandOf = (text: string) => {
+  const m = /^run\s+`\/([A-Za-z0-9:_-]+)\s*([^`]*)`/i.exec(text)
+  return m ? { command: m[1] ?? '', args: (m[2] ?? '').trim() } : undefined
+}
+
 // One line per answered ask ("1. yes", "2. no: text", "3. text"), after the go-ahead.
 export const composeReply = (asks: Ask[], answers: Record<string, Answer>, goAhead = false) =>
   [
