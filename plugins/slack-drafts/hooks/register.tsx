@@ -58,24 +58,27 @@ const trash = async ($: EngineInterface, d: Draft, url: string) => {
 const docId = (name: string, at: number) =>
   `${name.replace(/\.md$/, '').replace(/[^A-Za-z0-9_.~:@+-]/g, '_')}-${Math.round(at)}`
 
-const syncPhone = async ($: EngineInterface, url: string, list: Draft[]) => {
-  if (!url) return
+// Returns what happened, for /drafts to say; failures also toast.
+const syncPhone = async ($: EngineInterface, url: string, list: Draft[]): Promise<string> => {
+  if (!url) return 'phone page off (set its URL in /config)'
   const synced = ((await $.store.get('synced')) ?? {}) as Record<string, number>
   const now = Date.now()
   const changed = list.filter(d => synced[d.name] !== d.mtimeMs)
   const gone = Object.keys(synced).filter(name => !list.some(d => d.name === name))
-  if (changed.length === 0 && gone.length === 0) return
+  if (changed.length === 0 && gone.length === 0) return 'phone page up to date'
   const writes = [
     ...changed.map(d => ({ op: 'set' as const, collection: 'drafts', doc_id: docId(d.name, now), data: { name: d.name, md: d.text, savedAt: d.mtimeMs } })),
     ...gone.map(name => ({ op: 'set' as const, collection: 'drafts', doc_id: docId(name, now), data: { name, deleted: true, savedAt: now } })),
   ]
   const r = await $.tool.call({ tool: 'ArtifactData', action: 'batch', url, writes })
   if (r.deny !== undefined || r.isError) {
-    $.ui.toast(`Phone sync failed: ${(r.deny ?? r.text ?? 'no reason given').slice(0, 160)}`)
-    return
+    const why = (r.deny ?? r.text ?? 'no reason given').slice(0, 160)
+    $.ui.toast(`Phone sync failed: ${why}`)
+    return `phone sync failed: ${why}`
   }
   const next = Object.fromEntries(list.map(d => [d.name, d.mtimeMs]))
   await $.store.set('synced', next)
+  return `sent ${writes.length} change${writes.length === 1 ? '' : 's'} to the phone page`
 }
 
 const open = ($: EngineInterface, focus: boolean) =>
@@ -94,8 +97,8 @@ export const register: Register = (on, options) => {
   on('command.run', { command: 'drafts' }, async $ => {
     const list = await refresh($)
     await open($, true)
-    await syncPhone($, phoneUrl, list)
-    return { text: `${list.length} Slack draft${list.length === 1 ? '' : 's'}.` }
+    const phone = await syncPhone($, phoneUrl, list)
+    return { text: `${list.length} draft${list.length === 1 ? '' : 's'} in the pane, ${phone}.` }
   })
 
   // A draft written by any tool (Write, Edit, a Bash heredoc) refreshes the list,
