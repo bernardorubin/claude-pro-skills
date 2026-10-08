@@ -4,7 +4,7 @@
 
 <h1 align="center">claude-pro-skills</h1>
 
-A Claude Code plugin marketplace by Bernardo Rubin. The main plugin (`claude-pro-skills`) bundles everything, no command/skill prefixes to type; `usage-bars` is a separate mod for the prompt.
+A Claude Code plugin marketplace by Bernardo Rubin. The main plugin (`claude-pro-skills`) bundles everything, no command/skill prefixes to type; `usage-bars` and `slack-drafts` are separate mods.
 
 ## Installation
 
@@ -64,6 +64,17 @@ A band above the prompt (terminal and desktop Code tab) with two bars: context w
 ```
 
 See [`plugins/usage-bars/README.md`](plugins/usage-bars/README.md).
+
+## `slack-drafts`
+
+A `/drafts` pane for the drafts `/write-slack-message` saves, with a copy button that keeps Slack links and code, and an optional private phone page to paste them from your iPhone. Installed separately:
+
+```
+/plugin install slack-drafts@claude-pro-skills
+/reload-plugins
+```
+
+See [`plugins/slack-drafts/README.md`](plugins/slack-drafts/README.md) for the one-time phone setup.
 
 ## License
 

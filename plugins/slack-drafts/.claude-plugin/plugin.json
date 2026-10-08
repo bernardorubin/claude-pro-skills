@@ -1,0 +1,17 @@
+{
+  "name": "slack-drafts",
+  "version": "0.1.0",
+  "description": "A /drafts pane for the Slack drafts write-slack-message saves: rendered preview, Slack-safe copy, delete",
+  "author": {
+    "name": "Bernardo Rubin"
+  },
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "phoneUrl": {
+      "type": "string",
+      "title": "Phone page",
+      "description": "The claude.ai artifact URL of your Slack Drafts phone page. Each saved draft is copied there so you can paste it from your phone. Empty turns it off.",
+      "default": ""
+    }
+  }
+}

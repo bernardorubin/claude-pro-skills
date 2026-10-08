@@ -10,6 +10,7 @@ claude-pro-skills/
 │   └── marketplace.json              # marketplace manifest — lists every plugin
 ├── plugins/
 │   ├── usage-bars/                    # separate function-hooks mod (hooks/register.tsx); `claude plugin validate` + `claude plugin test` it
+│   ├── slack-drafts/                  # separate mod: /drafts pane + phone/ artifact page; phone/slack-html.js is built from hooks/slack-html.ts (see its README)
 │   └── claude-pro-skills/             # the main bundled plugin (see below)
 │       ├── .claude-plugin/
 │       │   └── plugin.json           # plugin manifest
