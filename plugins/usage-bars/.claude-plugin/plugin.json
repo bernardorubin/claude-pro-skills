@@ -1,6 +1,6 @@
 {
   "name": "usage-bars",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Two bars above the prompt: context window used and what's left of the 5-hour rate-limit window",
   "author": { "name": "Bernardo Rubin" },
   "types": "./types/index.d.ts"

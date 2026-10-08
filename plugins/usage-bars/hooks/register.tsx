@@ -89,8 +89,8 @@ export const register: Register = on => {
     return (
       <Box gap={2}>
         <Box flexDirection="column">
-          <Text dimColor>ctx</Text>
-          <Text dimColor>5h</Text>
+          <Text dimColor>Context</Text>
+          <Text dimColor>5-hour limit</Text>
         </Box>
         <Box flexDirection="column">
           {meter(ctxPct, ctxTone, `context ${ctxPct}% used`)}
