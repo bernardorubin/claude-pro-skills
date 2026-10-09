@@ -1,0 +1,194 @@
+---
+name: vault-keeper
+description: >-
+  Use in a project with a registered knowledge vault (listed in ~/.config/claude-pro-
+  skills/vaults.json) when the user documents a finding, looks up domain context,
+  ingests a source into the wiki, or asks for a vault lint. Triggers on "add this to
+  the vault", "what does the wiki say about X", "let's document this finding", "ingest
+  this doc", "lint the wiki". Does nothing when no vault is registered; set one up
+  with vault-init.
+allowed-tools: Read, Write, Edit, Bash(jq:*), Bash(cat:*), Bash(test:*), Bash(ls:*), Bash(date:*), Bash(grep:*), Bash(find:*), Bash(git:*)
+---
+
+# Vault Keeper
+
+A reusable skill for maintaining a personal knowledge base (Karpathy's LLM Wiki pattern) on a per-project basis. Each registered project gets a vault — a structured Obsidian-compatible markdown directory with `raw/` (immutable sources) and `wiki/` (LLM-maintained pages with cross-links and citations).
+
+This skill makes Claude:
+1. **Read from the vault** before answering domain questions (instead of re-deriving context every session)
+2. **Write to the vault** proactively when discovering things worth preserving
+3. **Defer to each vault's own `CLAUDE.md`** for project-specific schema rules
+
+If the user is in a project with no registered vault, this skill **silently terminates**. Use `/vault-init` to set up a new vault.
+
+---
+
+## Step 1 — Resolve the current project to a vault path
+
+Read the registry at `~/.config/claudio/vaults.json`. Schema:
+
+```json
+{
+  "vaults": {
+    "/abs/path/to/project": "/abs/path/to/vault",
+    "/abs/path/to/another-project": "/abs/path/to/another-vault"
+  }
+}
+```
+
+```bash
+test -f ~/.config/claudio/vaults.json || { echo "no-registry"; exit 0; }
+cat ~/.config/claudio/vaults.json
+```
+
+Walk up the cwd directory tree (current working directory, then parent, then parent's parent, …) and look for an exact match against the registry keys. The first match wins. This means a session in `/Users/foo/apps/myproject/subdir/` matches an entry for `/Users/foo/apps/myproject`.
+
+<!-- CANONICAL vault-registry resolver. Satellites: save-to-vault Step 1, vault-resolve-conflicts Step 1, save-session-to-worklog "Vault routing". Edit here first, then propagate to all satellites (see repo CLAUDE.md "Shared vault plumbing"). -->
+```bash
+# Inline resolver (Claude can run this verbatim):
+DIR="$(pwd)"
+VAULT=""
+while [ "$DIR" != "/" ] && [ -z "$VAULT" ]; do
+  VAULT=$(jq -r --arg d "$DIR" '.vaults[$d] // empty' ~/.config/claudio/vaults.json 2>/dev/null)
+  DIR="$(dirname "$DIR")"
+done
+echo "${VAULT:-(no vault for this project)}"
+```
+
+If no vault matches: **stop here. Do not announce the skill, do not write anything. The user's request continues normally without vault involvement.**
+
+If a vault matches: continue to Step 2.
+
+## Step 2 — Load the vault's schema
+
+Each vault has its own `CLAUDE.md` at the vault root that defines project-specific rules: page format, citation conventions, ingest workflow, lint workflow, **auto-update triggers**. Read it once per session before doing any vault work:
+
+```
+{vault}/CLAUDE.md
+```
+
+The vault's CLAUDE.md is the **schema authority**. This skill provides the generic plumbing (registry lookup, when to engage); the vault's CLAUDE.md provides the specifics (what kind of facts get filed where, how to cite, how to format pages).
+
+If the vault's `CLAUDE.md` doesn't exist, the vault is malformed — surface this to the user. Suggest they re-run `/vault-init` or write a CLAUDE.md from scratch. Do not improvise rules.
+
+## Step 3 — Engage based on the user's intent
+
+After loading the vault's schema, decide which mode to enter:
+
+### Read mode (domain questions)
+
+Triggered by: "what does X do?", "how does Y work?", "who owns Z?", "what's our setup for ...?"
+
+1. Read `{vault}/wiki/index.md` first
+2. Follow `[[wiki-links]]` to relevant pages
+3. Synthesize the answer **with citations to specific wiki pages**: "see `[[payments-provider]]`"
+4. If the answer isn't in the wiki, say so clearly. Then offer to investigate (read code, web search, ask user) and **file the answer back as a new wiki page**
+
+### Write mode — proactive auto-update (no permission needed for small touches)
+
+Triggered when, during normal work, you encounter:
+
+- A new integration detail or quirk worth remembering → update `wiki/integrations/<service>.md`
+- An architectural decision + rationale → update `wiki/projects/*.md` and/or `wiki/concepts/*.md`
+- A debugging finding (root cause + reusable fix) → add or update `wiki/playbooks/<topic>.md`
+- A team-member fact (ownership, expertise, contact pattern) → update `wiki/people/<name>.md`
+- A multi-week epic touching multiple files → create or update `wiki/tickets/<ID>.md`
+- A new term/concept used 2+ times → create `wiki/concepts/<term>.md`
+- A contradiction with an existing claim → note both, mark contradiction explicitly, link to newer source
+
+**Always after any wiki write**:
+1. Refresh the entry in `{vault}/wiki/index.md`
+2. Append a one-line entry to `{vault}/wiki/log.md` (single append-only operation log, Karpathy pattern). Format: `## [YYYY-MM-DD] update | {page} | {what}`
+3. If you introduced a new `[[wiki-link]]`, make sure the target page exists (stub it if needed)
+
+**Threshold**: file a fact if knowing it would have saved 5+ minutes at session start. Skip if the source code itself documents it clearly. Don't file ephemeral status (PR review state, in-flight bugs already fixed in commits).
+
+**For larger ingests** (a brand-new raw source, not just a small finding): use Ingest mode below.
+
+### Ingest mode (new raw source)
+
+Triggered by: "I added a new doc to raw/", "ingest this", or when the user drops a file in `{vault}/raw/`.
+
+Follow the workflow defined in `{vault}/CLAUDE.md` (it's typically: read full source → discuss key takeaways with user → write summary page in `wiki/sources/` → create/update concept/entity pages → add cross-links → update index → log entry). A single source typically touches 10–15 wiki pages.
+
+**Discuss takeaways with the user before writing anything.** Surface the 3–7 most important findings and ask which to emphasize. This is the most important step and shouldn't be skipped.
+
+### Epic-shipped mode (final ingest + archive)
+
+Triggered by phrases like: *"do a final ingest of `raw/projects/<slug>/` then archive it"*, *"the payments epic is done, wrap it up"*, *"archive the {project} folder"*.
+
+Steps:
+1. List every file in `{vault}/raw/projects/<slug>/`
+2. For each file, diff against current wiki content — file anything new or changed into the relevant concept/integration/ticket/playbook pages
+3. Append a log entry to `{vault}/wiki/log.md`: `## [YYYY-MM-DD] archive | <slug> epic shipped | {pages updated}`
+4. `git mv {vault}/raw/projects/<slug>/ {vault}/raw/archive/projects/<slug>/` (or plain `mv` if vault isn't a git repo)
+5. If the user said *"and delete it"*: `rm -rf {vault}/raw/archive/projects/<slug>/` after step 4 (confirm once before destructive removal)
+6. Tell the user: "archived [and deleted]; citations are filename-only and remain valid in the wiki"
+
+**Default behavior is archive (reversible).** Only delete if explicitly asked. Citations elsewhere in the wiki use bare filenames, so neither move nor delete breaks anything currently filed.
+
+### Lint mode (audit)
+
+Triggered by: "lint the vault", "audit the wiki", "what's stale?"
+
+Walk the wiki and report (don't auto-fix):
+- **Orphans**: pages with no inbound `[[wiki-links]]` from other pages
+- **Stubs**: pages mentioned in `[[wiki-links]]` that don't exist yet
+- **Contradictions**: claims that conflict between pages
+- **Stale claims**: facts where `last_updated` is older than newer sources cited in the same page
+- **Format violations**: missing frontmatter, missing summary, wrong filename casing
+- **Index drift**: pages that exist but aren't in `index.md`, or index entries pointing to nonexistent pages
+
+Report as a numbered list with suggested fixes.
+
+## Step 4 — Hard rules (apply across all modes)
+
+1. **`{vault}/raw/` is per-file mutable.** Reference docs (e.g. external snapshots, sandbox notes) inside `raw/projects/<slug>/` are citation anchors — don't modify. Living plans in those same folders, and worklog files in `raw/work-logs/<user-slug>/`, ARE meant to be edited freely by both Claude and the user. **Worklog folders are user-scoped** — only edit files under the active user's slug (resolved by `/save-session-to-worklog` from `git config user.email` or `$CLAUDIO_VAULT_USER`); treat other teammates' worklog folders as read-only references when they exist. Defer to each vault's own `CLAUDE.md` for project-specific conventions.
+2. **Always update `{vault}/wiki/index.md` and `{vault}/wiki/log.md`** after any wiki write.
+3. **Page names are lowercase-hyphenated** (with the rare exception of ticket IDs like `ACME-5611.md` if the vault's CLAUDE.md says so).
+4. **No empty wiki pages.** A stubbed page gets at least a summary line and a "Related pages" section.
+5. **When uncertain about categorization, ask the user.** Better to pause than to file something in the wrong folder.
+6. **Auto-sync the vault to its remote after a write.** Once a write is complete (the finding filed + `index.md`/`log.md` updated), commit and push it, union-merging any conflict. The vault is its own git repo (separate from any code repo) and is meant to sync continuously, so push without asking; this never affects code-repo push approvals. Skip silently for a non-git or remote-less vault. Always use `git -C "$VAULT"` (never `cd`).
+
+   <!-- CANONICAL vault git-sync block. Satellites: save-to-vault Step 6, save-session-to-worklog Step 5.7. Edit here first, then propagate (see repo CLAUDE.md "Shared vault plumbing"). -->
+   ```bash
+   if git -C "$VAULT" rev-parse --git-dir >/dev/null 2>&1 \
+      && git -C "$VAULT" remote get-url origin >/dev/null 2>&1; then
+     if [ -n "$(git -C "$VAULT" status --porcelain)" ]; then
+       git -C "$VAULT" add -A
+       git -C "$VAULT" commit -q -m "vault: <short summary of the finding>"
+     fi
+     B="$(git -C "$VAULT" rev-parse --abbrev-ref HEAD)"
+     git -C "$VAULT" pull --rebase origin "$B"   # sync teammates first
+     git -C "$VAULT" push origin "$B"
+   fi
+   ```
+
+   On a `pull --rebase` conflict, **union-merge** (keep BOTH sides, never discard) per the [[vault-resolve-conflicts]] skill: append-only `log.md`/worklogs union cleanly; a page edited on both sides keeps both statements (mark the contradiction per rule 1). Then `git -C "$VAULT" add -A`, `git -C "$VAULT" rebase --continue`, and push. Only stop and surface if a conflict genuinely can't be union-merged. (To batch many rapid ambient writes, it's fine to sync once after the last one rather than after each.)
+
+## Step 5 — Tell the user what you did (briefly)
+
+When you write to the vault, surface a short confirmation in your reply:
+
+> Filed [[page-name]] (1 page touched), logged in `wiki/log.md`.
+
+Not a paragraph. One line per write. The user can browse the diff in Obsidian or via git.
+
+---
+
+## What this skill does NOT do
+
+- It does NOT set up new vaults — that's `/vault-init`'s job
+- It does NOT replace the vault's own `CLAUDE.md` — it defers to it
+- It does NOT auto-trigger when no vault is registered for the cwd — it returns silently
+
+## How vaults relate to other context layers
+
+| Layer | Lifetime | Owner |
+|---|---|---|
+| **Vault wiki** (`{vault}/wiki/`) | Persistent across sessions; structured, cross-linked | Claude maintains; user reads in Obsidian |
+| **Vault raw** (`{vault}/raw/`) | Immutable | User curates |
+| **Memory** (`~/.claude/projects/<cwd-mangled>/memory/`) | Persistent across sessions; flat, per-cwd | Claude's own session-level scratch |
+| **CLAUDE.md** (in-project) | Persistent; loaded every session in that tree | User authors |
+
+The vault is for **knowledge that belongs to the project domain** (team, integrations, decisions, gotchas). Memory is for **session-level rules** (how the user wants Claude to communicate). CLAUDE.md is for **structural orientation** (where things are, how to run things).

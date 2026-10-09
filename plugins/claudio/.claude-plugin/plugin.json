@@ -1,0 +1,27 @@
+{
+  "name": "claudio",
+  "description": "Claude Code toolkit: confidence-scored code reviews (PR, local, or full-repo audit), git workflow shortcuts, PR/Slack helpers, Claude meta skills, Jira integration, and per-project knowledge vaults (Karpathy-style LLM Wiki). All skills invocable with no prefix.",
+  "version": "4.0.0",
+  "author": {
+    "name": "Bernardo Rubin",
+    "url": "https://github.com/bernardorubin"
+  },
+  "homepage": "https://github.com/bernardorubin/claude-pro-skills",
+  "repository": "https://github.com/bernardorubin/claude-pro-skills",
+  "license": "MIT",
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "phoneUrl": {
+      "type": "string",
+      "title": "Slack drafts phone page",
+      "description": "The claude.ai artifact URL of your Slack Drafts phone page. Each saved draft is copied there so you can paste it from your phone. Empty turns it off.",
+      "default": ""
+    },
+    "usageBars": {
+      "type": "boolean",
+      "title": "Usage bars",
+      "description": "Show the context and 5-hour limit bars above the prompt. Off by default, since another plugin's band (a skin, say) may want that spot.",
+      "default": false
+    }
+  }
+}

@@ -1,22 +1,22 @@
 <p align="center">
-  <img src="logo.svg" width="120" alt="claude-pro-skills logo">
+  <img src="logo.svg" width="120" alt="claudio logo">
 </p>
 
-<h1 align="center">claude-pro-skills</h1>
+<h1 align="center">claudio</h1>
 
-A Claude Code plugin marketplace by Bernardo Rubin. One plugin (`claude-pro-skills`) bundles everything: the skills, with no command/skill prefixes to type, plus two mods, a usage band above the prompt and a Slack drafts pane.
+A Claude Code plugin marketplace by Bernardo Rubin. One plugin (`claudio`) bundles everything: the skills, with no command/skill prefixes to type, plus two mods, a usage band above the prompt and a Slack drafts pane.
 
 ## Installation
 
 ```
 /plugin marketplace add bernardorubin/claude-pro-skills
-/plugin install claude-pro-skills@claude-pro-skills
+/plugin install claudio@claudio
 /reload-plugins
 ```
 
-## What's inside `claude-pro-skills`
+## What's inside `claudio`
 
-Everything is a **skill** — no `claude-pro-skills:` prefix needed when invoking. Skills appear in the slash palette as `/<name>` and auto-trigger on natural language.
+Everything is a **skill** — no `claudio:` prefix needed when invoking. Skills appear in the slash palette as `/<name>` and auto-trigger on natural language.
 
 | Skill | Triggers on |
 |-------|-------------|
@@ -48,20 +48,20 @@ Everything is a **skill** — no `claude-pro-skills:` prefix needed when invokin
 | `/handoff` | "write a handoff doc", "hand this off to a new session", "context is getting long" — compacts the conversation into `~/Desktop/handoff-<slug>.md` for a fresh session to pick up |
 | `/claude-learn` | "document what we learned", "update CLAUDE.md with this" |
 | `/claude-modularize` | "split up CLAUDE.md", "modularize CLAUDE.md" |
-| `/update-claude-pro-skills` | "update the claude pro skills", "update my skills to the latest", "update the toolkit" — pulls the newest published version of this plugin via the `claude plugin` CLI |
+| `/update-claudio` | "update claudio", "update my skills to the latest", "update the toolkit" — pulls the newest published version of this plugin via the `claude plugin` CLI |
 
 The plugin also bundles one subagent: `code-reviewer`, the parallel review agent `/pr-review` launches for its focus-area passes.
 
-See [`plugins/claude-pro-skills/README.md`](plugins/claude-pro-skills/README.md) for full details on every skill, the PR review modes (PR / local / full-repo), and the iterative review loop.
+See [`plugins/claudio/README.md`](plugins/claudio/README.md) for full details on every skill, the PR review modes (PR / local / full-repo), and the iterative review loop.
 
 ## Mods
 
-Two function-hook mods ship inside `claude-pro-skills`, so there is nothing extra to install:
+Two function-hook mods ship inside `claudio`, so there is nothing extra to install:
 
-- **Usage band**: two bars above the prompt (terminal and desktop Code tab), context window used and what's left of the 5-hour rate-limit window, orange then red as each nears its limit.
+- **Usage band**: two bars above the prompt (terminal and desktop Code tab), context window used and what's left of the 5-hour rate-limit window, orange then red as each nears its limit. Off by default; turn on the plugin's **Usage bars** option in `/config`.
 - **`/slack-drafts`**: a pane for the drafts `/write-slack-message` saves, with a copy button that keeps Slack links and code, and an optional private phone page to paste them from your iPhone.
 
-See [the plugin README's Mods section](plugins/claude-pro-skills/README.md#mods) for the one-time phone setup.
+See [the plugin README's Mods section](plugins/claudio/README.md#mods) for the one-time phone setup.
 
 ## License
 

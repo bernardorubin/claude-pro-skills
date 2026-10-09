@@ -1,15 +1,15 @@
-# claude-pro-skills (claude-pro-skills marketplace)
+# claude-pro-skills repo (the claudio marketplace)
 
 This repo is a Claude Code **plugin marketplace**. It is not application code — there is no build, no test runner, and no package manager. Everything here is JSON manifests + markdown skill definitions consumed by the Claude Code harness.
 
 ## Repo layout
 
 ```
-claude-pro-skills/
+claude-pro-skills/                    # repo folder; the plugin inside is named claudio
 ├── .claude-plugin/
 │   └── marketplace.json              # marketplace manifest — lists every plugin
 ├── plugins/
-│   └── claude-pro-skills/             # the one plugin (see below)
+│   └── claudio/                       # the one plugin (see below)
 │       ├── .claude-plugin/
 │       │   └── plugin.json           # plugin manifest
 │       ├── skills/                   # skill folders, each with SKILL.md
@@ -24,20 +24,20 @@ claude-pro-skills/
 
 ## How everything wires together
 
-- **Marketplace name**: `claude-pro-skills` (set in `.claude-plugin/marketplace.json`)
+- **Marketplace name**: `claudio` (set in `.claude-plugin/marketplace.json`)
 - **GitHub identifier**: `bernardorubin/claude-pro-skills` (used in `/plugin marketplace add`)
-- **Single plugin**: `claude-pro-skills` — bundles 29 skills (no commands) and one hooks module carrying two mods. The `pr-review` skill itself supports three modes: PR review, local diff review, and full-repo audit.
-- **Install path** (after `/plugin install`): `~/.claude/plugins/cache/claude-pro-skills/claude-pro-skills/<version>/`
+- **Single plugin**: `claudio` — bundles 29 skills (no commands) and one hooks module carrying two mods. The `pr-review` skill itself supports three modes: PR review, local diff review, and full-repo audit.
+- **Install path** (after `/plugin install`): `~/.claude/plugins/cache/claudio/claudio/<version>/`
 
 When users update the marketplace and reinstall, the harness pulls from `main` of this repo via the `git-subdir` source defined in `marketplace.json`.
 
 ## Mods (function hooks)
 
-`hooks/register.tsx` holds every hook for both mods because the engine loads one hooks module per plugin, allows one unmatched `session.start` hook, and never follows `$` across an import. Pure helpers (`slack-html.ts`, `usage-bars.ts`) can live in their own files. Check changes with `claude plugin validate` and `claude plugin test` from `plugins/claude-pro-skills`; validate's reserved-name error on `claude-pro-skills` is expected.
+`hooks/register.tsx` holds every hook for both mods because the engine loads one hooks module per plugin, allows one unmatched `session.start` hook, and never follows `$` across an import. Pure helpers (`slack-html.ts`, `usage-bars.ts`) can live in their own files. Check changes with `claude plugin validate` and `claude plugin test` from `plugins/claudio`.
 
 ## Skills only — no commands
 
-This plugin uses **skills exclusively** (no commands). Skills appear in the slash palette as `/<name>` with no `claude-pro-skills:` prefix, and **auto-trigger** when Claude matches the user's natural language against the skill's `description`.
+This plugin uses **skills exclusively** (no commands). Skills appear in the slash palette as `/<name>` with no `claudio:` prefix, and **auto-trigger** when Claude matches the user's natural language against the skill's `description`.
 
 The historic command/skill split was dropped because the prefix made commands painful to type. Skills cover both use cases:
 
@@ -48,7 +48,7 @@ The historic command/skill split was dropped because the prefix made commands pa
 
 ## Adding a new skill
 
-1. Create `plugins/claude-pro-skills/skills/<name>/SKILL.md` with frontmatter:
+1. Create `plugins/claudio/skills/<name>/SKILL.md` with frontmatter:
    ```
    ---
    name: <name>
@@ -60,13 +60,13 @@ The historic command/skill split was dropped because the prefix made commands pa
    dependency-free (stdlib / system tools) and commit them executable — `write-slack-message`
    is the working example. Reference them from `SKILL.md` relative to the skill directory,
    never by an absolute path, since the cache path carries the version number.
-3. Document in `plugins/claude-pro-skills/README.md` and the root `README.md`, and bump the skill count in the plugin README's headline (the manifests deliberately carry no count).
+3. Document in `plugins/claudio/README.md` and the root `README.md`, and bump the skill count in the plugin README's headline (the manifests deliberately carry no count).
 
-The skill becomes invocable as `/<name>` (no prefix) and via the Skill tool as `claude-pro-skills:<name>`.
+The skill becomes invocable as `/<name>` (no prefix) and via the Skill tool as `claudio:<name>`.
 
 ## Adding a new subagent
 
-1. Create `plugins/claude-pro-skills/agents/<name>.md` with frontmatter:
+1. Create `plugins/claudio/agents/<name>.md` with frontmatter:
    ```
    ---
    name: <name>
@@ -77,15 +77,15 @@ The skill becomes invocable as `/<name>` (no prefix) and via the Skill tool as `
 2. Body is the agent's system prompt — what it specializes in, how it should behave.
 3. Document in the Subagents section of both READMEs.
 
-The agent becomes invocable via the Task tool as `subagent_type: claude-pro-skills:<name>`.
+The agent becomes invocable via the Task tool as `subagent_type: claudio:<name>`.
 
 ## Conventions
 
 - **Naming**: keep skill names short and descriptive. They're invoked as `/<name>` with no prefix.
 - **No AI co-author lines** in commit messages, PR titles/bodies, or any other artifact. Normal commit-and-push defaults apply here; pushing to `main` is what publishes (see Publishing flow), so that push is the step worth being deliberate about, not the commit.
 - **README is the source of truth** for what each skill does — keep it in sync when behavior changes.
-- **Single source of truth**: skill files live ONLY here. The user's `~/.claude/commands/` and `~/.claude/skills/` should not contain copies of anything bundled in `claude-pro-skills` (avoids drift).
-- **Config paths**: shared config lives under `~/.config/claude-pro-skills/` (e.g., `vaults.json` for the vault registry). Env-var overrides are prefixed `CLAUDE_PRO_SKILLS_*` (e.g., `$CLAUDE_PRO_SKILLS_VAULT_USER`).
+- **Single source of truth**: skill files live ONLY here. The user's `~/.claude/commands/` and `~/.claude/skills/` should not contain copies of anything bundled in `claudio` (avoids drift).
+- **Config paths**: shared config lives under `~/.config/claudio/` (e.g., `vaults.json` for the vault registry). Env-var overrides are prefixed `CLAUDIO_*` (e.g., `$CLAUDIO_VAULT_USER`).
 - **Shared vault plumbing is intentionally duplicated** so each skill stays self-contained. Two blocks: the vault-registry resolver (canonical: `vault-keeper` Step 1; copies in save-to-vault, vault-resolve-conflicts, save-session-to-worklog) and the git-sync/union-merge block (canonical: `vault-keeper` hard rule 6; copies in save-to-vault Step 6, save-session-to-worklog Step 5.7). Every copy carries an HTML-comment marker. When editing either block, edit the canonical first and propagate to every marked satellite in the same change.
 
 ## Versioning
@@ -97,9 +97,9 @@ The agent becomes invocable via the Task tool as `subagent_type: claude-pro-skil
 1. Make changes, validate JSON files parse:
    ```bash
    python3 -c "import json; json.load(open('.claude-plugin/marketplace.json'))"
-   python3 -c "import json; json.load(open('plugins/claude-pro-skills/.claude-plugin/plugin.json'))"
+   python3 -c "import json; json.load(open('plugins/claudio/.claude-plugin/plugin.json'))"
    ```
 2. Commit + push to `main`.
-3. On any machine that already has the marketplace: `/plugin marketplace update claude-pro-skills` → `/plugin install claude-pro-skills@claude-pro-skills` to pull updates.
+3. On any machine that already has the marketplace: `/plugin marketplace update claudio` → `/plugin install claudio@claudio` to pull updates.
 
 There is no app store, approval process, or release pipeline — pushing to `main` is publishing.
