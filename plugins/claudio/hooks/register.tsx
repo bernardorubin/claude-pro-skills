@@ -93,6 +93,18 @@ const startSlackDrafts = async ($: EngineInterface) => {
   $.clock.every(3_000, () => void refresh($).catch(() => undefined))
 }
 
+// ── first run: point a new install at /vault-init ──
+
+// Most skills read or write the project's vault, and a new install has none.
+// ponytail: one toast per install, and only while no vault registry exists at all
+const nudgeVault = async ($: EngineInterface) => {
+  if (await $.store.get('vaultNudged')) return
+  const registry = await $.fs.read(`${await home($)}/.config/claudio/vaults.json`).catch(() => null)
+  if (registry !== null) return
+  $.ui.toast('claudio: run /vault-init in your project so its skills keep a memory', { timeoutMs: 15_000 })
+  await $.store.set('vaultNudged', true)
+}
+
 // ── usage-bars: the context and 5-hour limit band above the prompt ──
 
 const snap = atom({ plugin: 'claudio', key: 'snap' } as const, null)
@@ -121,8 +133,8 @@ export const register: Register = (on, options) => {
 
   on('session.start', async ($, e, next) => {
     const ran = await next(e)
-    // one mod failing to start must not keep the other from starting
-    const failed = (await Promise.allSettled([startSlackDrafts($), showUsage && startUsageBars($)])).find(r => r.status === 'rejected')
+    // one mod failing to start must not keep the others from starting
+    const failed = (await Promise.allSettled([startSlackDrafts($), showUsage && startUsageBars($), nudgeVault($)])).find(r => r.status === 'rejected')
     if (failed) throw failed.reason
     return ran
   })

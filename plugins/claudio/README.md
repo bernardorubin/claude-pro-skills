@@ -12,6 +12,14 @@ A Claude Code toolkit — **29 skills, no prefix to type**. Shipping pipelines (
 /reload-plugins
 ```
 
+Then, in each project you work on, set up its knowledge vault:
+
+```
+/vault-init
+```
+
+The vault is the plugin's memory: `vault-keeper` reads it for prior context and files what each session learns, `/save-to-vault` and `/wrap-session` write to it, and `/save-session-to-worklog` keeps your worklogs there for `/standup` and `/weekly-summary` to read. Without one, those skills lose their memory, and the worklogs land on `~/Desktop/` instead. Until you have a vault anywhere, a new session shows a one-time reminder.
+
 ## Skills only — no prefix
 
 Every entry below is a **skill** invocable as `/<name>` (no `claudio:` prefix). Skills appear in the slash palette and **auto-trigger** when you describe the task in plain English.
@@ -134,7 +142,7 @@ Reads from and writes to a registered project's knowledge vault (Karpathy-style 
 To set up a new vault, use `/vault-init`.
 
 ### `/save-to-vault`
-A deliberate end-of-session sweep that files everything valuable from the **whole conversation** into the vault in one pass. Where `vault-keeper` writes facts incidentally as they surface during work, this is the explicit "we're done, capture what we learned" command — the session-level analogue of `vault-keeper`'s ingest mode, with the conversation itself as the source. It defers to `vault-keeper`'s write-mode rules and the vault's own `CLAUDE.md` for page format, citations, and the index/log update; its added value is scope (review the entire session) and dedup (skip anything `vault-keeper` already filed this session). If no vault is registered for the project, it says so and points to `/vault-init` rather than self-terminating silently.
+A deliberate end-of-session sweep that files everything valuable from the **whole conversation** into the vault in one pass. Where `vault-keeper` writes facts incidentally as they surface during work, this is the explicit "we're done, capture what we learned" command — the session-level analogue of `vault-keeper`'s ingest mode, with the conversation itself as the source. It defers to `vault-keeper`'s write-mode rules and the vault's own `CLAUDE.md` for page format, citations, and the index/log update; its added value is scope (review the entire session) and dedup (skip anything `vault-keeper` already filed this session). If no vault is registered for the project, it offers to run `/vault-init` on the spot rather than self-terminating silently.
 
 ```
 /save-to-vault                                 # Sweep the whole session into the wiki

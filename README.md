@@ -14,6 +14,14 @@ A Claude Code plugin marketplace by Bernardo Rubin. One plugin (`claudio`) bundl
 /reload-plugins
 ```
 
+Then, in each project you work on, set up its knowledge vault:
+
+```
+/vault-init
+```
+
+The vault is the plugin's memory: `vault-keeper` reads it for prior context and files what each session learns, `/save-to-vault` and `/wrap-session` write to it, and `/save-session-to-worklog` keeps your worklogs there for `/standup` and `/weekly-summary` to read. Without one, those skills lose their memory, and the worklogs land on `~/Desktop/` instead. Until you have a vault anywhere, a new session shows a one-time reminder.
+
 ## What's inside `claudio`
 
 Everything is a **skill** — no `claudio:` prefix needed when invoking. Skills appear in the slash palette as `/<name>` and auto-trigger on natural language.

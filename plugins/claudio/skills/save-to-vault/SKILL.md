@@ -33,7 +33,7 @@ done
 echo "${VAULT:-(no vault for this project)}"
 ```
 
-**If no vault matches**: unlike `vault-keeper` (which self-terminates silently because it auto-fires), this skill was invoked explicitly — so tell the user plainly: "No vault is registered for this project. Run `/vault-init` to set one up." Then stop.
+**If no vault matches** (or `no-registry`): unlike `vault-keeper` (which self-terminates silently because it auto-fires), this skill was invoked explicitly, so offer to set one up in one line: "No vault is registered for this project, so there's nowhere to file this session. Set one up now with `/vault-init`? (yes / skip)". On yes, run the `vault-init` skill, then re-run the lookup above and continue with the new vault. On skip, stop.
 
 **If a vault matches**: continue.
 

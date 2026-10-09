@@ -24,8 +24,9 @@ This skill is a conductor — it does not reimplement either; it invokes them in
   learning-heavy but commit-light, or vice versa.
 - **`--dry`**: if `$ARGUMENTS` contains `--dry`, run the worklog step in its dry-run
   preview and **skip the vault write** (dry means write nothing anywhere), then stop.
-- **No vault registered**: [[save-to-vault]] will say so and point to `/vault-init`.
-  That's fine — the worklog step still ran (it falls back to `~/Desktop/`). Just relay it.
+- **No vault registered**: [[save-to-vault]] offers to run `/vault-init` on the spot.
+  The worklog step already ran (it falls back to `~/Desktop/`), so a skip loses nothing
+  but the wiki sweep. Just relay it.
 - ponytail: both sub-skills each git-sync the vault, so a vault project gets two
   commits (worklog, then wiki). Left as-is — separate commits read cleanly; dedupe the
   sync only if it ever becomes a problem.
