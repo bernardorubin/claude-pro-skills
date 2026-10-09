@@ -342,20 +342,69 @@ Main content.
 
 #### `{vault}/README.md`
 
-```markdown
+````markdown
 # {Project} Vault
 
-A personal knowledge base for {Project} work. Built on Andrej Karpathy's LLM Wiki pattern.
+A personal, auto-updating knowledge base for {Project} work, built on Andrej Karpathy's LLM Wiki pattern. Claude maintains the wiki; you curate sources and ask questions. Knowledge compounds over time instead of being re-derived every session.
+
+> ⚠️ Private. Holds team names, ticket IDs and integration details. Not for sharing.
+
+## What it is
 
 Three layers:
-1. `raw/` — source documents (immutable; user curates)
-2. `wiki/` — markdown pages Claude maintains, cross-linked via `[[wiki-links]]`
-3. `CLAUDE.md` — the schema (page format, ingest workflow, auto-update triggers)
 
-Open in [Obsidian](https://obsidian.md). Entry point: `wiki/index.md`. The vault auto-updates during Claude sessions via the `vault-keeper` skill in claudio.
+1. **`raw/`** — source documents (immutable): articles, plans, testing notes, worklogs. You add them; Claude reads but never modifies them.
+2. **`wiki/`** — markdown pages Claude maintains: summaries, entity and concept pages, an index and an append-only log, cross-linked with Obsidian-style `[[wiki-links]]` and cited back to `raw/`.
+3. **`CLAUDE.md`** — the schema: page format, the ingest, query and lint workflows, and the **auto-update triggers** that make Claude write to the vault during normal work without being asked.
 
-> ⚠️ Personal knowledge base.
+The runtime lives in the [claudio](https://github.com/bernardorubin/claudio-skills) plugin: the `vault-keeper` skill reads and writes the vault during sessions, and `/vault-init` scaffolds new ones. A registry at `~/.config/claudio/vaults.json` maps project paths to vault paths, so the same skills serve several projects with different vaults.
+
+## Folder structure
+
 ```
+raw/                    ← source documents
+  projects/<slug>/      ← one bundle per epic: reference docs and living plans
+  work-logs/<user>/     ← each teammate's monthly worklogs
+    archive/            ← past months (auto-rotated)
+  archive/projects/     ← retired epic bundles (final-ingested)
+wiki/
+  index.md              ← table of contents for the whole wiki
+  log.md                ← append-only operation log (one file)
+  people/               ← teammates
+  projects/             ← repos and sub-projects
+  integrations/         ← third-party services and APIs
+  concepts/             ← flows, patterns, domain ideas
+  playbooks/            ← repeatable how-tos
+  tickets/              ← major epics with lasting context
+  sources/              ← summary pages for ingested raw/ docs
+templates/              ← page templates
+```
+
+**raw/ rules**
+- **`projects/<slug>/`** — reference docs (immutable) and living plans (freely edited) for one epic. When it ships, say "do a final ingest of raw/projects/<slug>/ then archive it": Claude folds it into the wiki and moves it to `archive/projects/`.
+- **`work-logs/<user>/`** — written by `/save-session-to-worklog`, one folder per teammate so a shared vault never overwrites anyone's. Past months move to that folder's `archive/` when it runs in a new month.
+- **`archive/projects/`** — retired epics. Wiki citations stay valid, so these can be deleted later to free space.
+
+## How to use
+
+**Browsing:** open the folder in [Obsidian](https://obsidian.md) and start at `wiki/index.md`. The graph view (Settings → Core plugins → Graph view) shows the shape of the knowledge base.
+
+**In Claude sessions under `{project-path}`:** `vault-keeper` reads `wiki/index.md` before answering domain questions, and files integration quirks, decisions, debugging findings, team facts and epic context as they come up, per the triggers in `CLAUDE.md`. `/save-to-vault` (or `/wrap-session`) sweeps a whole session in at the end.
+
+**Adding a source:** drop it in `raw/` and ask Claude to ingest it. Claude writes a summary page and updates the related concept, integration and people pages, all linked.
+
+**Asking a question:** Claude reads `wiki/index.md`, follows the links and answers with citations. New findings get filed back so the next session starts ahead.
+
+**Lint:** ask Claude to lint the wiki for orphans, contradictions, stale claims, missing links and stub pages.
+
+## Worklogs
+
+`/save-session-to-worklog` writes `raw/work-logs/<user>/<month>-<year>-<project>-worklog.md` and adds a line to `wiki/log.md`; `/standup` and `/weekly-summary` read those worklogs back. The operation log stays one append-only file: each entry is a line or two with a date prefix, so it stays small and greppable.
+
+## Acknowledgments
+
+Pattern from Andrej Karpathy's LLM Wiki writeup. The Memex (Vannevar Bush, 1945) is the deeper ancestor.
+````
 
 ### Step 5 — Init git (if requested)
 
