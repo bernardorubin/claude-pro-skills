@@ -28,7 +28,7 @@ test('draws each draft as who and when, the message, then its actions', async ($
     expect(await ui.find({ type: 'Text', text: 'dmytro' })).toBeDefined()
     expect(await ui.find({ type: 'Text', text: 'Oct 8, 13:20' })).toBeDefined()
     expect(await ui.find({ key: 'copy-0' })).toBeDefined()
-    expect(await ui.find({ key: 'md-0' })).toBeDefined()
+    expect(await ui.find({ key: 'md-0' })).toBeUndefined()
     expect(await ui.find({ key: 'del-0' })).toBeDefined()
     await ui.unmount()
   }

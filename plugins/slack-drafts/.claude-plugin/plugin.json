@@ -1,6 +1,6 @@
 {
   "name": "slack-drafts",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A /slack-drafts pane for the Slack drafts write-slack-message saves: rendered preview, Slack-safe copy, delete",
   "author": {
     "name": "Bernardo Rubin"

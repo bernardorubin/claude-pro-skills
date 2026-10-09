@@ -215,8 +215,7 @@ carry them into a normal draft.
 
 The `slack-drafts` mod (`slack-drafts@claude-pro-skills`) shows them: `/slack-drafts`
 opens a pane listing every draft newest first, with Copy for Slack (an HTML
-clipboard copy, so `[label](url)` pastes as a real link), copy raw markdown, and
-delete. On the phone, its pinned Slack Drafts page does the same. Mention it only if
+clipboard copy, so `[label](url)` pastes as a real link) and delete. On the phone, its pinned Slack Drafts page does the same. Mention it only if
 the user asks how to find an older draft; the drafting flow above must work
 unchanged without it.
 

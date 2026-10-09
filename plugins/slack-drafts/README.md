@@ -6,7 +6,7 @@ A `/slack-drafts` pane in Claude Code (terminal and desktop Code tab) for the dr
 
 - `/slack-drafts` opens the pane: one card per draft, newest first, rendered as Markdown.
 - Saving a draft opens the pane on its own.
-- **Copy for Slack** puts an HTML version on the Mac clipboard (via `osascript`), so `[label](url)` pastes as a link and backticks as code. **Copy markdown** copies the raw text. **Delete** moves the file to the Trash.
+- **Copy for Slack** puts an HTML version on the Mac clipboard (via `osascript`), so `[label](url)` pastes as a link and backticks as code. **Delete** moves the file to the Trash.
 - `SLACK_DRAFTS_DIR` overrides the folder.
 
 ## On your phone

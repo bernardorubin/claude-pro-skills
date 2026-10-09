@@ -29,11 +29,6 @@ const copyForSlack = async ($: EngineInterface, d: Draft) => {
   $.ui.toast('Copied as plain text (the Slack-safe copy failed)')
 }
 
-const copyMarkdown = async ($: EngineInterface, d: Draft) => {
-  await $.process.run(['pbcopy'], { stdin: d.text })
-  $.ui.toast('Copied the raw markdown')
-}
-
 // ponytail: moved to ~/.Trash, not unlinked, so a misclick is recoverable from Finder
 const trash = async ($: EngineInterface, d: Draft, url: string) => {
   const to = `${await home($)}/.Trash/${d.name.replace(/\.md$/, '')} ${Date.now()}.md`
@@ -129,7 +124,6 @@ export const register: Register = (on, options) => {
               <Markdown text={d.text} />
               <Box gap={1} flexWrap="wrap">
                 <Button key={`copy-${i}`} label="Copy for Slack" variant="primary" onPress={() => copyForSlack($, d)} />
-                <Button key={`md-${i}`} label="Copy markdown" onPress={() => copyMarkdown($, d)} />
                 <Button key={`del-${i}`} label="Delete" plain dimColor onPress={() => trash($, d, phoneUrl)} />
               </Box>
             </Box>

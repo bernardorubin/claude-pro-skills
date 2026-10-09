@@ -168,7 +168,7 @@ Drafts a Slack message ready to paste, business-casual, with **no sentence cap**
 
 **Where it saves.** `~/Desktop/slack-message-for-<recipient>.md` by default, overwriting the previous draft for that person. Create `~/Desktop/slack-drafts/` and it switches to timestamped files in there instead, so rewriting a message stops destroying the version it replaces. The folder's existence is the opt-in and the skill never creates it for you.
 
-**Reading drafts back.** Install the separate `slack-drafts` mod (`/plugin install slack-drafts@claude-pro-skills`): `/slack-drafts` opens a pane of every draft with **Copy for Slack** (an HTML clipboard copy, so `[label](url)` pastes as a real link), copy raw markdown and delete, and its optional phone page brings the same copy to your iPhone. See [`../slack-drafts/README.md`](../slack-drafts/README.md).
+**Reading drafts back.** Install the separate `slack-drafts` mod (`/plugin install slack-drafts@claude-pro-skills`): `/slack-drafts` opens a pane of every draft with **Copy for Slack** (an HTML clipboard copy, so `[label](url)` pastes as a real link) and delete, and its optional phone page brings the same copy to your iPhone. See [`../slack-drafts/README.md`](../slack-drafts/README.md).
 
 **On a phone**, say so and the draft comes back in the chat as a code block for one-press copy, flattened for a plain-text paste (links become bare URLs, which mobile Slack unfurls; backticks and fence markers are stripped because mobile converts nothing). The file on disk keeps its markdown either way, and with the `slack-drafts` phone page set up the formatted version is there too.
 
