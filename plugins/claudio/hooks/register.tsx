@@ -18,10 +18,15 @@ const home = async ($: EngineInterface) => (await $.env.get('HOME')) ?? ''
 const dirOf = async ($: EngineInterface) =>
   (await $.env.get('SLACK_DRAFTS_DIR')) ?? `${await home($)}/Desktop/slack-drafts`
 
+const signature = (files: { name: string; mtimeMs: number }[]) => files.map(f => `${f.name}@${f.mtimeMs}`).join('|')
+
+// Reads the files only when the folder's names or mtimes moved, so polling it is cheap.
 const refresh = async ($: EngineInterface) => {
   const dir = await dirOf($)
   const entries = await $.fs.list(dir).catch(() => [])
   const mds = entries.filter(f => f.kind === 'file' && f.name.endsWith('.md')).sort((a, b) => b.mtimeMs - a.mtimeMs)
+  const held = await read($, drafts)
+  if (signature(mds) === signature(held)) return held
   const list: Draft[] = await Promise.all(
     mds.map(async f => ({ name: f.name, path: `${dir}/${f.name}`, mtimeMs: f.mtimeMs, text: await $.fs.read(`${dir}/${f.name}`) })),
   )
@@ -82,6 +87,10 @@ const open = ($: EngineInterface, focus: boolean) =>
 const startSlackDrafts = async ($: EngineInterface) => {
   await $.command.register({ name: 'slack-drafts', description: 'Show your Slack drafts in a pane and send new ones to the phone page' })
   await refresh($)
+  // Each session holds its own list, so a save or delete made in another session
+  // shows here on the next tick. ponytail: a 3s poll of one small folder; a file
+  // watcher if the engine ever grows one
+  $.clock.every(3_000, () => void refresh($).catch(() => undefined))
 }
 
 // ── usage-bars: the context and 5-hour limit band above the prompt ──
@@ -128,9 +137,10 @@ export const register: Register = (on, options) => {
   // A draft written by any tool (Write, Edit, a Bash heredoc) refreshes the list,
   // and a new or changed one opens the pane.
   on('tool.call', async ($, e, next) => {
-    const ran = await next(e)
-    if (e.tool === 'ArtifactData' || !JSON.stringify(e).includes('slack-drafts')) return ran
+    if (e.tool === 'ArtifactData' || !JSON.stringify(e).includes('slack-drafts')) return next(e)
+    // read before the tool runs, or the poll could see the new draft first and keep the pane shut
     const newest = (await read($, drafts))[0]?.mtimeMs ?? 0
+    const ran = await next(e)
     const list = await refresh($)
     if ((list[0]?.mtimeMs ?? 0) > newest) void open($, false)
     await syncPhone($, phoneUrl, list)

@@ -335,7 +335,7 @@ Off by default, since another plugin's band (a skin, say) may want that spot: tu
 A pane for the drafts `/write-slack-message` saves to `~/Desktop/slack-drafts/`, plus an optional phone page so you can paste them from your iPhone with Slack formatting intact.
 
 - `/slack-drafts` opens the pane: one card per draft, newest first, rendered as Markdown.
-- Saving a draft opens the pane on its own.
+- Saving a draft opens the pane on its own, and a save or delete in any session shows in every open pane within a few seconds.
 - **Copy for Slack** puts an HTML version on the Mac clipboard (via `osascript`), so `[label](url)` pastes as a link and backticks as code. **Delete** moves the file to the Trash.
 - `SLACK_DRAFTS_DIR` overrides the folder.
 
