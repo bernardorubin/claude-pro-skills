@@ -1,11 +1,18 @@
 import { atom, read, update } from 'claude-code'
-import type { EngineInterface, Register } from 'claude-code'
+import type { EngineInterface, Register, SessionContextUsage, SessionRateLimit } from 'claude-code'
 
-import type { Draft } from '../types'
+import type { Draft, UsageSnap } from '../types'
 import { clipboardScript, labelOf } from './slack-html'
+import { BAR_PX, BLUE, ROW_PX, bar, svgBar, timeLeft, tokens, tone } from './usage-bars'
+
+// Two mods in one module: the engine loads one hooks module per plugin, allows
+// one unmatched session.start hook, and never follows $ across an import, so
+// every hook and every helper that takes $ lives here.
+
+// ── slack-drafts: the /slack-drafts pane and the phone page copy ──
 
 const PANE = 'slack-drafts'
-const drafts = atom({ plugin: 'slack-drafts', key: 'drafts' } as const, [])
+const drafts = atom({ plugin: 'claude-pro-skills', key: 'drafts' } as const, [])
 
 const home = async ($: EngineInterface) => (await $.env.get('HOME')) ?? ''
 const dirOf = async ($: EngineInterface) =>
@@ -72,13 +79,41 @@ const syncPhone = async ($: EngineInterface, url: string, list: Draft[]): Promis
 const open = ($: EngineInterface, focus: boolean) =>
   $.ui.open({ id: PANE, title: 'Slack drafts', closeOnEscape: true, ...(focus ? { focus: true as const } : {}) })
 
+const startSlackDrafts = async ($: EngineInterface) => {
+  await $.command.register({ name: 'slack-drafts', description: 'Show your Slack drafts in a pane and send new ones to the phone page' })
+  await refresh($)
+}
+
+// ── usage-bars: the context and 5-hour limit band above the prompt ──
+
+const snap = atom({ plugin: 'claude-pro-skills', key: 'snap' } as const, null)
+
+const saveUsage = async (
+  $: EngineInterface,
+  u: { context: SessionContextUsage; rateLimits: SessionRateLimit[] },
+) => {
+  const next: UsageSnap = {
+    context: u.context,
+    fiveHour: u.rateLimits.find(r => r.kind === 'five_hour') ?? null,
+    now: await $.clock.now(),
+  }
+  await update($, snap, () => next)
+}
+
+const startUsageBars = async ($: EngineInterface) => {
+  await saveUsage($, await $.session.usage())
+  // ponytail: 60s tick only so the reset countdown moves while idle
+  $.clock.every(60_000, () => void $.session.usage().then(u => saveUsage($, u)))
+}
+
 export const register: Register = (on, options) => {
   const phoneUrl = String(options.phoneUrl ?? '')
 
   on('session.start', async ($, e, next) => {
     const ran = await next(e)
-    await $.command.register({ name: 'slack-drafts', description: 'Show your Slack drafts in a pane and send new ones to the phone page' })
-    await refresh($)
+    // one mod failing to start must not keep the other from starting
+    const failed = (await Promise.allSettled([startSlackDrafts($), startUsageBars($)])).find(r => r.status === 'rejected')
+    if (failed) throw failed.reason
     return ran
   })
 
@@ -129,6 +164,63 @@ export const register: Register = (on, options) => {
             </Box>
           )
         })}
+      </Box>
+    )
+  })
+
+  on('session.measure', async ($, e, next) => {
+    await saveUsage($, e)
+    return next(e)
+  })
+
+  on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
+    const s = await read($, snap)
+    if (e.props.hasSurvey || s === null) return next(e)
+
+    const els = $.ui.resolve(e)
+    const { Box, Text } = els
+    const meter = (pct: number, color: string, alt: string) =>
+      'Svg' in els ? (
+        <els.Svg source={svgBar(pct, color)} alt={alt} width={BAR_PX} height={ROW_PX} />
+      ) : (
+        <Text color={color}>{bar(pct)}</Text>
+      )
+
+    const ctxPct = Math.round(s.context.percent ?? 0)
+    const ctxTokens = s.context.tokens === undefined ? '—' : tokens(s.context.tokens)
+    const used = s.fiveHour?.percentUsed ?? 0
+    const left = Math.round(100 - used)
+    const ctxTone = tone(ctxPct, 60, 85)
+    const fiveTone = tone(used, 75, 90)
+    const alert = (c: string) => (c === BLUE ? undefined : c)
+    const fiveDetail =
+      s.fiveHour === null ? 'no reading yet' : `left · resets in ${timeLeft(s.fiveHour.resetsAt, s.now)}`
+
+    // ponytail: columns, not rows, so labels and bars line up on any font
+    return (
+      <Box gap={2}>
+        <Box flexDirection="column">
+          <Text dimColor>Context</Text>
+          <Text dimColor>5-hour limit</Text>
+        </Box>
+        <Box flexDirection="column">
+          {meter(ctxPct, ctxTone, `context ${ctxPct}% used`)}
+          {meter(s.fiveHour === null ? 0 : left, fiveTone, `5-hour window ${left}% left`)}
+        </Box>
+        <Box flexDirection="column" alignItems="flex-end">
+          <Text bold color={alert(ctxTone)}>
+            {ctxPct}%
+          </Text>
+          <Text bold color={alert(fiveTone)}>
+            {s.fiveHour === null ? '—' : `${left}%`}
+          </Text>
+        </Box>
+        <Box flexDirection="column">
+          <Text dimColor>
+            used · {ctxTokens} of {tokens(s.context.window)}
+          </Text>
+          <Text dimColor>{fiveDetail}</Text>
+        </Box>
       </Box>
     )
   })

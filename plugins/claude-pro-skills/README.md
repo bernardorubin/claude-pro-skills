@@ -168,7 +168,7 @@ Drafts a Slack message ready to paste, business-casual, with **no sentence cap**
 
 **Where it saves.** `~/Desktop/slack-message-for-<recipient>.md` by default, overwriting the previous draft for that person. Create `~/Desktop/slack-drafts/` and it switches to timestamped files in there instead, so rewriting a message stops destroying the version it replaces. The folder's existence is the opt-in and the skill never creates it for you.
 
-**Reading drafts back.** Install the separate `slack-drafts` mod (`/plugin install slack-drafts@claude-pro-skills`): `/slack-drafts` opens a pane of every draft with **Copy for Slack** (an HTML clipboard copy, so `[label](url)` pastes as a real link) and delete, and its optional phone page brings the same copy to your iPhone. See [`../slack-drafts/README.md`](../slack-drafts/README.md).
+**Reading drafts back.** `/slack-drafts` opens a pane of every draft with **Copy for Slack** (an HTML clipboard copy, so `[label](url)` pastes as a real link) and delete, and its optional phone page brings the same copy to your iPhone. See [Mods](#mods).
 
 **On a phone**, say so and the draft comes back in the chat as a code block for one-press copy, flattened for a plain-text paste (links become bare URLs, which mobile Slack unfurls; backticks and fence markers are stripped because mobile converts nothing). The file on disk keeps its markdown either way, and with the `slack-drafts` phone page set up the formatted version is there too.
 
@@ -309,6 +309,60 @@ Reviews saved as `pr-review-{PR_NUMBER}.md` (one stable file per PR — re-runs 
 
 ### `/review-cycle`
 The review-**and-fix** loop, where `/pr-review` only reviews. It's a thin conductor over `/pr-review`: it reviews the PR and posts the findings as **one living PR comment**, then fixes the findings it judges worth fixing (critical + solid improvements — it leaves nitpicks/false-positives/out-of-scope with a noted reason, not a blind fix-everything), runs the repo's quality gates, pushes, and **edits that same comment in place** on each pass (strikes through what's fixed, surfaces anything new) — looping until clean. The end state is one PR comment that tracked the review to resolution, plus a short summary of what was fixed vs deliberately left. Reach for it when you want the issues *fixed and pushed*, not just listed. `/shipit` invokes it as its self-review step (after asking whether the PR even needs a cycle). Auto-triggers on "run the review cycle", "review and fix this PR", "do the review loop". Never deploys/publishes — a review cycle fixes and pushes, nothing more.
+
+## Mods
+
+The plugin also carries one function-hooks module ([`hooks/register.tsx`](hooks/register.tsx)) with two mods. Built on Claude Code's function-hooks plugin API (early access, may change between releases).
+
+### Usage band
+
+A band above the prompt (terminal and desktop Code tab) with two bars:
+
+```
+Context       ━━━━──────────────  14%  used · 137.8K of 1.0M
+5-hour limit  ━━━━━━━━━━━━━━━━━─  99%  left · resets in 4h 51m
+```
+
+- **Context**: context window used. Orange from 60%, red from 85%.
+- **5-hour limit**: what's left of the 5-hour rate-limit window, draining as you use it. Orange from 75% used, red from 90% used. Shows "no reading yet" until the first reply (and off a subscription).
+
+Desktop draws SVG bars; the terminal draws `■□` bars. Updates after every turn, and the reset countdown ticks every minute. Collapse it with `[-]` or ctrl+x ctrl+a.
+
+### `/slack-drafts`
+
+A pane for the drafts `/write-slack-message` saves to `~/Desktop/slack-drafts/`, plus an optional phone page so you can paste them from your iPhone with Slack formatting intact.
+
+- `/slack-drafts` opens the pane: one card per draft, newest first, rendered as Markdown.
+- Saving a draft opens the pane on its own.
+- **Copy for Slack** puts an HTML version on the Mac clipboard (via `osascript`), so `[label](url)` pastes as a link and backticks as code. **Delete** moves the file to the Trash.
+- `SLACK_DRAFTS_DIR` overrides the folder.
+
+**On your phone.** Slack on iOS only keeps formatting when the clipboard carries HTML, which the Claude app cannot put there for a mod. So drafts are mirrored to a private claude.ai artifact ([`slack-drafts-phone/index.html`](slack-drafts-phone/index.html)) whose **Copy for Slack** button does that copy in the browser. Each save, delete or `/slack-drafts` appends rows to that artifact's database through the `ArtifactData` tool (approve it once). The page shows the newest row per draft and tidies the rest.
+
+Set it up once per account:
+
+1. Publish `slack-drafts-phone/index.html` as an artifact with `slack-drafts-phone/slack-html.js` beside it and capabilities `{"db": {"rules": [{"path": "drafts", "read": "owner", "write": "owner"}]}, "user": {}}` (ask Claude to do it).
+2. Put its URL in the plugin's **Slack drafts phone page** option (`/config`, or `pluginConfigs["claude-pro-skills@claude-pro-skills"].options.phoneUrl` in `~/.claude/settings.json`).
+3. Pin the page in claude.ai so it is one tap away on the phone.
+
+Leave the option empty to skip the phone copy.
+
+### Developing the mods
+
+`slack-drafts-phone/slack-html.js` is built from `hooks/slack-html.ts`, so the pane and the page share one converter. From `plugins/claude-pro-skills`, after changing it:
+
+```
+npx esbuild@0.24.2 hooks/slack-html.ts --bundle --format=iife --global-name=SlackHtml --target=es2020 --outfile=slack-drafts-phone/slack-html.js
+```
+
+Then republish the artifact with the new `slack-html.js`. Check any hooks change with:
+
+```
+claude plugin validate .
+claude plugin test .
+```
+
+`validate` always reports one error, the reserved `claude-` name prefix; anything else is real.
 
 ## Subagents
 

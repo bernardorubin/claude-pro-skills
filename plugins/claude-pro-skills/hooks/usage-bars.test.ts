@@ -1,6 +1,6 @@
 import { expect, test } from 'claude-code/testing'
 
-import { bar, timeLeft, tokens, tone } from './register'
+import { bar, timeLeft, tokens, tone } from './usage-bars'
 
 test('bars, token counts and countdown format', async () => {
   expect(bar(0)).toBe('□'.repeat(20))

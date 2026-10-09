@@ -4,7 +4,7 @@
 
 <h1 align="center">claude-pro-skills</h1>
 
-A Claude Code plugin marketplace by Bernardo Rubin. The main plugin (`claude-pro-skills`) bundles everything, no command/skill prefixes to type; `usage-bars` and `slack-drafts` are separate mods.
+A Claude Code plugin marketplace by Bernardo Rubin. One plugin (`claude-pro-skills`) bundles everything: the skills, with no command/skill prefixes to type, plus two mods, a usage band above the prompt and a Slack drafts pane.
 
 ## Installation
 
@@ -31,7 +31,7 @@ Everything is a **skill** — no `claude-pro-skills:` prefix needed when invokin
 | `/pr-review` | "review this PR", "review my uncommitted changes", "audit the whole repo" — three modes: PR / local / full-repo; picks frontend or backend reviewers from the changed files |
 | `/review-cycle` | "run the review cycle", "review and fix this PR", "do the review loop" — reviews → posts a living PR comment → fixes what's worth fixing → pushes → updates the comment, until clean (reuses `/pr-review`) |
 | `/pr-description` | "write a PR description", "draft the PR body", "update the PR" |
-| `/write-slack-message` | "draft a slack message", "how should I phrase this for slack" — tiny by default, saves to a drafts folder, which the `slack-drafts` mod shows with a copy button that keeps Slack links working |
+| `/write-slack-message` | "draft a slack message", "how should I phrase this for slack" — tiny by default, saves to a drafts folder, which the `/slack-drafts` pane shows with a copy button that keeps Slack links working |
 | `/prd-to-jira` | "create tickets from this PRD", "break this down into jira tasks" |
 | `/jira-cli` | Jira URL or key (ACME-1234, WEB-456), "update the description on ABC-123", "add a comment to …", "what's the status of …", "move this to in progress" |
 | `/vault-keeper` | "save this to the vault", "what does the wiki say about X", "ingest this doc", "lint the wiki" (auto-fires inside any registered vault project) |
@@ -54,27 +54,14 @@ The plugin also bundles one subagent: `code-reviewer`, the parallel review agent
 
 See [`plugins/claude-pro-skills/README.md`](plugins/claude-pro-skills/README.md) for full details on every skill, the PR review modes (PR / local / full-repo), and the iterative review loop.
 
-## `usage-bars`
+## Mods
 
-A band above the prompt (terminal and desktop Code tab) with two bars: context window used, and what's left of the 5-hour rate-limit window. Orange then red as each nears its limit. Installed separately:
+Two function-hook mods ship inside `claude-pro-skills`, so there is nothing extra to install:
 
-```
-/plugin install usage-bars@claude-pro-skills
-/reload-plugins
-```
+- **Usage band**: two bars above the prompt (terminal and desktop Code tab), context window used and what's left of the 5-hour rate-limit window, orange then red as each nears its limit.
+- **`/slack-drafts`**: a pane for the drafts `/write-slack-message` saves, with a copy button that keeps Slack links and code, and an optional private phone page to paste them from your iPhone.
 
-See [`plugins/usage-bars/README.md`](plugins/usage-bars/README.md).
-
-## `slack-drafts`
-
-A `/slack-drafts` pane for the drafts `/write-slack-message` saves, with a copy button that keeps Slack links and code, and an optional private phone page to paste them from your iPhone. Installed separately:
-
-```
-/plugin install slack-drafts@claude-pro-skills
-/reload-plugins
-```
-
-See [`plugins/slack-drafts/README.md`](plugins/slack-drafts/README.md) for the one-time phone setup.
+See [the plugin README's Mods section](plugins/claude-pro-skills/README.md#mods) for the one-time phone setup.
 
 ## License
 

@@ -176,7 +176,7 @@ Never preemptively keep something because they might want it.
 4. **The file IS the delivery. Never paste the draft into the chat reply.** Say
    it's saved, give the path, stop. Pasting it inline makes the user read the
    same message twice.
-5. **Start nothing.** In folder mode the `slack-drafts` mod, when installed,
+5. **Start nothing.** In folder mode this plugin's `/slack-drafts` pane
    sees the save, opens its pane and sends the draft to the phone page on its
    own. Mention `/slack-drafts` once in the report line only if the user seems
    not to know where drafts show up.
@@ -190,7 +190,7 @@ their phone, on the road, travelling, away from their laptop, or ask for the
 message "here", "in the chat", or "pasted", switch delivery:
 
 - **Still write the file**, exactly as above. It is how the draft survives the
-  trip, and with the `slack-drafts` mod's phone page set up it is also how the
+  trip, and with the `/slack-drafts` phone page set up it is also how the
   draft reaches the phone with formatting intact.
 - **Flatten it for a plain-text paste**: run `<this skill's directory>/scripts/mdclip.py
   --plain <the file>` and use ITS output. A phone clipboard carries no HTML
@@ -202,7 +202,7 @@ message "here", "in the chat", or "pasted", switch delivery:
 - **Then output that flattened text in a fenced code block** -- the block is what
   gives them one-press copy in the Claude app. It holds the message and nothing
   else: no commentary inside it, no preamble around it.
-- **When the `slack-drafts` mod has a phone page**, add one line after the block:
+- **When the `/slack-drafts` phone page is set up**, add one line after the block:
   the formatted version is on the Slack Drafts page (pinned in claude.ai), whose
   Copy for Slack keeps links and code.
 
@@ -213,8 +213,8 @@ carry them into a normal draft.
 
 ### Browsing past drafts (optional)
 
-The `slack-drafts` mod (`slack-drafts@claude-pro-skills`) shows them: `/slack-drafts`
-opens a pane listing every draft newest first, with Copy for Slack (an HTML
+This plugin's `/slack-drafts` pane shows them: it
+lists every draft newest first, with Copy for Slack (an HTML
 clipboard copy, so `[label](url)` pastes as a real link) and delete. On the phone, its pinned Slack Drafts page does the same. Mention it only if
 the user asks how to find an older draft; the drafting flow above must work
 unchanged without it.

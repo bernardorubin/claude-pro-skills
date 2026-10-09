@@ -24,7 +24,7 @@ test('draws each draft as who and when, the message, then its actions', async ($
   await $.session.start({ cwd: '/Users/test', surface: 'desktop', isInteractive: true })
 
   for (const surface of ['terminal', 'desktop'] as const) {
-    const ui = await $.ui.mount({ plugin: 'slack-drafts', surface, ...PANE })
+    const ui = await $.ui.mount({ plugin: 'claude-pro-skills', surface, ...PANE })
     expect(await ui.find({ type: 'Text', text: 'dmytro' })).toBeDefined()
     expect(await ui.find({ type: 'Text', text: 'Oct 8, 13:20' })).toBeDefined()
     expect(await ui.find({ key: 'copy-0' })).toBeDefined()

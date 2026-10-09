@@ -17,35 +17,7 @@
         "ref": "main"
       },
       "description": "Claude Code toolkit: confidence-scored code reviews (PR, local, or full-repo audit), git workflow shortcuts, PR/Slack helpers, Claude meta skills, Jira integration, and per-project knowledge vaults. All skills invocable with no prefix.",
-      "version": "3.40.0",
-      "author": {
-        "name": "Bernardo Rubin"
-      }
-    },
-    {
-      "name": "usage-bars",
-      "source": {
-        "source": "git-subdir",
-        "url": "https://github.com/bernardorubin/claude-pro-skills.git",
-        "path": "plugins/usage-bars",
-        "ref": "main"
-      },
-      "description": "Two bars above the prompt: context window used and what's left of the 5-hour rate-limit window. Terminal and desktop.",
-      "version": "0.1.1",
-      "author": {
-        "name": "Bernardo Rubin"
-      }
-    },
-    {
-      "name": "slack-drafts",
-      "source": {
-        "source": "git-subdir",
-        "url": "https://github.com/bernardorubin/claude-pro-skills.git",
-        "path": "plugins/slack-drafts",
-        "ref": "main"
-      },
-      "description": "A /slack-drafts pane for the Slack drafts /write-slack-message saves: Slack-safe copy on the Mac, and an optional phone page to paste them from your iPhone with links intact.",
-      "version": "0.1.5",
+      "version": "3.41.0",
       "author": {
         "name": "Bernardo Rubin"
       }

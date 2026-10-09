@@ -9,13 +9,14 @@ claude-pro-skills/
 ├── .claude-plugin/
 │   └── marketplace.json              # marketplace manifest — lists every plugin
 ├── plugins/
-│   ├── usage-bars/                    # separate function-hooks mod (hooks/register.tsx); `claude plugin validate` + `claude plugin test` it
-│   ├── slack-drafts/                  # separate mod: /slack-drafts pane + phone/ artifact page; phone/slack-html.js is built from hooks/slack-html.ts (see its README)
-│   └── claude-pro-skills/             # the main bundled plugin (see below)
+│   └── claude-pro-skills/             # the one plugin (see below)
 │       ├── .claude-plugin/
 │       │   └── plugin.json           # plugin manifest
 │       ├── skills/                   # skill folders, each with SKILL.md
 │       ├── agents/                   # subagents as .md files (optional)
+│       ├── hooks/                    # function-hooks mods: usage band + /slack-drafts pane (register.tsx)
+│       ├── types/                    # the mods' $.state contract
+│       ├── slack-drafts-phone/       # phone artifact page; slack-html.js is built from hooks/slack-html.ts
 │       ├── README.md                 # user-facing plugin docs
 │       └── comparison.png            # asset referenced by README
 └── README.md                         # marketplace overview, install instructions
@@ -25,10 +26,14 @@ claude-pro-skills/
 
 - **Marketplace name**: `claude-pro-skills` (set in `.claude-plugin/marketplace.json`)
 - **GitHub identifier**: `bernardorubin/claude-pro-skills` (used in `/plugin marketplace add`)
-- **Single plugin**: `claude-pro-skills` — bundles 29 skills (no commands). The `pr-review` skill itself supports three modes: PR review, local diff review, and full-repo audit.
+- **Single plugin**: `claude-pro-skills` — bundles 29 skills (no commands) and one hooks module carrying two mods. The `pr-review` skill itself supports three modes: PR review, local diff review, and full-repo audit.
 - **Install path** (after `/plugin install`): `~/.claude/plugins/cache/claude-pro-skills/claude-pro-skills/<version>/`
 
 When users update the marketplace and reinstall, the harness pulls from `main` of this repo via the `git-subdir` source defined in `marketplace.json`.
+
+## Mods (function hooks)
+
+`hooks/register.tsx` holds every hook for both mods because the engine loads one hooks module per plugin, allows one unmatched `session.start` hook, and never follows `$` across an import. Pure helpers (`slack-html.ts`, `usage-bars.ts`) can live in their own files. Check changes with `claude plugin validate` and `claude plugin test` from `plugins/claude-pro-skills`; validate's reserved-name error on `claude-pro-skills` is expected.
 
 ## Skills only — no commands
 
