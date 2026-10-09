@@ -5,7 +5,7 @@ This repo is a Claude Code **plugin marketplace**. It is not application code �
 ## Repo layout
 
 ```
-claude-pro-skills/                    # local folder (GitHub repo: claudio-skills); the plugin inside is named claudio
+claudio-skills/                       # repo folder; the plugin inside is named claudio
 ├── .claude-plugin/
 │   └── marketplace.json              # marketplace manifest — lists every plugin
 ├── plugins/
