@@ -2,7 +2,7 @@ import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
 import type { Draft } from '../types'
-import { clipboardScript, labelOf, toPlain } from './slack-html'
+import { clipboardScript, labelOf } from './slack-html'
 
 const PANE = 'slack-drafts'
 const drafts = atom({ plugin: 'slack-drafts', key: 'drafts' } as const, [])
@@ -27,13 +27,6 @@ const copyForSlack = async ($: EngineInterface, d: Draft) => {
   if (rich?.exitCode === 0) return $.ui.toast(`Copied ${labelOf(d.name).who} draft for Slack`)
   await $.process.run(['pbcopy'], { stdin: d.text })
   $.ui.toast('Copied as plain text (the Slack-safe copy failed)')
-}
-
-// The phone app writes its own clipboard: plain text only, and iOS Slack converts
-// nothing on paste, so it gets the flattened text (bare URLs, no backticks).
-const copyOnPhone = async ($: EngineInterface, text: string, what: string) => {
-  const r = await $.ui.copy({ text, surface: 'mobile' })
-  $.ui.toast(r.isCopied ? `Copied ${what}` : `The app can't copy from a mod yet (${r.reason})`)
 }
 
 const copyMarkdown = async ($: EngineInterface, d: Draft) => {
@@ -115,38 +108,30 @@ export const register: Register = (on, options) => {
 
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
     const { Box, Text, Button, Markdown } = $.ui.resolve(e)
-    const onPhone = e.surface === 'mobile'
     const list = await read($, drafts)
 
     if (list.length === 0) {
       return <Text dimColor>No drafts yet. /write-slack-message saves them to ~/Desktop/slack-drafts.</Text>
     }
 
+    // ponytail: three rows per draft (who and when, the message, the actions) so a
+    // narrow pane never squeezes the date into a column beside the buttons
     return (
       <Box flexDirection="column" gap={1}>
         {list.map((d, i) => {
           const { who, when } = labelOf(d.name)
           return (
-            <Box key={`draft-${i}`} flexDirection="column" borderStyle="round" borderDimColor paddingX={1}>
-              <Box justifyContent="space-between" gap={1}>
-                <Box gap={1}>
-                  <Text bold>{who}</Text>
-                  <Text dimColor>{when}</Text>
-                </Box>
-                <Box gap={1}>
-                  <Button
-                    key={`copy-${i}`}
-                    label={onPhone ? 'Copy plain' : 'Copy for Slack'}
-                    variant="primary" onPress={() => (onPhone ? copyOnPhone($, toPlain(d.text), 'plain text for Slack') : copyForSlack($, d))}
-                  />
-                  <Button
-                    key={`md-${i}`}
-                    label="Markdown" onPress={() => (onPhone ? copyOnPhone($, d.text, 'the raw markdown') : copyMarkdown($, d))}
-                  />
-                  <Button key={`del-${i}`} label="Delete" onPress={() => trash($, d, phoneUrl)} />
-                </Box>
+            <Box key={`draft-${i}`} flexDirection="column" borderStyle="round" borderDimColor paddingX={1} gap={1}>
+              <Box gap={2}>
+                <Text bold wrap="truncate-end">{who}</Text>
+                {when !== '' && <Text dimColor wrap="truncate-end">{when}</Text>}
               </Box>
               <Markdown text={d.text} />
+              <Box gap={1} flexWrap="wrap">
+                <Button key={`copy-${i}`} label="Copy for Slack" variant="primary" onPress={() => copyForSlack($, d)} />
+                <Button key={`md-${i}`} label="Copy markdown" onPress={() => copyMarkdown($, d)} />
+                <Button key={`del-${i}`} label="Delete" plain dimColor onPress={() => trash($, d, phoneUrl)} />
+              </Box>
             </Box>
           )
         })}

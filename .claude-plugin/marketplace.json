@@ -45,21 +45,7 @@
         "ref": "main"
       },
       "description": "A /slack-drafts pane for the Slack drafts /write-slack-message saves: Slack-safe copy on the Mac, and an optional phone page to paste them from your iPhone with links intact.",
-      "version": "0.1.3",
-      "author": {
-        "name": "Bernardo Rubin"
-      }
-    },
-    {
-      "name": "quick-replies",
-      "source": {
-        "source": "git-subdir",
-        "url": "https://github.com/bernardorubin/claude-pro-skills.git",
-        "path": "plugins/quick-replies",
-        "ref": "main"
-      },
-      "description": "Turns Claude's \"Next steps\" and \"I need from you\" lists into Go ahead, Yes / No buttons and reply boxes above the prompt, sent back as one message.",
-      "version": "0.1.1",
+      "version": "0.1.4",
       "author": {
         "name": "Bernardo Rubin"
       }
