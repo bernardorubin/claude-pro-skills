@@ -37,7 +37,7 @@ Note it (e.g. `3.9.1`) so you can show old → new at the end.
 claude plugin marketplace update claudio
 ```
 
-This re-fetches `bernardorubin/claude-pro-skills` so the newest published version
+This re-fetches `bernardorubin/claudio-skills` so the newest published version
 becomes available to install.
 
 ### 3. Update the plugin to the latest

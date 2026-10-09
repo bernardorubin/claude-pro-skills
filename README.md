@@ -9,7 +9,7 @@ A Claude Code plugin marketplace by Bernardo Rubin. One plugin (`claudio`) bundl
 ## Installation
 
 ```
-/plugin marketplace add bernardorubin/claude-pro-skills
+/plugin marketplace add bernardorubin/claudio-skills
 /plugin install claudio@claudio
 /reload-plugins
 ```

@@ -7,7 +7,7 @@ A Claude Code toolkit — **29 skills, no prefix to type**. Shipping pipelines (
 ## Installation
 
 ```
-/plugin marketplace add bernardorubin/claude-pro-skills
+/plugin marketplace add bernardorubin/claudio-skills
 /plugin install claudio@claudio
 /reload-plugins
 ```

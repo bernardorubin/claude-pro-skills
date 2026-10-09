@@ -1,11 +1,11 @@
-# claude-pro-skills repo (the claudio marketplace)
+# claudio-skills repo (the claudio marketplace)
 
 This repo is a Claude Code **plugin marketplace**. It is not application code — there is no build, no test runner, and no package manager. Everything here is JSON manifests + markdown skill definitions consumed by the Claude Code harness.
 
 ## Repo layout
 
 ```
-claude-pro-skills/                    # repo folder; the plugin inside is named claudio
+claude-pro-skills/                    # local folder (GitHub repo: claudio-skills); the plugin inside is named claudio
 ├── .claude-plugin/
 │   └── marketplace.json              # marketplace manifest — lists every plugin
 ├── plugins/
@@ -25,7 +25,7 @@ claude-pro-skills/                    # repo folder; the plugin inside is named 
 ## How everything wires together
 
 - **Marketplace name**: `claudio` (set in `.claude-plugin/marketplace.json`)
-- **GitHub identifier**: `bernardorubin/claude-pro-skills` (used in `/plugin marketplace add`)
+- **GitHub identifier**: `bernardorubin/claudio-skills` (used in `/plugin marketplace add`)
 - **Single plugin**: `claudio` — bundles 29 skills (no commands) and one hooks module carrying two mods. The `pr-review` skill itself supports three modes: PR review, local diff review, and full-repo audit.
 - **Install path** (after `/plugin install`): `~/.claude/plugins/cache/claudio/claudio/<version>/`
 

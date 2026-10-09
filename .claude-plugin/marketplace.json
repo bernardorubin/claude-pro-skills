@@ -12,7 +12,7 @@
       "name": "claudio",
       "source": {
         "source": "git-subdir",
-        "url": "https://github.com/bernardorubin/claude-pro-skills.git",
+        "url": "https://github.com/bernardorubin/claudio-skills.git",
         "path": "plugins/claudio",
         "ref": "main"
       },

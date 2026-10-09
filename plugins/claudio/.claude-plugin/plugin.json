@@ -6,8 +6,8 @@
     "name": "Bernardo Rubin",
     "url": "https://github.com/bernardorubin"
   },
-  "homepage": "https://github.com/bernardorubin/claude-pro-skills",
-  "repository": "https://github.com/bernardorubin/claude-pro-skills",
+  "homepage": "https://github.com/bernardorubin/claudio-skills",
+  "repository": "https://github.com/bernardorubin/claudio-skills",
   "license": "MIT",
   "types": "./types/index.d.ts",
   "userConfig": {
