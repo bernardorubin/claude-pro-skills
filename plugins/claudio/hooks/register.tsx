@@ -137,6 +137,19 @@ export const register: Register = (on, options) => {
     return ran
   }).catch(($, e, next) => next(e)) // never block a tool call; next replays its result
 
+  // The desktop app turns a click on an unfocused pane into a focus move and never
+  // presses the Button (anthropics/claude-code bug). A click landing on Copy that
+  // way copies anyway; Delete keeps needing its own click, since Tab and the arrows
+  // move focus the same way inside a focused pane.
+  on('ui.focus', { component: 'Pane', requestId: PANE }, async ($, e, next) => {
+    const wasFocused = (await $.ui.panes()).some(p => p.id === PANE && p.isFocused)
+    const moved = await next(e)
+    const name = e.element?.startsWith('copy-') ? e.element.slice('copy-'.length) : undefined
+    const d = (await read($, drafts)).find(x => x.name === name)
+    if (e.origin.kind === 'person' && !wasFocused && d) await copyForSlack($, d)
+    return moved
+  }).catch(($, e, next) => next(e))
+
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
     const { Box, Text, Button, Markdown } = $.ui.resolve(e)
     const list = await read($, drafts)
@@ -159,8 +172,8 @@ export const register: Register = (on, options) => {
               </Box>
               <Markdown text={d.text} />
               <Box gap={1} flexWrap="wrap">
-                <Button key={`copy-${i}`} label="Copy for Slack" variant="primary" onPress={() => copyForSlack($, d)} />
-                <Button key={`del-${i}`} label="Delete" plain dimColor onPress={() => trash($, d, phoneUrl)} />
+                <Button key={`copy-${d.name}`} label="Copy for Slack" variant="primary" onPress={() => copyForSlack($, d)} />
+                <Button key={`del-${d.name}`} label="Delete" plain dimColor onPress={() => trash($, d, phoneUrl)} />
               </Box>
             </Box>
           )
