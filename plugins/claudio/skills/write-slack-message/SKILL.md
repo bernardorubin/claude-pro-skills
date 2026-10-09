@@ -156,6 +156,13 @@ Never preemptively keep something because they might want it.
    - `SLACK_DRAFTS_DIR` is set, or `~/Desktop/slack-drafts/` exists → save to
      `<dir>/<recipient>-<MMDD-HHMM>.md`. Drafts accumulate, so rewriting a
      message never destroys the version it replaces.
+
+     **Then clear what it supersedes.** If this draft replaces an earlier one to
+     the same recipient in the folder (a redraft, or a new message that covers
+     everything the old one said), move the old file to `~/.Trash/` after
+     saving, as the pane's Delete does. Keep drafts on another topic and any the
+     user said they already sent. Name each removal in the report line: "Saved
+     grace-1008-2353.md, removed grace-1008-2155.md (superseded)".
    - Neither → save to `~/Desktop/slack-message-for-<recipient>.md`, overwriting
      any previous draft for that person. This is the default and needs no setup.
 
