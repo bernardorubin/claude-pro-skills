@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="logo.svg" width="120" alt="claudio logo">
+  <img src="claudio-skills.webp" width="420" alt="claudio-skills">
 </p>
 
 <h1 align="center">claudio</h1>
